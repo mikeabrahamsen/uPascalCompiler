@@ -5,23 +5,20 @@ using System.Text;
 
 namespace Compiler.LexicalAnalyzer
 {
-    class Token
+    class Word : Token
     {
+        public String lexeme = string.Empty;
         
-        public Token(Tag t)
+        public Word(string s, Tag tag) : base(tag)
         {
-            Tag = t;
-        }
-
-        public Tag Tag
-        {
-            get;
-            set;
+            lexeme = s;
         }
 
         public override string ToString()
         {
-            return Tag.ToString();
+            return lexeme;
         }
+
+
     }
 }

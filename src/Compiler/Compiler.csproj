@@ -45,10 +45,17 @@
   <ItemGroup>
     <Compile Include="LexicalAnalyzer\LexicalAnalyzer.cs" />
     <Compile Include="LexicalAnalyzer\Token.cs" />
+    <Compile Include="LexicalAnalyzer\Word.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="LexicalAnalyzer\Program1.mp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="LexicalAnalyzer\Symbols.txt" />
+    <Content Include="LexicalAnalyzer\ReservedWords.txt" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
