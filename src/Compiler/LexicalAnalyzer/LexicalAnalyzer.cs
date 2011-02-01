@@ -71,17 +71,27 @@ namespace Compiler.LexicalAnalyzer
             while (!tokens.EndOfStream)
             {
                 s = tokens.ReadLine();
-                // grab the name and the lexeme from the file
-                // TODO: fix regex to group what is between the quotes but not including
-                MatchCollection matchTokenName = Regex.Matches( s, "(?<x>[a-zA-Z_]+)");
-                MatchCollection matchTokenLexeme = Regex.Matches( s, "(?<x>\".+\")" );
+                               
+                MatchCollection matchTokenName = Regex.Matches( s, "(?<name>[a-zA-Z_]+).+\"(?<lexeme>.+)\"");
                 
-                name = matchTokenName[0].Value;
-                lexeme = matchTokenLexeme[0].Value;
-                //grab everything between the quotes quotes
-                lexeme = lexeme.Substring( 1, lexeme.Length -2 );
+                Match token = matchTokenName[0];
+                name = token.Groups["name"].ToString ();
+                lexeme = token.Groups["lexeme"].ToString ();
 
+                // Add all of the tokens to the word list
                 words.Add( new Word(lexeme, (Tag)Enum.Parse(typeof(Tag),name,false)));
+            }
+            string strText = "212.56.87.23 zamov.online.fr";
+
+            Regex oRegex = new Regex ( @"(?<IP_ADDRESS>(\d|\.)+)\s" + @"(?<URL>\S+)" );
+
+            MatchCollection oMatchCollection = oRegex.Matches ( strText );
+
+            foreach ( Match oMatch in oMatchCollection )
+            {
+
+                Console.WriteLine ( "IP: " + oMatch.Groups["IP_ADDRESS"] );
+                Console.WriteLine ( "URL: " + oMatch.Groups["URL"] );
             }
         }
         /// <summary>
@@ -91,6 +101,14 @@ namespace Compiler.LexicalAnalyzer
         {
             column++;
             peek = Convert.ToChar( file.Read() );
+        }
+
+        /// <summary>
+        /// Peeks at the next character without consuming
+        /// </summary>
+        private void readchar (char c)
+        {
+
         }
         /// <summary>
         /// Scan to the next character
