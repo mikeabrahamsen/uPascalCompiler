@@ -39,28 +39,9 @@ MP_COLON
 
         public LexicalAnalyzer()
         {
-            //TODO: Load These From File
+            //TODO: place in try catch
             LoadTokens( "mpTokens.txt" );
-            
-            words.Add( new Word("Program", Tag.MP_PROGRAM) );
-            words.Add( new Word("begin",Tag.MP_BEGIN) );
-            words.Add( new Word("end", Tag.MP_END) );
-            words.Add( new Word("and", Tag.MP_AND) );            
-            words.Add( new Word("div", Tag.MP_DIV) );
-            words.Add(new Word("do",Tag.MP_DO));
-            words.Add(new Word("downto",Tag.MP_DOWNTO));
-            words.Add(new Word("else",Tag.MP_ELSE));
-            words.Add(new Word("fixed",Tag.MP_FIXED));
-            words.Add(new Word("float",Tag.MP_FLOAT));
-            words.Add(new Word("for",Tag.MP_FOR));
-            words.Add(new Word("function",Tag.MP_FUNCTION));
-            words.Add(new Word("if",Tag.MP_IF));
-            words.Add(new Word("integer",Tag.MP_INTEGER));
-            words.Add(new Word("mod",Tag.MP_MOD));
-            words.Add(new Word("not",Tag.MP_NOT));
-            words.Add(new Word("or",Tag.MP_OR));
-            words.Add(new Word("procedure",Tag.MP_PROCEDURE));
-
+   
             while (!file.EndOfStream)
             {
                 column = 0;
