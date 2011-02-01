@@ -53,8 +53,7 @@
     <None Include="LexicalAnalyzer\Program1.mp" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="LexicalAnalyzer\Symbols.txt" />
-    <Content Include="LexicalAnalyzer\ReservedWords.txt" />
+    <Content Include="LexicalAnalyzer\mpTokens.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace Compiler.LexicalAnalyzer
 {
@@ -14,7 +15,18 @@ namespace Compiler.LexicalAnalyzer
         MP_FUNCTION, MP_IF, MP_INTEGER, MP_MOD, MP_NOT,
         MP_OR, MP_PROCEDURE, MP_PROGRAM, MP_READ, MP_REPEAT,
         MP_THEN, MP_TO, MP_UNTIL, MP_VAR, MP_WHILE,
-        MP_WRITE, MP_IDENTIFIER
+        MP_WRITE, MP_IDENTIFIER,MP_PERIOD,MP_COMMA,
+MP_SCOLON,MP_LPAREN,MP_RPAREN,
+MP_EQUAL,
+MP_GTHAN,
+MP_GEQUAL,
+MP_LTHAN,
+MP_LEQUAL,
+MP_NEQUAL,
+MP_ASSIGN,
+MP_PLUS,MP_MINUS,
+MP_TIMES ,
+MP_COLON 
         //TODO: add other tags
     }
     class LexicalAnalyzer
@@ -28,6 +40,8 @@ namespace Compiler.LexicalAnalyzer
         public LexicalAnalyzer()
         {
             //TODO: Load These From File
+            LoadTokens( "mpTokens.txt" );
+            
             words.Add( new Word("Program", Tag.MP_PROGRAM) );
             words.Add( new Word("begin",Tag.MP_BEGIN) );
             words.Add( new Word("end", Tag.MP_END) );
@@ -50,34 +64,57 @@ namespace Compiler.LexicalAnalyzer
             while (!file.EndOfStream)
             {
                 column = 0;
-               Word word =  Scan();
+               Word word =  GetNextToken();
                Console.WriteLine( word.Tag + "\t" + line + "\t" + column + "\t" + word.lexeme );
             }
         }
+        public void LoadTokens(string filename)
+        {
+            StreamReader tokens = new StreamReader( filename );
+            string s,name,lexeme;
+            
+            while (!tokens.EndOfStream)
+            {
+                s = tokens.ReadLine();
+                // grab the name and the lexeme from the file
+                // TODO: fix regex to group what is between the quotes but not including
+                MatchCollection matchTokenName = Regex.Matches( s, "(?<x>[a-zA-Z_]+)");
+                MatchCollection matchTokenLexeme = Regex.Matches( s, "(?<x>\".+\")" );
+                
+                name = matchTokenName[0].Value;
+                lexeme = matchTokenLexeme[0].Value;
+                //grab everything between the quotes quotes
+                lexeme = lexeme.Substring( 1, lexeme.Length -2 );
 
+                words.Add( new Word(lexeme, (Tag)Enum.Parse(typeof(Tag),name,false)));
+            }
+        }
         private void readchar()
         {
             column++;
             peek = Convert.ToChar( file.Read() );
         }
-        
-        public Word Scan()
+        private void SkipWhiteSpace()
         {
-                for (; ; readchar())
+            for (; ; readchar())
+            {
+                if (peek == ' ' || peek == '\t')
                 {
-                    if (peek == ' ' || peek == '\t')
-                    {
-                        continue;
-                    }
-                    else if (peek == '\n')
-                    {
-                        line++;
-                    }
-                    else
-                    {
-                        break;
-                    }
+                    continue;
                 }
+                else if (peek == '\n')
+                {
+                    line++;
+                }
+                else
+                {
+                    break;
+                }
+            }
+        }
+        public Word GetNextToken()
+        {
+            SkipWhiteSpace();
                 /*
                 if (char.IsDigit(peek))
                 {
@@ -106,7 +143,7 @@ namespace Compiler.LexicalAnalyzer
                     words.Add( tempWord );
                     return tempWord;
                 }
-                Word word = new Word( "Nothing",Tag.MP_IDENTIFIER );
+                Word word = new Word( "Not yet implemented",Tag.MP_IDENTIFIER );
                 peek = ' ';
                 return word;                
         }

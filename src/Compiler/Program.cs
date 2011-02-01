@@ -12,6 +12,7 @@ namespace Compiler
         {
             LA.LexicalAnalyzer scanner = new LA.LexicalAnalyzer();
             
+            //Added to hold console window open for viewing
             Console.ReadLine();
         }
 
