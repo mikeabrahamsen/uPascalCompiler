@@ -32,7 +32,7 @@ namespace Compiler.LexicalAnalyzer
     {        
         public static int line = 1;
         public static int column = 1;
-        char peek = ' ';
+        char currentChar = ' ';
         private StreamReader file = new StreamReader("program1.mp");
         private List<Word> words = new List<Word>();
 
@@ -100,15 +100,15 @@ namespace Compiler.LexicalAnalyzer
         private void readchar()
         {
             column++;
-            peek = Convert.ToChar( file.Read() );
+            currentChar = Convert.ToChar( file.Read() );
         }
 
         /// <summary>
         /// Peeks at the next character without consuming
         /// </summary>
-        private void readchar (char c)
+        private char readchar (char c)
         {
-
+            return Convert.ToChar(file.Peek ());
         }
         /// <summary>
         /// Scan to the next character
@@ -117,11 +117,11 @@ namespace Compiler.LexicalAnalyzer
         {
             for (; ; readchar())
             {
-                if (peek == ' ' || peek == '\t')
+                if (currentChar == ' ' || currentChar == '\t')
                 {
                     continue;
                 }
-                else if (peek == '\n')
+                else if (currentChar == '\n')
                 {
                     line++;
                 }
@@ -144,14 +144,14 @@ namespace Compiler.LexicalAnalyzer
 
                 }
                  * */
-                if (char.IsLetter( peek ))
+                if (char.IsLetter( currentChar ))
                 {
                     StringBuilder sb = new StringBuilder();
                     do
                     {
-                        sb.Append( peek );
+                        sb.Append( currentChar );
                         readchar();
-                    } while (char.IsLetterOrDigit( peek ));
+                    } while (char.IsLetterOrDigit( currentChar ));
                     string s = sb.ToString();
 
                     foreach (Word w in words)
@@ -167,7 +167,7 @@ namespace Compiler.LexicalAnalyzer
                     return tempWord;
                 }
                 Word word = new Word( "Not yet implemented",Tag.MP_IDENTIFIER );
-                peek = ' ';
+                currentChar = ' ';
                 return word;                
         }
     }
