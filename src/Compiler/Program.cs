@@ -6,6 +6,9 @@ using LA = Compiler.LexicalAnalyzer;
 
 namespace Compiler
 {
+    /// <summary>
+    /// Program driver for testing
+    /// </summary>
     class Program
     {
         static void Main(string[] args)
