@@ -7,6 +7,9 @@ using System.Text.RegularExpressions;
 
 namespace Compiler.LexicalAnalyzer
 {
+    /// <summary>
+    /// Enum values for all of the tokens
+    /// </summary>
     public enum Tag
     {
         MP_AND = 256,
@@ -16,19 +19,15 @@ namespace Compiler.LexicalAnalyzer
         MP_OR, MP_PROCEDURE, MP_PROGRAM, MP_READ, MP_REPEAT,
         MP_THEN, MP_TO, MP_UNTIL, MP_VAR, MP_WHILE,
         MP_WRITE, MP_IDENTIFIER,MP_PERIOD,MP_COMMA,
-MP_SCOLON,MP_LPAREN,MP_RPAREN,
-MP_EQUAL,
-MP_GTHAN,
-MP_GEQUAL,
-MP_LTHAN,
-MP_LEQUAL,
-MP_NEQUAL,
-MP_ASSIGN,
-MP_PLUS,MP_MINUS,
-MP_TIMES ,
-MP_COLON 
+        MP_SCOLON,MP_LPAREN,MP_RPAREN,MP_EQUAL,
+        MP_GTHAN,MP_GEQUAL,MP_LTHAN,MP_LEQUAL,
+        MP_NEQUAL,MP_ASSIGN,MP_PLUS,MP_MINUS,
+        MP_TIMES,MP_COLON 
         //TODO: add other tags
     }
+    /// <summary>
+    /// Handles functions for the Lexical Analyzer
+    /// </summary>
     class LexicalAnalyzer
     {        
         public static int line = 1;
@@ -37,19 +36,34 @@ MP_COLON
         private StreamReader file = new StreamReader("program1.mp");
         private List<Word> words = new List<Word>();
 
+        /// <summary>
+        /// Sets up the Lexical Analyzer
+        /// </summary>
         public LexicalAnalyzer()
         {
             //TODO: place in try catch
             LoadTokens( "mpTokens.txt" );
-   
+            Scan();
+           
+        }
+
+        /// <summary>
+        /// Scans the file gathering token information
+        /// </summary>
+        private void Scan()
+        {
             while (!file.EndOfStream)
             {
                 column = 0;
-               Word word =  GetNextToken();
-               Console.WriteLine( word.Tag + "\t" + line + "\t" + column + "\t" + word.lexeme );
+                Word word = GetNextToken();
+                Console.WriteLine( word.Tag + "\t" + line + "\t" + column + "\t" + word.lexeme );
             }
         }
-        public void LoadTokens(string filename)
+        /// <summary>
+        /// Loads necessary tokens from a file
+        /// </summary>
+        /// <param name="filename"></param>
+        private void LoadTokens(string filename)
         {
             StreamReader tokens = new StreamReader( filename );
             string s,name,lexeme;
@@ -70,11 +84,17 @@ MP_COLON
                 words.Add( new Word(lexeme, (Tag)Enum.Parse(typeof(Tag),name,false)));
             }
         }
+        /// <summary>
+        /// Reads one char at a time from the file
+        /// </summary>
         private void readchar()
         {
             column++;
             peek = Convert.ToChar( file.Read() );
         }
+        /// <summary>
+        /// Scan to the next character
+        /// </summary>
         private void SkipWhiteSpace()
         {
             for (; ; readchar())
@@ -93,6 +113,10 @@ MP_COLON
                 }
             }
         }
+        /// <summary>
+        /// Return the token with corresponding line, column, and lexeme information
+        /// </summary>
+        /// <returns></returns>
         public Word GetNextToken()
         {
             SkipWhiteSpace();
