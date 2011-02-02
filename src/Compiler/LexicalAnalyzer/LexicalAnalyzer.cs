@@ -22,7 +22,9 @@ namespace Compiler.LexicalAnalyzer
         MP_SCOLON,MP_LPAREN,MP_RPAREN,MP_EQUAL,
         MP_GTHAN,MP_GEQUAL,MP_LTHAN,MP_LEQUAL,
         MP_NEQUAL,MP_ASSIGN,MP_PLUS,MP_MINUS,
-        MP_TIMES,MP_COLON 
+        MP_TIMES, MP_COLON, MP_EOF, MP_INTEGER_LIT,
+        MP_FIXED_LIT, MP_FLOAT_LIT, MP_STRING_LIT
+
         //TODO: add other tags
     }
     /// <summary>
@@ -77,21 +79,9 @@ namespace Compiler.LexicalAnalyzer
                 Match token = matchTokenName[0];
                 name = token.Groups["name"].ToString ();
                 lexeme = token.Groups["lexeme"].ToString ();
-
+                
                 // Add all of the tokens to the word list
                 words.Add( new Word(lexeme, (Tag)Enum.Parse(typeof(Tag),name,false)));
-            }
-            string strText = "212.56.87.23 zamov.online.fr";
-
-            Regex oRegex = new Regex ( @"(?<IP_ADDRESS>(\d|\.)+)\s" + @"(?<URL>\S+)" );
-
-            MatchCollection oMatchCollection = oRegex.Matches ( strText );
-
-            foreach ( Match oMatch in oMatchCollection )
-            {
-
-                Console.WriteLine ( "IP: " + oMatch.Groups["IP_ADDRESS"] );
-                Console.WriteLine ( "URL: " + oMatch.Groups["URL"] );
             }
         }
         /// <summary>
