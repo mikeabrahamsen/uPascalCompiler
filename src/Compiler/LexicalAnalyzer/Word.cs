@@ -11,16 +11,15 @@ namespace Compiler.LexicalAnalyzer
     /// </summary>
     class Word : Token
     {
-        public String lexeme = string.Empty;
         
-        public Word(string s, Tag tag) : base(tag)
+        public Word(string s, int tag) : base(tag)
         {
-            lexeme = s;
+            Lexeme = s;
         }
-
+        
         public override string ToString()
         {
-            return lexeme;
+            return Lexeme;
         }
 
 

@@ -14,20 +14,25 @@ namespace Compiler.LexicalAnalyzer
         /// Constructor for tag
         /// </summary>
         /// <param name="t"></param>
-        public Token(Tag t)
+        public Token(int t)
         {
-            Tag = t;
+            Tag = (Tags)t;
+            Lexeme = Convert.ToChar(t).ToString();
         }
 
         /// <summary>
         /// Get and Set tag
         /// </summary>
-        public Tag Tag
+        public Tags Tag
         {
             get;
             set;
         }
-
+        public string Lexeme
+        {
+            get;
+            set;
+        }
         /// <summary>
         /// Print out the tag
         /// </summary>
