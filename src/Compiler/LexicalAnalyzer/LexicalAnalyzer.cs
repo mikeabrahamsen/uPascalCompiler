@@ -82,11 +82,11 @@ namespace Compiler.LexicalAnalyzer
             string output;
             while (!file.EndOfStream)
             {
-                Column = 0;
+                
                 Token token = GetNextToken();
                
                     output = string.Format("{0,-20} {1,-5} {2,-5} {3}",
-                      token.Tag, Line, Column, token.Lexeme);
+                      token.Tag, Line, (Column - token.Lexeme.Length) - 1, token.Lexeme);
                 
                 Console.WriteLine(output);
             }
@@ -121,8 +121,8 @@ namespace Compiler.LexicalAnalyzer
         /// </summary>
         private void ReadChar()
         {
-            Column++;
             currentChar = Convert.ToChar(file.Read());
+            Column++;
         }
 
         /// <summary>
@@ -471,13 +471,14 @@ namespace Compiler.LexicalAnalyzer
         {
             for(; ; ReadChar())
             {
-                if(currentChar == 32 || currentChar == '\t')
+                if(currentChar == 32 || currentChar == '\t' || currentChar == 10)
                 {
                     continue;
                 }
-                else if(currentChar == 10 || currentChar == 13)
+                else if(currentChar == 13)
                 {
                     Line++;
+                    Column = 0; 
                 }
                 else
                 {
