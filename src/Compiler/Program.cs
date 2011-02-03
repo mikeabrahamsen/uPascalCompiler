@@ -9,7 +9,7 @@ namespace Compiler
     /// <summary>
     /// Program driver for testing
     /// </summary>
-    class Program
+    class Driver
     {
         static void Main(string[] args)
         {
