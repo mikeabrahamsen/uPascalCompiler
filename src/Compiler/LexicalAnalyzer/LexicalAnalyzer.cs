@@ -58,7 +58,7 @@ namespace Compiler.LexicalAnalyzer
         
         char currentChar = ' ';
         
-        private StreamReader file = new StreamReader("program1.mp");
+        private StreamReader file = new StreamReader("Program1.mp");
         private List<Word> ReservedWords = new List<Word>();
 
         /// <summary>
@@ -122,7 +122,7 @@ namespace Compiler.LexicalAnalyzer
         private void ReadChar()
         {
             Column++;
-            currentChar = Convert.ToChar( file.Read() );
+            currentChar = Convert.ToChar(file.Read());
         }
 
         /// <summary>
@@ -134,6 +134,11 @@ namespace Compiler.LexicalAnalyzer
    
             return c.Equals(currentChar);
         }
+
+        private char Peek()
+        {
+            return Convert.ToChar( file.Peek() );
+        }
         
         /// <summary>
         /// Return the token with corresponding line, column, and lexeme information
@@ -142,7 +147,7 @@ namespace Compiler.LexicalAnalyzer
         private Token GetNextToken()
         {
             SkipWhiteSpace();
-                
+
             switch(currentChar)
             {
                 case '(':
@@ -157,14 +162,21 @@ namespace Compiler.LexicalAnalyzer
                     return ScanLessThan();                    
                 case '>':
                     return ScanGreaterThan();
-                case '\'':
-                    return ScanStringLiteral();
+                case ',':
+                    return ScanComma();
+//                case '\'':
+//                    return ScanStringLiteral();
             }
             if (char.IsLetter( currentChar ))
             {
                 return ScanIdentifier();                
             }
-            if (char.IsDigit(currentChar))
+
+
+            //This does not work, it never gets to the first '9' within the Program1.mp hello world line we added
+            // the problem is that currentChar never hits the 9? I think it may be a problem with reading the
+            // char value as an ascii character? 9 is tab... so that would explain why it never shows up before '!'
+            if (currentChar <= 0 && currentChar >= 9)
             {
                 return ScanNumericLiteral();
             }
@@ -174,6 +186,11 @@ namespace Compiler.LexicalAnalyzer
             return word;                
         }
 
+        private Token ScanComma()
+        {
+            ReadChar();
+            return new Token(',');
+        }
         private Token ScanStringLiteral()
         {
             throw new NotImplementedException();
@@ -186,7 +203,85 @@ namespace Compiler.LexicalAnalyzer
 
         private Token ScanNumericLiteral()
         {
-            throw new NotImplementedException();
+            char next = Peek();
+            StringBuilder sb = new StringBuilder();
+            sb.Append(currentChar);
+            
+            if (next.Equals('.'))
+            {
+                ReadChar();
+                sb.Append(currentChar);
+                next = Peek();
+
+                do{
+                    ReadChar();
+                    sb.Append(currentChar); 
+                    next = Peek();
+                } while (next >= '0' && next <= '9');
+
+                string s = sb.ToString();
+
+               if(!(next.Equals('e') || next.Equals('E')))
+               {
+                   return new Word(s, (int)Tags.MP_FIXED_LIT);
+               }
+
+            }
+
+            if (next >= '0' && next <= '9')
+            {
+                do
+                {
+                    
+                    ReadChar();
+                    sb.Append(currentChar);
+                    next = Peek();
+                } while (next >= '0' && next <= '9');
+                
+                string s = sb.ToString();
+
+                if (!(next.Equals('e') || next.Equals('E') 
+                    ))
+                {
+                    return new Word(s, (int)Tags.MP_INTEGER_LIT);
+                }               
+            }
+
+            if (next.Equals('e') || next.Equals('E'))
+            {
+                ReadChar();
+                next = Peek();
+                if (next >= '0' && next <= '9')
+                {
+                    ReadChar();
+                    sb.Append(currentChar);
+                    string s = sb.ToString();
+                    return new Word(s, (int)Tags.MP_FLOAT_LIT);
+                   
+                }
+
+                if(next.Equals('+') || next.Equals('-'))
+                {
+                    //plusminus
+                    ReadChar();
+                    sb.Append(currentChar);
+                    next = Peek();
+
+                    //digits
+                    do
+                    {
+                        ReadChar();
+                        sb.Append(currentChar);
+                        next = Peek();
+                    } while (next <= '0' && next >= '9');
+                }
+                string returnMe = sb.ToString();
+                return new Word(returnMe, (int)Tags.MP_FLOAT_LIT);
+            }
+
+
+
+            return new Token((int)Tags.MP_AND);
         }
 
         private Token ScanIdentifier()
@@ -265,6 +360,7 @@ namespace Compiler.LexicalAnalyzer
             ReadChar();
             return new Token('(');
         }
+
         /// <summary>
         /// Scan to the next character
         /// </summary>

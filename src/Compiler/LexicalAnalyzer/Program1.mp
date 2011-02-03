@@ -1,6 +1,6 @@
 ﻿Program HelloWorld(output);
 begin
-  writeln('Hello, world!');
+  writeln('Hello, world 9!');
   this := cant;
 end.
 
