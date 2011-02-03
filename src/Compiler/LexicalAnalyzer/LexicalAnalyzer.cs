@@ -80,16 +80,30 @@ namespace Compiler.LexicalAnalyzer
         private void Scan()
         {
             string output;
-            while (!file.EndOfStream)
+            Token token;
+            //there is still 1 char left in the buffer when this loop complete..
+            //TODO: Fix that!
+            try
             {
-                
-                Token token = GetNextToken();
-               
+
+                while(!file.EndOfStream)
+                {
+                    token = GetNextToken();
+
                     output = string.Format("{0,-20} {1,-5} {2,-5} {3}",
                       token.Tag, Line, (Column - token.Lexeme.Length) - 1, token.Lexeme);
-                
-                Console.WriteLine(output);
+
+                    Console.WriteLine(output);
+                }
             }
+            catch (IOException e)
+            {
+                throw (e);                
+            }
+            
+
+            
+
         }
         /// <summary>
         /// Loads necessary tokens from a file
@@ -121,7 +135,7 @@ namespace Compiler.LexicalAnalyzer
         /// </summary>
         private void ReadChar()
         {
-            currentChar = Convert.ToChar(file.Read());
+            currentChar = Convert.ToChar(file.Read());            
             Column++;
         }
 
@@ -147,7 +161,11 @@ namespace Compiler.LexicalAnalyzer
         private Token GetNextToken()
         {
             SkipWhiteSpace();
-
+            if(currentChar.Equals('{'))
+            {
+                ScanComment();
+                SkipWhiteSpace();
+            }
             switch(currentChar)
             {
                 case '(':
@@ -166,17 +184,15 @@ namespace Compiler.LexicalAnalyzer
                     return ScanComma();
                 case '\'':
                     return ScanStringLiteral();
+                case '.':
+                    return ScanPeriod();
+                case '\0':
+                    return ScanEndOfFile();                
             }
             if (char.IsLetter( currentChar ))
             {
                 return ScanIdentifier();                
-            }
-            
-            //This does not work, it never gets to the first '9' within the Program1.mp hello world line we added
-            // the problem is that currentChar never hits the 9? I think it may be a problem with reading the
-            // char value as an ascii character? 9 is tab... so that would explain why it never shows up before '!'
-
-            //The 9 in the program should show up in the string literal.
+            }            
             if (char.IsDigit(currentChar))
             {
                 return ScanNumericLiteral();
@@ -185,6 +201,21 @@ namespace Compiler.LexicalAnalyzer
            Word word = new Word( "Not yet implemented",(int)Tags.MP_IDENTIFIER );
             currentChar = ' ';
             return word;                
+        }
+
+        private Token ScanPeriod ()
+        {
+            ReadChar();
+            return new Token((int)Tags.MP_PERIOD);
+        }
+
+        private void ScanComment ()
+        {
+            while(!currentChar.Equals('}'))
+            {
+                ReadChar();
+            }
+            ReadChar();
         }
 
         private Token ScanComma()

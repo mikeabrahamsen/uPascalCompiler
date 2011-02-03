@@ -1,7 +1,7 @@
 ﻿Program HelloWorld(output);
 begin
   writeln('Hello, ''w''orld 9!');
-  this := cant;
+  this := cant; {we foudn a comment}
 end.
 
 
