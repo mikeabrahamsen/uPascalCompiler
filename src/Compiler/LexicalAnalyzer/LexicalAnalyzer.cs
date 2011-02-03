@@ -256,92 +256,133 @@ namespace Compiler.LexicalAnalyzer
         private enum States
         {
             S0 = 0,
-            S1,S2,S3,S4,S5
+            S1,S2,S3,S4,S5,S6,S7
 
         }
         private Token ScanNumericLiteral()
         {
-            
+            bool finishState = false;   
             char next = Peek();
+            States state = States.S0;
+            string s;
             StringBuilder sb = new StringBuilder();
-            sb.Append(currentChar);
-            if(!next.Equals('.') && !next.Equals('E') && !next.Equals('e') && !char.IsDigit(next))
+            while(!finishState)
             {
-                return new Token(currentChar);
-            }
-            if (next.Equals('.'))
-            {
-                ReadChar();
-                sb.Append(currentChar);
-                
-
-                do{
-                    ReadChar();
-                    sb.Append(currentChar); 
-                    next = Peek();
-                } while (char.IsDigit(next));
-
-                string s = sb.ToString();
-
-               if(!(next.Equals('e') && !next.Equals('E')))
-               {
-                   ReadChar();
-                   return new Word(s, (int)Tags.MP_FIXED_LIT);
-               }
-
-            }
-
-            if (next >= '0' && next <= '9')
-            {
-                do
+                switch(state)
                 {
-                    
-                    ReadChar();
-                    sb.Append(currentChar);
-                    next = Peek();
-                } while (next >= '0' && next <= '9');
-                
-                string s = sb.ToString();
-
-                if (!(next.Equals('e') || next.Equals('E') 
-                    ))
-                {
-                    return new Word(s, (int)Tags.MP_INTEGER_LIT);
-                }               
-            }
-
-            if (next.Equals('e') || next.Equals('E'))
-            {
-                ReadChar();
-                next = Peek();
-                if (next >= '0' && next <= '9')
-                {
-                    ReadChar();
-                    sb.Append(currentChar);
-                    string s = sb.ToString();
-                    return new Word(s, (int)Tags.MP_FLOAT_LIT);
-                   
-                }
-
-                if(next.Equals('+') || next.Equals('-'))
-                {
-                    //plusminus
-                    ReadChar();
-                    sb.Append(currentChar);
-                    next = Peek();
-
-                    //digits
-                    do
-                    {
+                    case States.S0:
+                        sb.Append(currentChar);
+                        state = States.S1;
+                        break;
+                    case States.S1:
+                        while(char.IsDigit(next))
+                        {
+                            finishState = true;
+                            ReadChar();
+                            sb.Append(currentChar);
+                            next = Peek();
+                        }
+                        if(next.Equals('e') || next.Equals('E'))
+                        {
+                            finishState = false;
+                            state = States.S4;
+                            break;
+                        }
+                        if(next.Equals('.'))
+                        {
+                            finishState = false;
+                            state = States.S2;
+                            break;
+                        }
+                         s = sb.ToString();
+                        ReadChar();
+                        return new Word(s, (int)Tags.MP_INTEGER_LIT);
+                    case States.S2:
+                        ReadChar();
+                        sb.Append(currentChar);
+                                               
+                        finishState = false;
+                        next = Peek();
+                        //TODO: this is messy - what if it's not a digit?
+                        if(char.IsDigit(next))
+                        {                            
+                            state = States.S3;
+                            break;
+                        }
+                        break;
+                    case States.S3:
+                        while(char.IsDigit(next))
+                        {
+                            finishState = true;
+                            ReadChar();
+                            sb.Append(currentChar);
+                            next = Peek();
+                        }
+                        if(next.Equals('e') || next.Equals('E'))
+                        {
+                            finishState = false;
+                            state = States.S4;
+                            break;
+                        }
+                        else
+                        {
+                            s = sb.ToString();
+                            ReadChar();
+                            return new Word(s, (int)Tags.MP_FIXED_LIT);
+                        }
+                    case States.S4:
+                        finishState = false;
                         ReadChar();
                         sb.Append(currentChar);
                         next = Peek();
-                    } while (next <= '0' && next >= '9');
-                }
-                string returnMe = sb.ToString();
-                return new Word(returnMe, (int)Tags.MP_FLOAT_LIT);
-            }
+                        if(char.IsDigit(next))
+                        {
+                            state = States.S5;
+                            break;
+                        }
+                        if(next.Equals('+') || next.Equals('-'))
+                        {
+                            state = States.S6;
+                            break;
+                        }
+                        break;
+                    case States.S5:
+                        ReadChar();
+                        while(char.IsDigit(next))
+                        {
+                            finishState = true;                            
+                            sb.Append(currentChar);
+                            next = Peek();
+                            ReadChar();
+                        }
+                        s = sb.ToString();
+                        return new Word(s, (int)Tags.MP_FLOAT_LIT);
+                    case States.S6:
+                        ReadChar();
+                        sb.Append(currentChar);
+                        finishState = false;
+                        next = Peek();
+                        //TODO: this is messy - what if it's not a digit?
+                        if(char.IsDigit(next))
+                        {                            
+                            state = States.S7;
+                            break;
+                        }
+                        break;
+                    case States.S7:
+                        ReadChar();
+                        while(char.IsDigit(next))
+                        {
+                            finishState = true;                            
+                            sb.Append(currentChar);
+                            next = Peek();
+                            ReadChar();
+                        }
+                        s = sb.ToString();
+                        return new Word(s, (int)Tags.MP_FLOAT_LIT);
 
+                }
+            }
             return new Token(currentChar);
         }
 
@@ -396,6 +437,7 @@ namespace Compiler.LexicalAnalyzer
         {
             if (PeekChar('='))
             {
+                ReadChar();
                 return new Word(":=", (int)Tags.MP_ASSIGN);
             }
             else
