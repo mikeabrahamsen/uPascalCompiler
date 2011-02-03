@@ -205,10 +205,12 @@ namespace Compiler.LexicalAnalyzer
                 {
                     case States.S0:
                         //start state, there is now a " ' " in the charbuffer
+                        sb.Append(currentChar);
                         state = States.S1;
                         break;
                     case States.S1:
                         //read until we get a " ' "
+                        
                         ReadChar();
                         if(currentChar.Equals('\''))
                         {
@@ -235,6 +237,7 @@ namespace Compiler.LexicalAnalyzer
                         }
                         else
                         {
+                            sb.Append(currentChar);
                             ReadChar();
                             finishState = true;
                             break;
