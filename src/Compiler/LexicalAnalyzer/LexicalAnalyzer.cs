@@ -179,7 +179,6 @@ namespace Compiler.LexicalAnalyzer
             //The 9 in the program should show up in the string literal.
             if (char.IsDigit(currentChar))
             {
-                ReadChar();
                 return ScanNumericLiteral();
             }
             
@@ -266,23 +265,27 @@ namespace Compiler.LexicalAnalyzer
             char next = Peek();
             StringBuilder sb = new StringBuilder();
             sb.Append(currentChar);
-            
+            if(!next.Equals('.') && !next.Equals('E') && !next.Equals('e') && !char.IsDigit(next))
+            {
+                return new Token(currentChar);
+            }
             if (next.Equals('.'))
             {
                 ReadChar();
                 sb.Append(currentChar);
-                next = Peek();
+                
 
                 do{
                     ReadChar();
                     sb.Append(currentChar); 
                     next = Peek();
-                } while (next >= '0' && next <= '9');
+                } while (char.IsDigit(next));
 
                 string s = sb.ToString();
 
-               if(!(next.Equals('e') || next.Equals('E')))
+               if(!(next.Equals('e') && !next.Equals('E')))
                {
+                   ReadChar();
                    return new Word(s, (int)Tags.MP_FIXED_LIT);
                }
 
@@ -339,9 +342,7 @@ namespace Compiler.LexicalAnalyzer
                 return new Word(returnMe, (int)Tags.MP_FLOAT_LIT);
             }
 
-
-
-            return new Token((int)Tags.MP_AND);
+            return new Token(currentChar);
         }
 
         private Token ScanIdentifier()
