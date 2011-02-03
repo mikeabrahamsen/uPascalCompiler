@@ -21,8 +21,9 @@ namespace Compiler.LexicalAnalyzer
         MP_WRITE,MP_WRITELN, MP_IDENTIFIER,
         MP_GEQUAL,MP_LEQUAL,
         MP_NEQUAL,MP_ASSIGN,
-        MP_COLON, MP_EOF, MP_INTEGER_LIT,
+         MP_EOF, MP_INTEGER_LIT,
         MP_FIXED_LIT, MP_FLOAT_LIT, MP_STRING_LIT,
+        MP_COLON = 58,
         MP_PERIOD = 46,
         MP_COMMA = 44,
         MP_SCOLON = 59,
@@ -119,27 +120,7 @@ namespace Compiler.LexicalAnalyzer
    
             return c.Equals(currentChar);
         }
-        /// <summary>
-        /// Scan to the next character
-        /// </summary>
-        private void SkipWhiteSpace()
-        {
-            for (; ; ReadChar())
-            {
-                if (currentChar == ' ' || currentChar == '\t')
-                {
-                    continue;
-                }
-                else if (currentChar == '\n')
-                {
-                    line++;
-                }
-                else
-                {
-                    break;
-                }
-            }
-        }
+        
         /// <summary>
         /// Return the token with corresponding line, column, and lexeme information
         /// </summary>
@@ -147,12 +128,7 @@ namespace Compiler.LexicalAnalyzer
         public Token GetNextToken()
         {
             SkipWhiteSpace();
-                /*
-                if (char.IsDigit(peek))
-                {
-
-                }
-                 * */
+                
             switch(currentChar)
             {
                 case '(':
@@ -170,11 +146,27 @@ namespace Compiler.LexicalAnalyzer
                         return new Word(":=", (int)Tags.MP_ASSIGN);
                     }
                     else
-                    {
-                        return new Token('=');
+                    {   
+                        return new Token(':');
                     }
-                default:
-                    break;
+                case '<':
+                    if(ReadChar('='))
+                    {
+                        return new Word("<=",(int)Tags.MP_LEQUAL);
+                    }
+                    else
+                    {
+                        return new Token('<');
+                    }
+                case '>':
+                    if(ReadChar('='))
+                    {
+                        return new Word(">=", (int)Tags.MP_GEQUAL);
+                    }
+                    else
+                    {
+                        return new Token('>');
+                    }                
             }
             if (char.IsLetter( currentChar ))
             {
@@ -201,6 +193,27 @@ namespace Compiler.LexicalAnalyzer
            Word word = new Word( "Not yet implemented",(int)Tags.MP_IDENTIFIER );
             currentChar = ' ';
             return word;                
+        }
+        /// <summary>
+        /// Scan to the next character
+        /// </summary>
+        private void SkipWhiteSpace ()
+        {
+            for(; ; ReadChar())
+            {
+                if(currentChar == ' ' || currentChar == '\t')
+                {
+                    continue;
+                }
+                else if(currentChar == 10 || currentChar == 13)
+                {
+                    line++;
+                }
+                else
+                {
+                    break;
+                }
+            }
         }
     }
 
