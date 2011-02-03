@@ -164,20 +164,22 @@ namespace Compiler.LexicalAnalyzer
                     return ScanGreaterThan();
                 case ',':
                     return ScanComma();
-//                case '\'':
-//                    return ScanStringLiteral();
+                case '\'':
+                    return ScanStringLiteral();
             }
             if (char.IsLetter( currentChar ))
             {
                 return ScanIdentifier();                
             }
-
-
+            
             //This does not work, it never gets to the first '9' within the Program1.mp hello world line we added
             // the problem is that currentChar never hits the 9? I think it may be a problem with reading the
             // char value as an ascii character? 9 is tab... so that would explain why it never shows up before '!'
-            if (currentChar <= 0 && currentChar >= 9)
+
+            //The 9 in the program should show up in the string literal.
+            if (char.IsDigit(currentChar))
             {
+                ReadChar();
                 return ScanNumericLiteral();
             }
             
@@ -193,16 +195,74 @@ namespace Compiler.LexicalAnalyzer
         }
         private Token ScanStringLiteral()
         {
-            throw new NotImplementedException();
+            bool finishState = false;
+            States state;
+            char next;
+            state = States.S0;
+            StringBuilder sb = new StringBuilder();
+            while(!finishState)
+            {
+                switch (state)
+                {
+                    case States.S0:
+                        //start state, there is now a " ' " in the charbuffer
+                        state = States.S1;
+                        break;
+                    case States.S1:
+                        //read until we get a " ' "
+                        ReadChar();
+                        if(currentChar.Equals('\''))
+                        {
+                            state = States.S2;
+                            break;
+                        }
+                        else
+                        {
+
+                            sb.Append(currentChar);
+                            
+                            state = States.S1;
+                            break;
+                        }
+                    case States.S2:
+                        next = Peek();
+                        if(next.Equals('\''))
+                        {
+                            sb.Append(currentChar);
+                            ReadChar();
+                            sb.Append(currentChar);
+                            state = States.S1;
+                            break;
+                        }
+                        else
+                        {
+                            ReadChar();
+                            finishState = true;
+                            break;
+                        }                        
+                }
+            }
+            string s = sb.ToString();
+                       
+
+            Word tempWord = new Word(s, (int)Tags.MP_STRING_LIT);
+            ReservedWords.Add(tempWord);
+            return tempWord;
         }
 
         private Token ScanEndOfFile()
         {
             return new Token((int)Tags.MP_EOF);
         }
+        private enum States
+        {
+            S0 = 0,
+            S1,S2,S3,S4,S5
 
+        }
         private Token ScanNumericLiteral()
         {
+            
             char next = Peek();
             StringBuilder sb = new StringBuilder();
             sb.Append(currentChar);
@@ -368,7 +428,7 @@ namespace Compiler.LexicalAnalyzer
         {
             for(; ; ReadChar())
             {
-                if(currentChar == ' ' || currentChar == '\t')
+                if(currentChar == 32 || currentChar == '\t')
                 {
                     continue;
                 }

@@ -1,10 +1,9 @@
 ﻿Program HelloWorld(output);
 begin
-  writeln('Hello, world 9!');
+  writeln('Hello, ''w''orld 9!');
   this := cant;
 end.
 
-Thiswillbeantestprogramllll
 
 program sample1;
   var i, j: integer;
