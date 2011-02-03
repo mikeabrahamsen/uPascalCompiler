@@ -28,6 +28,9 @@ namespace Compiler.LexicalAnalyzer
             get;
             set;
         }
+        /// <summary>
+        /// Get and set the Lexeme
+        /// </summary>
         public string Lexeme
         {
             get;

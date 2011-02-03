@@ -18,7 +18,7 @@ namespace Compiler.LexicalAnalyzer
         MP_FUNCTION, MP_IF, MP_INTEGER, MP_MOD, MP_NOT,
         MP_OR, MP_PROCEDURE, MP_PROGRAM, MP_READ, MP_REPEAT,
         MP_THEN, MP_TO, MP_UNTIL, MP_VAR, MP_WHILE,
-        MP_WRITE, MP_IDENTIFIER,
+        MP_WRITE,MP_WRITELN, MP_IDENTIFIER,
         MP_GEQUAL,MP_LEQUAL,
         MP_NEQUAL,MP_ASSIGN,
         MP_COLON, MP_EOF, MP_INTEGER_LIT,
@@ -75,7 +75,6 @@ namespace Compiler.LexicalAnalyzer
                       token.Tag, line, column, token.Lexeme);
                 
                 Console.WriteLine(output);
-                //Console.WriteLine( word.Tag + "\t" + line + "\t" + column + "\t" + word.lexeme );
             }
         }
         /// <summary>
@@ -114,9 +113,11 @@ namespace Compiler.LexicalAnalyzer
         /// <summary>
         /// Peeks at the next character without consuming
         /// </summary>
-        private char ReadChar (char c)
+        private bool ReadChar (char c)
         {
-            return Convert.ToChar(file.Peek ());
+            ReadChar();
+   
+            return c.Equals(currentChar);
         }
         /// <summary>
         /// Scan to the next character
@@ -160,32 +161,46 @@ namespace Compiler.LexicalAnalyzer
                 case ')':
                     ReadChar();
                     return new Token(')');
-            }
-                if (char.IsLetter( currentChar ))
-                {
-                    StringBuilder sb = new StringBuilder();
-                    do
+                case ';':
+                    ReadChar();
+                    return new Token(';');
+                case ':':
+                    if(ReadChar('='))
                     {
-                        sb.Append( currentChar );
-                        ReadChar();
-                    } while (char.IsLetterOrDigit( currentChar ));
-                    string s = sb.ToString();
-
-                    foreach (Word w in words)
-                    {
-                        if (w.Lexeme.Equals( s ))
-                        {
-                            return w;
-                        }
+                        return new Word(":=", (int)Tags.MP_ASSIGN);
                     }
+                    else
+                    {
+                        return new Token('=');
+                    }
+                default:
+                    break;
+            }
+            if (char.IsLetter( currentChar ))
+            {
+                StringBuilder sb = new StringBuilder();
+                do
+                {
+                    sb.Append( currentChar );
+                    ReadChar();
+                } while (char.IsLetterOrDigit( currentChar ));
+                string s = sb.ToString();
 
-                    Word tempWord = new Word( s, (int)Tags.MP_IDENTIFIER );
-                    words.Add( tempWord );
-                    return tempWord;
+                foreach (Word w in words)
+                {
+                    if (w.Lexeme.Equals( s ))
+                    {
+                        return w;
+                    }
                 }
-                Word word = new Word( "Not yet implemented",(int)Tags.MP_IDENTIFIER );
-                currentChar = ' ';
-                return word;                
+
+                Word tempWord = new Word( s, (int)Tags.MP_IDENTIFIER );
+                words.Add( tempWord );
+                return tempWord;
+            }
+           Word word = new Word( "Not yet implemented",(int)Tags.MP_IDENTIFIER );
+            currentChar = ' ';
+            return word;                
         }
     }
 
