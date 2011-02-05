@@ -10,11 +10,12 @@ program sample1;
 begin
   readln(i); 
   j := 9800; 
-  k := 12.043;
+  k := 12.043asd;
   a := 12e-1;
   l := 34.21e21;
   m := 22.43e-78;
   write( 'Result is ' );
   write( j ); 
   writeln
-end.
+end
+l := 34.21e21
