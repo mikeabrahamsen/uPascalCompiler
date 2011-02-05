@@ -18,9 +18,9 @@ namespace Compiler.LexicalAnalyzer
         MP_FUNCTION, MP_IF, MP_INTEGER, MP_MOD, MP_NOT,
         MP_OR, MP_PROCEDURE, MP_PROGRAM, MP_READ, MP_REPEAT,
         MP_THEN, MP_TO, MP_UNTIL, MP_VAR, MP_WHILE,
-        MP_WRITE,MP_WRITELN, MP_IDENTIFIER,
-        MP_GEQUAL,MP_LEQUAL,
-        MP_NEQUAL,MP_ASSIGN,
+        MP_WRITE, MP_WRITELN, MP_IDENTIFIER,
+        MP_GEQUAL, MP_LEQUAL,
+        MP_NEQUAL, MP_ASSIGN,
         MP_INTEGER_LIT,
         MP_FIXED_LIT, MP_FLOAT_LIT, MP_STRING_LIT,
         MP_COLON = 58,
@@ -54,30 +54,30 @@ namespace Compiler.LexicalAnalyzer
         {
             get;
             private set;
-        }       
-        
+        }
+
         char currentChar = ' ';
-        
+
         private StreamReader file = new StreamReader("Program1.mp");
         private List<Word> ReservedWords = new List<Word>();
 
         /// <summary>
         /// Sets up the Lexical Analyzer
         /// </summary>
-        public LexicalAnalyzer()
+        public LexicalAnalyzer ()
         {
             Column = 1;
             Line = 1;
             //TODO: place in try catch
-            LoadTokens( "mpTokens.txt" );
+            LoadTokens("mpTokens.txt");
             Scan();
-           
+
         }
 
         /// <summary>
         /// Scans the file gathering token information
         /// </summary>
-        private void Scan()
+        private void Scan ()
         {
             string output;
             Token token;
@@ -96,46 +96,42 @@ namespace Compiler.LexicalAnalyzer
                     Console.WriteLine(output);
                 }
             }
-            catch (IOException e)
+            catch(IOException e)
             {
-                throw (e);                
+                throw (e);
             }
-            
-
-            
-
         }
         /// <summary>
         /// Loads necessary tokens from a file
         /// </summary>
         /// <param name="filename"></param>
-        private void LoadTokens(string filename)
+        private void LoadTokens (string filename)
         {
-            StreamReader tokens = new StreamReader( filename );
-            string s,name,lexeme;
-            
-            while (!tokens.EndOfStream)
+            StreamReader tokens = new StreamReader(filename);
+            string s, name, lexeme;
+
+            while(!tokens.EndOfStream)
             {
                 s = tokens.ReadLine();
-                               
-                MatchCollection matchTokenName = Regex.Matches( s, "(?<name>[a-zA-Z_]+).+\"(?<lexeme>.+)\"");
-                
+
+                MatchCollection matchTokenName = Regex.Matches(s, "(?<name>[a-zA-Z_]+).+\"(?<lexeme>.+)\"");
+
                 Match token = matchTokenName[0];
-                name = token.Groups["name"].ToString ();
-                lexeme = token.Groups["lexeme"].ToString ();
-                
+                name = token.Groups["name"].ToString();
+                lexeme = token.Groups["lexeme"].ToString();
+
                 // Add all of the tokens to the word list
-                
-                ReservedWords.Add( new Word(lexeme, (int)(Tags)Enum.Parse(typeof(Tags),name,false)));
+
+                ReservedWords.Add(new Word(lexeme, (int)(Tags)Enum.Parse(typeof(Tags), name, false)));
             }
         }
-       
+
         /// <summary>
         /// Reads one char at a time from the file
         /// </summary>
-        private void ReadChar()
+        private void ReadChar ()
         {
-            currentChar = Convert.ToChar(file.Read());            
+            currentChar = Convert.ToChar(file.Read());
             Column++;
         }
 
@@ -145,20 +141,20 @@ namespace Compiler.LexicalAnalyzer
         private bool PeekChar (char c)
         {
             ReadChar();
-   
+
             return c.Equals(currentChar);
         }
 
-        private char Peek()
+        private char Peek ()
         {
-            return Convert.ToChar( file.Peek() );
+            return Convert.ToChar(file.Peek());
         }
-        
+
         /// <summary>
         /// Return the token with corresponding line, column, and lexeme information
         /// </summary>
         /// <returns></returns>
-        private Token GetNextToken()
+        private Token GetNextToken ()
         {
             SkipWhiteSpace();
             if(currentChar.Equals('{'))
@@ -169,15 +165,15 @@ namespace Compiler.LexicalAnalyzer
             switch(currentChar)
             {
                 case '(':
-                    return ScanLeftParen();                    
+                    return ScanLeftParen();
                 case ')':
-                    return ScanRightParen();                    
+                    return ScanRightParen();
                 case ';':
-                    return ScanSemicolon();                    
+                    return ScanSemicolon();
                 case ':':
-                    return ScanColonOrAssignOp();                    
+                    return ScanColonOrAssignOp();
                 case '<':
-                    return ScanLessThan();                    
+                    return ScanLessThan();
                 case '>':
                     return ScanGreaterThan();
                 case ',':
@@ -187,20 +183,20 @@ namespace Compiler.LexicalAnalyzer
                 case '.':
                     return ScanPeriod();
                 case '\0':
-                    return ScanEndOfFile();                
+                    return ScanEndOfFile();
             }
-            if (char.IsLetter( currentChar ))
+            if(char.IsLetter(currentChar))
             {
-                return ScanIdentifier();                
-            }            
-            if (char.IsDigit(currentChar))
+                return ScanIdentifier();
+            }
+            if(char.IsDigit(currentChar))
             {
                 return ScanNumericLiteral();
             }
-            
-           Word word = new Word( "Not yet implemented",(int)Tags.MP_IDENTIFIER );
+
+            Word word = new Word("Not yet implemented", (int)Tags.MP_IDENTIFIER);
             currentChar = ' ';
-            return word;                
+            return word;
         }
 
         private Token ScanPeriod ()
@@ -218,12 +214,12 @@ namespace Compiler.LexicalAnalyzer
             ReadChar();
         }
 
-        private Token ScanComma()
+        private Token ScanComma ()
         {
             ReadChar();
             return new Token(',');
         }
-        private Token ScanStringLiteral()
+        private Token ScanStringLiteral ()
         {
             bool finishState = false;
             States state;
@@ -232,16 +228,14 @@ namespace Compiler.LexicalAnalyzer
             StringBuilder sb = new StringBuilder();
             while(!finishState)
             {
-                switch (state)
+                switch(state)
                 {
                     case States.S0:
                         //start state, there is now a " ' " in the charbuffer
                         sb.Append(currentChar);
                         state = States.S1;
                         break;
-                    case States.S1:
-                        //read until we get a " ' "
-                        
+                    case States.S1:                        
                         ReadChar();
                         if(currentChar.Equals('\''))
                         {
@@ -250,9 +244,7 @@ namespace Compiler.LexicalAnalyzer
                         }
                         else
                         {
-
                             sb.Append(currentChar);
-                            
                             state = States.S1;
                             break;
                         }
@@ -272,34 +264,35 @@ namespace Compiler.LexicalAnalyzer
                             ReadChar();
                             finishState = true;
                             break;
-                        }                        
+                        }
                 }
             }
             string s = sb.ToString();
-                       
+
 
             Word tempWord = new Word(s, (int)Tags.MP_STRING_LIT);
             ReservedWords.Add(tempWord);
             return tempWord;
         }
 
-        private Token ScanEndOfFile()
+        private Token ScanEndOfFile ()
         {
             return new Token((int)Tags.MP_EOF);
         }
         private enum States
         {
             S0 = 0,
-            S1,S2,S3,S4,S5,S6,S7
+            S1, S2, S3, S4, S5, S6, S7
 
         }
-        private Token ScanNumericLiteral()
+        private Token ScanNumericLiteral ()
         {
-            bool finishState = false;   
+            bool finishState = false;
             char next = Peek();
             States state = States.S0;
             string s;
             StringBuilder sb = new StringBuilder();
+
             while(!finishState)
             {
                 switch(state)
@@ -319,7 +312,7 @@ namespace Compiler.LexicalAnalyzer
                         if(next.Equals('e') || next.Equals('E'))
                         {
                             finishState = false;
-                            state = States.S4;
+                            state = States.S3;
                             break;
                         }
                         if(next.Equals('.'))
@@ -328,43 +321,27 @@ namespace Compiler.LexicalAnalyzer
                             state = States.S2;
                             break;
                         }
-                         s = sb.ToString();
+                        s = sb.ToString();
                         ReadChar();
+                        if(s.Contains("."))
+                        {
+                            return new Word(s, (int)Tags.MP_FIXED_LIT);
+                        }
                         return new Word(s, (int)Tags.MP_INTEGER_LIT);
                     case States.S2:
                         ReadChar();
                         sb.Append(currentChar);
-                                               
+
                         finishState = false;
                         next = Peek();
                         //TODO: this is messy - what if it's not a digit?
                         if(char.IsDigit(next))
-                        {                            
-                            state = States.S3;
+                        {
+                            state = States.S1;
                             break;
                         }
                         break;
                     case States.S3:
-                        while(char.IsDigit(next))
-                        {
-                            finishState = true;
-                            ReadChar();
-                            sb.Append(currentChar);
-                            next = Peek();
-                        }
-                        if(next.Equals('e') || next.Equals('E'))
-                        {
-                            finishState = false;
-                            state = States.S4;
-                            break;
-                        }
-                        else
-                        {
-                            s = sb.ToString();
-                            ReadChar();
-                            return new Word(s, (int)Tags.MP_FIXED_LIT);
-                        }
-                    case States.S4:
                         finishState = false;
                         ReadChar();
                         sb.Append(currentChar);
@@ -376,7 +353,19 @@ namespace Compiler.LexicalAnalyzer
                         }
                         if(next.Equals('+') || next.Equals('-'))
                         {
-                            state = States.S6;
+                            state = States.S4;
+                            break;
+                        }
+                        break;
+                    case States.S4:
+                        ReadChar();
+                        sb.Append(currentChar);
+                        finishState = false;
+                        next = Peek();
+                        //TODO: this is messy - what if it's not a digit?
+                        if(char.IsDigit(next))
+                        {
+                            state = States.S5;
                             break;
                         }
                         break;
@@ -384,55 +373,31 @@ namespace Compiler.LexicalAnalyzer
                         ReadChar();
                         while(char.IsDigit(next))
                         {
-                            finishState = true;                            
+                            finishState = true;
                             sb.Append(currentChar);
                             next = Peek();
                             ReadChar();
                         }
                         s = sb.ToString();
-                        return new Word(s, (int)Tags.MP_FLOAT_LIT);
-                    case States.S6:
-                        ReadChar();
-                        sb.Append(currentChar);
-                        finishState = false;
-                        next = Peek();
-                        //TODO: this is messy - what if it's not a digit?
-                        if(char.IsDigit(next))
-                        {                            
-                            state = States.S7;
-                            break;
-                        }
-                        break;
-                    case States.S7:
-                        ReadChar();
-                        while(char.IsDigit(next))
-                        {
-                            finishState = true;                            
-                            sb.Append(currentChar);
-                            next = Peek();
-                            ReadChar();
-                        }
-                        s = sb.ToString();
-                        return new Word(s, (int)Tags.MP_FLOAT_LIT);
-
+                        return new Word(s, (int)Tags.MP_FLOAT_LIT);                   
                 }
             }
             return new Token(currentChar);
         }
 
-        private Token ScanIdentifier()
+        private Token ScanIdentifier ()
         {
             StringBuilder sb = new StringBuilder();
             do
             {
                 sb.Append(currentChar);
                 ReadChar();
-            } while (char.IsLetterOrDigit(currentChar) || currentChar == (char)95);
+            } while(char.IsLetterOrDigit(currentChar) || currentChar == (char)95);
             string s = sb.ToString();
 
-            foreach (Word w in ReservedWords)
+            foreach(Word w in ReservedWords)
             {
-                if (w.Lexeme.Equals(s))
+                if(w.Lexeme.Equals(s))
                 {
                     return w;
                 }
@@ -443,21 +408,21 @@ namespace Compiler.LexicalAnalyzer
             return tempWord;
         }
 
-        private Token ScanGreaterThan()
+        private Token ScanGreaterThan ()
         {
-            if (PeekChar('='))
+            if(PeekChar('='))
             {
                 return new Word(">=", (int)Tags.MP_GEQUAL);
             }
             else
             {
                 return new Token('>');
-            }  
+            }
         }
 
-        private Token ScanLessThan()
+        private Token ScanLessThan ()
         {
-            if (PeekChar('='))
+            if(PeekChar('='))
             {
                 return new Word("<=", (int)Tags.MP_LEQUAL);
             }
@@ -467,9 +432,9 @@ namespace Compiler.LexicalAnalyzer
             }
         }
 
-        private Token ScanColonOrAssignOp()
+        private Token ScanColonOrAssignOp ()
         {
-            if (PeekChar('='))
+            if(PeekChar('='))
             {
                 ReadChar();
                 return new Word(":=", (int)Tags.MP_ASSIGN);
@@ -480,19 +445,19 @@ namespace Compiler.LexicalAnalyzer
             }
         }
 
-        private Token ScanSemicolon()
+        private Token ScanSemicolon ()
         {
             ReadChar();
             return new Token(';');
         }
 
-        private Token ScanRightParen()
+        private Token ScanRightParen ()
         {
             ReadChar();
             return new Token(')');
         }
 
-        private Token ScanLeftParen()
+        private Token ScanLeftParen ()
         {
             ReadChar();
             return new Token('(');
@@ -512,7 +477,7 @@ namespace Compiler.LexicalAnalyzer
                 else if(currentChar == 13)
                 {
                     Line++;
-                    Column = 0; 
+                    Column = 0;
                 }
                 else
                 {
@@ -522,5 +487,5 @@ namespace Compiler.LexicalAnalyzer
         }
     }
 
-    
+
 }
