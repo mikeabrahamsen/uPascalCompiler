@@ -4,42 +4,11 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Text.RegularExpressions;
+using Compiler.LexicalAnalyzer.Library;
 
 namespace Compiler.LexicalAnalyzer
 {
-    /// <summary>
-    /// Enum values for all of the tokens
-    /// </summary>
-    public enum Tags
-    {
-        MP_AND = 256,
-        MP_BEGIN, MP_DIV, MP_DO, MP_DOWNTO,
-        MP_ELSE, MP_END, MP_FIXED, MP_FLOAT, MP_FOR,
-        MP_FUNCTION, MP_IF, MP_INTEGER, MP_MOD, MP_NOT,
-        MP_OR, MP_PROCEDURE, MP_PROGRAM, MP_READ, MP_REPEAT,
-        MP_THEN, MP_TO, MP_UNTIL, MP_VAR, MP_WHILE,
-        MP_WRITE, MP_WRITELN, MP_IDENTIFIER,
-        MP_GEQUAL, MP_LEQUAL,
-        MP_NEQUAL, MP_ASSIGN,
-        MP_INTEGER_LIT,
-        MP_FIXED_LIT, MP_FLOAT_LIT, MP_STRING_LIT,
-        MP_COLON = 58,
-        MP_PERIOD = 46,
-        MP_COMMA = 44,
-        MP_SCOLON = 59,
-        MP_LPAREN = 40,
-        MP_RPAREN = 41,
-        MP_EQUAL = 61,
-        MP_GTHAN = 62,
-        MP_LTHAN = 60,
-        MP_PLUS = 43,
-        MP_MINUS = 45,
-        MP_TIMES = 42,
-        MP_EOF = 3
 
-        //TODO: add other tags
-        // Set non composite tags to numbers
-    }
     /// <summary>
     /// Handles functions for the Lexical Analyzer
     /// </summary>
@@ -279,12 +248,7 @@ namespace Compiler.LexicalAnalyzer
             ReadChar();
             return new Token((int)Tags.MP_EOF);
         }
-        private enum States
-        {
-            S0 = 0,
-            S1, S2, S3, S4, S5, S6, S7
 
-        }
         private Token ScanNumericLiteral ()
         {
             bool finishState = false;
