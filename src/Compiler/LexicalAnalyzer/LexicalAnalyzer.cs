@@ -47,6 +47,7 @@ namespace Compiler.LexicalAnalyzer
             Line = 1;
             //TODO: place in try catch
             LoadTokens("mpTokens.txt");
+            ReadChar();
             Scan();
 
         }
@@ -165,7 +166,11 @@ namespace Compiler.LexicalAnalyzer
                 case '\0':
                     return ScanEndOfFile();
             }
-            if(char.IsLetter(CurrentChar) || CurrentChar.Equals(95))
+            if(CurrentChar.Equals((char)95) && char.IsLetterOrDigit(NextChar))
+            {
+                return ScanIdentifier();
+            }
+            if(char.IsLetter(CurrentChar))
             {
                 return ScanIdentifier();
             }
@@ -373,8 +378,8 @@ namespace Compiler.LexicalAnalyzer
             string s = sb.ToString();
             ReadChar();
             foreach(Word w in ReservedWords)
-            {                
-                if(w.Lexeme.Equals(s))
+            {  
+                if(w.Lexeme.Equals(s,StringComparison.OrdinalIgnoreCase))
                 {
                     return w;
                 }
