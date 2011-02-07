@@ -158,10 +158,14 @@ namespace Compiler.LexicalAnalyzer
                     return ScanStringLiteral();
                 case '.':
                     return ScanPeriod();
+                case '+':
+                    return ScanPlusOperator();
+                case '-':
+                    return ScanMinusOperator();
                 case '\0':
                     return ScanEndOfFile();
             }
-            if(char.IsLetter(CurrentChar))
+            if(char.IsLetter(CurrentChar) || CurrentChar.Equals(95))
             {
                 return ScanIdentifier();
             }
@@ -173,6 +177,18 @@ namespace Compiler.LexicalAnalyzer
             Word word = new Word("Not yet implemented", (int)Tags.MP_IDENTIFIER);
             CurrentChar = ' ';
             return word;
+        }
+
+        private Token ScanPlusOperator ()
+        {
+            ReadChar();
+            return new Token((int)Tags.MP_PLUS);
+        }
+
+        private Token ScanMinusOperator ()
+        {
+            ReadChar();
+            return new Token((int)Tags.MP_MINUS);
         }
 
         private Token ScanPeriod ()
@@ -357,7 +373,7 @@ namespace Compiler.LexicalAnalyzer
             string s = sb.ToString();
             ReadChar();
             foreach(Word w in ReservedWords)
-            {
+            {                
                 if(w.Lexeme.Equals(s))
                 {
                     return w;
