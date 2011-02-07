@@ -150,7 +150,7 @@ namespace Compiler.LexicalAnalyzer
                 case ':':
                     return ScanColonOrAssignOp();
                 case '<':
-                    return ScanLessThan();
+                    return ScanLessThanOrNotEqual();
                 case '>':
                     return ScanGreaterThan();
                 case ',':
@@ -163,6 +163,10 @@ namespace Compiler.LexicalAnalyzer
                     return ScanPlusOperator();
                 case '-':
                     return ScanMinusOperator();
+                case '=':
+                    return ScanEqual();
+                case '*':
+                    return ScanMultiply();
                 case '\0':
                     return ScanEndOfFile();
             }
@@ -182,6 +186,18 @@ namespace Compiler.LexicalAnalyzer
             Word word = new Word("Not yet implemented", (int)Tags.MP_IDENTIFIER);
             CurrentChar = ' ';
             return word;
+        }
+
+        private Token ScanMultiply ()
+        {
+            ReadChar();
+            return new Token((int)Tags.MP_TIMES);
+        }
+
+        private Token ScanEqual ()
+        {
+            ReadChar();
+            return new Token((int)Tags.MP_EQUAL);
         }
 
         private Token ScanPlusOperator ()
@@ -397,17 +413,27 @@ namespace Compiler.LexicalAnalyzer
             }
             else
             {
-                ReadChar();
                 return new Token('>');
             }
         }
 
-        private Token ScanLessThan ()
+        private Token ScanLessThanOrNotEqual ()
         {
-            if(ReadChar('='))
+            if(NextChar.Equals('='))
             {
+                //Read In Next Character
+                ReadChar();
+                //Put file pointer to next character
                 ReadChar();
                 return new Word("<=", (int)Tags.MP_LEQUAL);
+            }
+            if(NextChar.Equals('>'))
+            {
+                //Read Next Character
+                ReadChar();
+                //Put file pointer to next character
+                ReadChar();
+                return new Word("<>", (int)Tags.MP_NEQUAL);
             }
             else
             {
@@ -425,7 +451,6 @@ namespace Compiler.LexicalAnalyzer
             }
             else
             {
-                ReadChar();
                 return new Token(':');
             }
         }
