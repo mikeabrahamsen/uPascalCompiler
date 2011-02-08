@@ -14,25 +14,37 @@ namespace Compiler.LexicalAnalyzer
     /// </summary>
     class LexicalAnalyzer
     {
+        /// <summary>
+        /// Get and set the line number
+        /// </summary>
         public int Line
         {
             get;
             private set;
         }
+        /// <summary>
+        /// Get and set the column number
+        /// </summary>
         public int Column
         {
             get;
             private set;
         }
+        /// <summary>
+        /// Get and set the CurrentCharacter
+        /// </summary>
         public char CurrentChar
         {
             get;
-            set;
+            private set;
         }
+        /// <summary>
+        /// Get and set the NextCharacter
+        /// </summary>
         public char NextChar
         {
             get;
-            set;
+            private set;
         }
         private StreamReader file = new StreamReader("Program1.mp");
         private List<Word> ReservedWords = new List<Word>();
@@ -45,11 +57,10 @@ namespace Compiler.LexicalAnalyzer
         {
             Column = 1;
             Line = 1;
-            //TODO: place in try catch
+            //TODO: place in try catch - wont need once we do command line args. this will be moved
             LoadTokens("mpTokens.txt");
             ReadChar();
             Scan();
-
         }
 
         /// <summary>
@@ -97,7 +108,6 @@ namespace Compiler.LexicalAnalyzer
         /// </summary>
         private void ReadChar ()
         {
-
             if(!file.EndOfStream)
             {
                 CurrentChar = Convert.ToChar(file.Read());
@@ -187,37 +197,55 @@ namespace Compiler.LexicalAnalyzer
             CurrentChar = ' ';
             return word;
         }
-
+        /// <summary>
+        /// Create token for '*'
+        /// </summary>
+        /// <returns>Token</returns>
         private Token ScanMultiply ()
         {
             ReadChar();
             return new Token((int)Tags.MP_TIMES);
         }
-
+        /// <summary>
+        /// Create token for '='
+        /// </summary>
+        /// <returns>Token</returns>
         private Token ScanEqual ()
         {
             ReadChar();
             return new Token((int)Tags.MP_EQUAL);
         }
-
+        /// <summary>
+        /// Create token for '+'
+        /// </summary>
+        /// <returns>Token</returns>
         private Token ScanPlusOperator ()
         {
             ReadChar();
             return new Token((int)Tags.MP_PLUS);
         }
-
+        /// <summary>
+        /// Create token for '-'
+        /// </summary>
+        /// <returns>Token</returns>
         private Token ScanMinusOperator ()
         {
             ReadChar();
             return new Token((int)Tags.MP_MINUS);
         }
-
+        /// <summary>
+        /// Create token for '.'
+        /// </summary>
+        /// <returns>Token</returns>
         private Token ScanPeriod ()
         {
             ReadChar();
             return new Token((int)Tags.MP_PERIOD);
         }
-
+        /// <summary>
+        /// Skips over comments. 
+        /// TODO: Prints an error if EOF was found before closing comment
+        /// </summary>
         private void ScanComment ()
         {
             while(!CurrentChar.Equals('}'))
@@ -226,12 +254,19 @@ namespace Compiler.LexicalAnalyzer
             }
             ReadChar();
         }
-
+        /// <summary>
+        /// Create token for ','
+        /// </summary>
+        /// <returns>Token</returns>
         private Token ScanComma ()
         {
             ReadChar();
             return new Token(',');
         }
+        /// <summary>
+        /// Create token(word) for a string
+        /// </summary>
+        /// <returns>Word</returns>
         private Token ScanStringLiteral ()
         {
             bool finishState = false;
@@ -279,13 +314,19 @@ namespace Compiler.LexicalAnalyzer
             ReadChar();
             return new Word(s, (int)Tags.MP_STRING_LIT);            
         }
-
+        /// <summary>
+        /// Create token for EOF
+        /// </summary>
+        /// <returns>Token</returns>
         private Token ScanEndOfFile ()
         {
             ReadChar();
             return new Token((int)Tags.MP_EOF);
         }
-
+        /// <summary>
+        /// Create token for Numeric Literal
+        /// </summary>
+        /// <returns>Word</returns>
         private Token ScanNumericLiteral ()
         {
             bool finishState = false;
@@ -365,8 +406,7 @@ namespace Compiler.LexicalAnalyzer
                             break;
                         }
                         break;
-                    case States.S5:
-                        
+                    case States.S5:                        
                         while(char.IsDigit(NextChar))
                         {
                             ReadChar();
@@ -381,7 +421,11 @@ namespace Compiler.LexicalAnalyzer
             ReadChar();
             return new Token(CurrentChar);
         }
-
+        /// <summary>
+        /// Create token for ID
+        /// If the ID is a reseverd word, returns that reserved word token
+        /// </summary>
+        /// <returns>Word</returns>
         private Token ScanIdentifier ()
         {
             StringBuilder sb = new StringBuilder();
@@ -403,7 +447,10 @@ namespace Compiler.LexicalAnalyzer
             
             return new Word(s, (int)Tags.MP_IDENTIFIER);                           
         }
-
+        /// <summary>
+        /// Create token for '>' or '>='
+        /// </summary>
+        /// <returns>Token</returns>
         private Token ScanGreaterThan ()
         {
             if(ReadChar('='))
@@ -416,7 +463,10 @@ namespace Compiler.LexicalAnalyzer
                 return new Token('>');
             }
         }
-
+        /// <summary>
+        /// Create token for '<' or '<=' or '<>'
+        /// </summary>
+        /// <returns>Token</returns>
         private Token ScanLessThanOrNotEqual ()
         {
             if(NextChar.Equals('='))
@@ -441,7 +491,10 @@ namespace Compiler.LexicalAnalyzer
                 return new Token('<');
             }
         }
-
+        /// <summary>
+        /// Create token for ':' or ':='
+        /// </summary>
+        /// <returns></returns>
         private Token ScanColonOrAssignOp ()
         {
             if(ReadChar('='))
@@ -454,19 +507,28 @@ namespace Compiler.LexicalAnalyzer
                 return new Token(':');
             }
         }
-
+        /// <summary>
+        /// Create token for ';'
+        /// </summary>
+        /// <returns></returns>
         private Token ScanSemicolon ()
         {
             ReadChar();
             return new Token(';');
         }
-
+        /// <summary>
+        /// Create token for ')'
+        /// </summary>
+        /// <returns>Token</returns>
         private Token ScanRightParen ()
         {
             ReadChar();
             return new Token(')');
         }
-
+        /// <summary>
+        /// Create token for '('
+        /// </summary>
+        /// <returns></returns>
         private Token ScanLeftParen ()
         {
             ReadChar();
@@ -496,6 +558,4 @@ namespace Compiler.LexicalAnalyzer
             }
         }
     }
-
-
 }
