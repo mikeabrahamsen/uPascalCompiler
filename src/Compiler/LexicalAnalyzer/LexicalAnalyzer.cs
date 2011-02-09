@@ -263,8 +263,8 @@ namespace Compiler.LexicalAnalyzer
 
             ReadChar();
 
-            if(CurrentChar == (char)3)
-                Console.WriteLine("MP_RUN_COMMENT Error... durr.");
+            if (CurrentChar == (char)3)
+                Console.WriteLine("MP_RUN_COMMENT..... LINE.... COL.... of start of comment.");               
         }
         /// <summary>
         /// Create token for ','
