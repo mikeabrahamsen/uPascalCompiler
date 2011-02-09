@@ -13,7 +13,7 @@ namespace Compiler
     {
         static void Main(string[] args)
         {
-            LA.LexicalAnalyzer scanner = new LA.LexicalAnalyzer();
+            LA.LexicalAnalyzer scanner = new LA.LexicalAnalyzer(args[0]);
             
             //Added to hold console window open for viewing
             Console.ReadLine();

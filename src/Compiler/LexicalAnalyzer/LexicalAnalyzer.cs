@@ -46,19 +46,20 @@ namespace Compiler.LexicalAnalyzer
             get;
             private set;
         }
-        private StreamReader file = new StreamReader("Program1.mp");
+        private StreamReader file;
         private List<Word> ReservedWords = new List<Word>();
         private bool finished = false;
 
         /// <summary>
         /// Sets up the Lexical Analyzer
         /// </summary>
-        public LexicalAnalyzer ()
+        public LexicalAnalyzer (String mpFile)
         {
             Column = 1;
             Line = 1;
             //TODO: place in try catch - wont need once we do command line args. this will be moved
             LoadTokens("mpTokens.txt");
+            file = new StreamReader(mpFile);
             ReadChar();
             Scan();
         }
