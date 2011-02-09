@@ -108,6 +108,7 @@ namespace Compiler.LexicalAnalyzer
         /// </summary>
         private void ReadChar ()
         {
+            Column++;
             if(!file.EndOfStream)
             {
                 CurrentChar = Convert.ToChar(file.Read());
@@ -117,13 +118,13 @@ namespace Compiler.LexicalAnalyzer
                 }
                 else
                 {
-                    NextChar = '\0';
+                    NextChar = (char)3;
                 }
-                Column++;
+                
             }
             else
             {
-                finished = true;
+                CurrentChar = (char)3;
             }
             
         }
@@ -177,7 +178,7 @@ namespace Compiler.LexicalAnalyzer
                     return ScanEqual();
                 case '*':
                     return ScanMultiply();
-                case '\0':
+                case (char)3:
                     return ScanEndOfFile();
             }
             if(CurrentChar.Equals((char)95) && char.IsLetterOrDigit(NextChar))
@@ -320,7 +321,7 @@ namespace Compiler.LexicalAnalyzer
         /// <returns>Token</returns>
         private Token ScanEndOfFile ()
         {
-            ReadChar();
+            finished = true;
             return new Token((int)Tags.MP_EOF);
         }
         /// <summary>
