@@ -249,11 +249,22 @@ namespace Compiler.LexicalAnalyzer
         /// </summary>
         private void ScanComment ()
         {
-            while(!CurrentChar.Equals('}'))
+
+            while(!(NextChar == (char)3)) // or EOF
             {
                 ReadChar();
+
+                if (CurrentChar.Equals('}'))
+                {
+                    ReadChar();
+                    return;
+                }
             }
+
             ReadChar();
+
+            if(CurrentChar == (char)3)
+                Console.WriteLine("MP_RUN_COMMENT Error... durr.");
         }
         /// <summary>
         /// Create token for ','
