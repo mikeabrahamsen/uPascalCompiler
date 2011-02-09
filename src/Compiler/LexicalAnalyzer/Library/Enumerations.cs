@@ -21,6 +21,7 @@ namespace Compiler.LexicalAnalyzer.Library
         MP_NEQUAL, MP_ASSIGN,
         MP_INTEGER_LIT,
         MP_FIXED_LIT, MP_FLOAT_LIT, MP_STRING_LIT,
+        MP_ERROR, MP_RUN_COMMENT, MP_RUN_STRING,
         MP_COLON = 58,
         MP_PERIOD = 46,
         MP_COMMA = 44,

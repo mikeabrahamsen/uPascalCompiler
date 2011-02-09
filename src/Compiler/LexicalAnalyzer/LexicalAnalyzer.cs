@@ -250,7 +250,7 @@ namespace Compiler.LexicalAnalyzer
         private void ScanComment ()
         {
 
-            while(!(NextChar == (char)3)) // or EOF
+            while(!(NextChar == (char)3)) // or EOF6
             {
                 ReadChar();
 
@@ -294,6 +294,11 @@ namespace Compiler.LexicalAnalyzer
                         break;
                     case States.S1:                        
                         ReadChar();
+                        if(CurrentChar.Equals('\n'))
+                        {
+                            state = States.S3;
+                            break;
+                        }
                         if(CurrentChar.Equals('\''))
                         {
                             state = States.S2;
@@ -320,6 +325,11 @@ namespace Compiler.LexicalAnalyzer
                             finishState = true;
                             break;
                         }
+                    case States.S3:
+                        //return error token
+                        Console.WriteLine("MP_RUN_STRING error...");
+                        finishState = true;
+                        return new Token((int)Tags.MP_RUN_STRING);                        
                 }
             }
             string s = sb.ToString();
