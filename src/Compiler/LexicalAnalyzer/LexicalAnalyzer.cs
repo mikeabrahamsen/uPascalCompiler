@@ -186,7 +186,7 @@ namespace Compiler.LexicalAnalyzer
             {
                 return ScanIdentifier();
             }
-            if(char.IsLetter(CurrentChar))
+            if(Regex.IsMatch(CurrentChar.ToString(), @"^[a-zA-Z]+$"))
             {
                 return ScanIdentifier();
             }
@@ -195,8 +195,8 @@ namespace Compiler.LexicalAnalyzer
                 return ScanNumericLiteral();
             }
 
-            Word word = new Word("Not yet implemented", (int)Tags.MP_IDENTIFIER);
-            CurrentChar = ' ';
+            Word word = new Word(CurrentChar.ToString(), (int)Tags.MP_ERROR);
+            ReadChar();
             return word;
         }
         /// <summary>
@@ -295,7 +295,7 @@ namespace Compiler.LexicalAnalyzer
                         break;
                     case States.S1:                        
                         ReadChar();
-                        if(CurrentChar.Equals('\n'))
+                        if(CurrentChar == 13)
                         {
                             state = States.S3;
                             break;
@@ -328,9 +328,8 @@ namespace Compiler.LexicalAnalyzer
                         }
                     case States.S3:
                         //return error token
-                        Console.WriteLine("MP_RUN_STRING error...");
                         finishState = true;
-                        return new Token((int)Tags.MP_RUN_STRING);                        
+                        return new Word("No closing apostrophe found",(int)Tags.MP_RUN_STRING);                        
                 }
             }
             string s = sb.ToString();
@@ -452,7 +451,7 @@ namespace Compiler.LexicalAnalyzer
         private Token ScanIdentifier ()
         {
             StringBuilder sb = new StringBuilder();
-            while(char.IsLetterOrDigit(NextChar) || NextChar == (char)95) 
+            while(Regex.IsMatch(NextChar.ToString(), @"^[a-zA-Z0-9_]+$")) 
             {                  
                 sb.Append(CurrentChar);
                 ReadChar();              
