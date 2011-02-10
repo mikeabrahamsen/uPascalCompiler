@@ -30,6 +30,11 @@ namespace Compiler.LexicalAnalyzer
             get;
             private set;
         }
+        public int TokenStartColumn
+        {
+            get;
+            private set;
+        }
         /// <summary>
         /// Get and set the CurrentCharacter
         /// </summary>
@@ -70,14 +75,23 @@ namespace Compiler.LexicalAnalyzer
         private void Scan ()
         {
             string output;
-            Token token;           
-            
+            Token token;   
+                        
             while(!finished)
             {
+                ErrorFound = false;
                 token = GetNextToken();
+
                 output = string.Format("{0,-20} {1,-5} {2,-5} {3}",
                     token.Tag, Line, (Column - token.Lexeme.Length) - 1, token.Lexeme);
-                Console.WriteLine(output); 
+                Console.WriteLine(output);
+                
+                if(ErrorFound)
+                {
+                    Console.WriteLine(ErrorMessage);
+                }
+                
+                
             }            
         }
         /// <summary>
@@ -182,6 +196,7 @@ namespace Compiler.LexicalAnalyzer
                 case (char)3:
                     return ScanEndOfFile();
             }
+            //If currentchar is an underscore and next is a letter or digit
             if(CurrentChar.Equals((char)95) && char.IsLetterOrDigit(NextChar))
             {
                 return ScanIdentifier();
@@ -195,6 +210,8 @@ namespace Compiler.LexicalAnalyzer
                 return ScanNumericLiteral();
             }
 
+            ErrorFound = true;
+            ErrorMessage = string.Format("invalid character found on line: {0} starting position: {1}", Line, Column -1);
             Word word = new Word(CurrentChar.ToString(), (int)Tags.MP_ERROR);
             ReadChar();
             return word;
@@ -248,8 +265,9 @@ namespace Compiler.LexicalAnalyzer
         /// Skips over comments. 
         /// TODO: Prints an error if EOF was found before closing comment
         /// </summary>
-        private void ScanComment ()
+        private Token ScanComment ()
         {
+            TokenStartColumn = Column;
 
             while(!(NextChar == (char)3)) // or EOF6
             {
@@ -258,14 +276,24 @@ namespace Compiler.LexicalAnalyzer
                 if (CurrentChar.Equals('}'))
                 {
                     ReadChar();
-                    return;
+                    return new Token(null);
                 }
             }
 
             ReadChar();
 
-            if (CurrentChar == (char)3)
-                Console.WriteLine("MP_RUN_COMMENT..... LINE.... COL.... of start of comment.");               
+            if(CurrentChar == (char)3)
+            {
+                ErrorFound = true;
+                ErrorMessage = string.Format("run comment found on line: {0} starting position: {1}", Line, TokenStartColumn );
+
+                 
+                return new Token((int)Tags.MP_RUN_COMMENT);
+                
+            }
+
+            return new Token(null);
+                              
         }
         /// <summary>
         /// Create token for ','
@@ -286,6 +314,8 @@ namespace Compiler.LexicalAnalyzer
             States state;
             state = States.S0;
             StringBuilder sb = new StringBuilder();
+            string s;
+            TokenStartColumn = Column;
             while(!finishState)
             {
                 switch(state)
@@ -328,11 +358,14 @@ namespace Compiler.LexicalAnalyzer
                         }
                     case States.S3:
                         //return error token
+                        ErrorFound = true;
+                        ErrorMessage = string.Format("run string found on line: {0} starting position: {1}", Line, TokenStartColumn);
                         finishState = true;
-                        return new Word("No closing apostrophe found",(int)Tags.MP_RUN_STRING);                        
+                        s = sb.ToString();
+                        return new Word(s,(int)Tags.MP_RUN_STRING);                        
                 }
             }
-            string s = sb.ToString();
+            s = sb.ToString();
             ReadChar();
             return new Word(s, (int)Tags.MP_STRING_LIT);            
         }
@@ -556,7 +589,16 @@ namespace Compiler.LexicalAnalyzer
             ReadChar();
             return new Token('(');
         }
-
+        private bool ErrorFound
+        {
+            get;
+            set;
+        }
+        private string ErrorMessage
+        {
+            get;
+            set;
+        }
         /// <summary>
         /// Scan to the next character
         /// </summary>
