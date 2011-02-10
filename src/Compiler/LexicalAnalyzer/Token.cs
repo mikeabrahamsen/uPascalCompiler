@@ -17,7 +17,11 @@ namespace Compiler.LexicalAnalyzer
         /// <param name="t"></param>
         public Token(int? t)
         {
-            if(t != null)
+            if(t == null)
+            {
+                Tag = null;
+            }
+            else
             {
                 Tag = (Tags)t;
             }
@@ -27,7 +31,7 @@ namespace Compiler.LexicalAnalyzer
         /// <summary>
         /// Get and Set tag
         /// </summary>
-        public Tags Tag
+        public Tags? Tag
         {
             get;
             set;

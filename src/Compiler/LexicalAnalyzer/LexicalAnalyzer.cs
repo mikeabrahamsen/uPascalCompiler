@@ -81,15 +81,18 @@ namespace Compiler.LexicalAnalyzer
             {
                 ErrorFound = false;
                 token = GetNextToken();
-
-                output = string.Format("{0,-20} {1,-5} {2,-5} {3}",
-                    token.Tag, Line, (Column - token.Lexeme.Length) - 1, token.Lexeme);
-                Console.WriteLine(output);
-                
-                if(ErrorFound)
+                if(token.Tag != null)
                 {
-                    Console.WriteLine(ErrorMessage);
+                    output = string.Format("{0,-20} {1,-5} {2,-5} {3}",
+                        token.Tag, Line, (Column - token.Lexeme.Length) - 1, token.Lexeme);
+                    Console.WriteLine(output);
+                    if(ErrorFound)
+                    {
+                        Console.WriteLine(ErrorMessage);
+                    }
                 }
+                
+                
                 
                 
             }            
@@ -162,8 +165,7 @@ namespace Compiler.LexicalAnalyzer
             SkipWhiteSpace();
             if(CurrentChar.Equals('{'))
             {
-                ScanComment();
-                SkipWhiteSpace();
+                return ScanComment();                
             }
             switch(CurrentChar)
             {
@@ -268,11 +270,12 @@ namespace Compiler.LexicalAnalyzer
         private Token ScanComment ()
         {
             TokenStartColumn = Column;
-
+            StringBuilder sb = new StringBuilder();
+            string s;
             while(!(NextChar == (char)3)) // or EOF6
             {
                 ReadChar();
-
+                sb.Append(CurrentChar);
                 if (CurrentChar.Equals('}'))
                 {
                     ReadChar();
@@ -287,8 +290,8 @@ namespace Compiler.LexicalAnalyzer
                 ErrorFound = true;
                 ErrorMessage = string.Format("run comment found on line: {0} starting position: {1}", Line, TokenStartColumn );
 
-                 
-                return new Token((int)Tags.MP_RUN_COMMENT);
+                s = sb.ToString();
+                return new Word(s,(int)Tags.MP_RUN_COMMENT);
                 
             }
 
