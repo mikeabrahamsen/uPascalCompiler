@@ -486,15 +486,46 @@ namespace Compiler.LexicalAnalyzer
         /// <returns>Word</returns>
         private Token ScanIdentifier ()
         {
+            bool finishState = false;
+            States state =States.S0;
             StringBuilder sb = new StringBuilder();
-            while(Regex.IsMatch(NextChar.ToString(), @"^[a-zA-Z0-9_]+$")) 
-            {                  
-                sb.Append(CurrentChar);
-                ReadChar();              
+            while(!finishState)
+            {
+                switch(state)
+                {
+                    case States.S0:
+
+                        finishState = true;
+                        while(char.IsLetterOrDigit(CurrentChar))
+                        {
+                            sb.Append(CurrentChar);
+                            ReadChar();
+                        }
+                        if(CurrentChar == '_')
+                        {
+                            finishState = false;
+                            state = States.S1;
+                        }
+                            break;
+                    case States.S1:
+                            finishState = false;
+                            if(char.IsLetterOrDigit(NextChar))
+                            {
+                                sb.Append(CurrentChar);
+                                ReadChar();
+
+                                state = States.S0;
+                            }
+                            else
+                            {
+                                finishState = true;
+                            }
+                            
+                            break;
+                }
             }
-            sb.Append(CurrentChar);
+            
             string s = sb.ToString();
-            ReadChar();
             foreach(Word w in ReservedWords)
             {  
                 if(w.Lexeme.Equals(s,StringComparison.OrdinalIgnoreCase))
