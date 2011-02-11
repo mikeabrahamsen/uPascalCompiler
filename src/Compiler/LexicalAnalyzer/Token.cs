@@ -11,8 +11,12 @@ namespace Compiler.LexicalAnalyzer
     /// </summary>
     class Token
     {
+        public Token ()
+        { 
+        }
+
         /// <summary>
-        /// Constructor for tag
+        /// Constructor for Token
         /// </summary>
         /// <param name="t"></param>
         public Token(int? t)

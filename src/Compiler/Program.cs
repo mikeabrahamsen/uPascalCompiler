@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using LA = Compiler.LexicalAnalyzer;
+using Compiler.LexicalAnalyzer;
 
 namespace Compiler
 {
@@ -13,8 +13,28 @@ namespace Compiler
     {
         static void Main(string[] args)
         {
-            LA.LexicalAnalyzer scanner = new LA.LexicalAnalyzer(args[0]);
-            
+            LexicalAnalyzer.LexicalAnalyzer scanner = new LexicalAnalyzer.LexicalAnalyzer();
+
+            scanner.OpenFile(args[0]);
+
+            string output;
+            Token token = new Token();
+
+            while(!scanner.Finished)
+            {
+                scanner.ErrorFound = false;
+                token = scanner.GetNextToken();
+                if(token.Tag != null)
+                {
+                    output = string.Format("{0,-20} {1,-5} {2,-5} {3}",
+                        token.Tag, scanner.Line, (scanner.Column - token.Lexeme.Length-1), token.Lexeme);
+                    Console.WriteLine(output);
+                    if(scanner.ErrorFound)
+                    {
+                       Console.WriteLine(scanner.ErrorMessage);
+                    }
+                }
+            }
             //Added to hold console window open for viewing
             Console.ReadLine();
         }

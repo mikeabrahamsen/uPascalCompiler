@@ -53,50 +53,28 @@ namespace Compiler.LexicalAnalyzer
         }
         private StreamReader file;
         private List<Word> ReservedWords = new List<Word>();
-        private bool finished = false;
+        
 
-        /// <summary>
-        /// Sets up the Lexical Analyzer
-        /// </summary>
-        public LexicalAnalyzer (String mpFile)
+        public bool Finished
         {
+            get;
+            private set;
+        }
+        public LexicalAnalyzer ()
+        {
+            Finished = false;
             Column = 1;
             Line = 1;
-            //TODO: place in try catch - wont need once we do command line args. this will be moved
             LoadTokens("mpTokens.txt");
+        }
+       
+        public void OpenFile(string mpFile)
+        {
             file = new StreamReader(mpFile);
             ReadChar();
-            Scan();
+            //Scan();
         }
-
-        /// <summary>
-        /// Scans the file gathering token information
-        /// </summary>
-        private void Scan ()
-        {
-            string output;
-            Token token;   
-                        
-            while(!finished)
-            {
-                ErrorFound = false;
-                token = GetNextToken();
-                if(token.Tag != null)
-                {
-                    output = string.Format("{0,-20} {1,-5} {2,-5} {3}",
-                        token.Tag, Line, (Column - token.Lexeme.Length) - 1, token.Lexeme);
-                    Console.WriteLine(output);
-                    if(ErrorFound)
-                    {
-                        Console.WriteLine(ErrorMessage);
-                    }
-                }
-                
-                
-                
-                
-            }            
-        }
+       
         /// <summary>
         /// Loads necessary tokens from a file
         /// </summary>
@@ -160,9 +138,10 @@ namespace Compiler.LexicalAnalyzer
         /// Return the token with corresponding line, column, and lexeme information
         /// </summary>
         /// <returns></returns>
-        private Token GetNextToken ()
+        public Token GetNextToken ()
         {
             SkipWhiteSpace();
+            TokenStartColumn = Column + 1;
             if(CurrentChar.Equals('{'))
             {
                 return ScanComment();                
@@ -269,7 +248,6 @@ namespace Compiler.LexicalAnalyzer
         /// </summary>
         private Token ScanComment ()
         {
-            TokenStartColumn = Column;
             StringBuilder sb = new StringBuilder();
             string s;
             while(!(NextChar == (char)3)) // or EOF6
@@ -318,7 +296,6 @@ namespace Compiler.LexicalAnalyzer
             state = States.S0;
             StringBuilder sb = new StringBuilder();
             string s;
-            TokenStartColumn = Column;
             while(!finishState)
             {
                 switch(state)
@@ -378,7 +355,7 @@ namespace Compiler.LexicalAnalyzer
         /// <returns>Token</returns>
         private Token ScanEndOfFile ()
         {
-            finished = true;
+            Finished = true;
             return new Token((int)Tags.MP_EOF);
         }
         /// <summary>
@@ -623,12 +600,12 @@ namespace Compiler.LexicalAnalyzer
             ReadChar();
             return new Token('(');
         }
-        private bool ErrorFound
+        public bool ErrorFound
         {
             get;
             set;
         }
-        private string ErrorMessage
+        public string ErrorMessage
         {
             get;
             set;
