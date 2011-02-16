@@ -35,7 +35,11 @@ namespace Compiler.Parser
             Block();
             Match('.');
         }
-        private void ProgramHeading () { }
+        private void ProgramHeading () 
+        {
+            Match((int)Tags.MP_PROGRAM);
+            Match((int)Tags.MP_IDENTIFIER);
+        }
         private void Block () { }
         private void VariableDeclarationPart () { }
         private void ProcedureAndFunctionDeclarationPart () { }
