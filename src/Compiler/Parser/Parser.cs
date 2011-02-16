@@ -10,15 +10,15 @@ namespace Compiler.Parser
     class Parser
     {
         private LexicalAnalyzer.LexicalAnalyzer scanner;
-
-        private Token LookAhead
+        
+        private Token LookAheadToken
         {
             get;
             set;
         }
         private void Match (int tag)
         {
-            if((int)LookAhead.Tag == tag)
+            if((int)LookAheadToken.Tag == tag)
             {
                 Move();
             }
@@ -26,7 +26,7 @@ namespace Compiler.Parser
         }
         private void Move ()
         {
-            LookAhead = scanner.GetNextToken();
+            LookAheadToken = scanner.GetNextToken();
         }
         private void Program () 
         {
@@ -47,7 +47,25 @@ namespace Compiler.Parser
             ProcedureAndFunctionDeclarationPart();
             StatementPart();
         }
-        private void VariableDeclarationPart () { }
+        private void VariableDeclarationPart () 
+        {
+            switch(LookAheadToken.Tag)
+            {
+                case Tags.MP_VAR: //"var" Variable Declaration ";" VariableDeclationTail
+                    Match((int)Tags.MP_VAR);
+                    break;
+                case Tags.DUMMYTAG: //lambda
+                    
+                    break;
+                default:
+                    //throw error
+                    break;
+                
+            }
+            
+            VariableDeclation();
+
+        }
         private void ProcedureAndFunctionDeclarationPart () { }
         private void StatementPart () { }
         private void VariableDeclation () { }

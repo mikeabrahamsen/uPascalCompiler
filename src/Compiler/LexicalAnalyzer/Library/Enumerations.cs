@@ -34,7 +34,8 @@ namespace Compiler.LexicalAnalyzer.Library
         MP_PLUS = 43,
         MP_MINUS = 45,
         MP_TIMES = 42,
-        MP_EOF = 3
+        MP_EOF = 3,
+        DUMMYTAG = 999
     }
 
     /// <summary>

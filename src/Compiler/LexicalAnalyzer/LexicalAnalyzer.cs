@@ -257,7 +257,7 @@ namespace Compiler.LexicalAnalyzer
                 if (CurrentChar.Equals('}'))
                 {
                     ReadChar();
-                    return new Token(null);
+                    return new Token();
                 }
             }
 
@@ -273,7 +273,7 @@ namespace Compiler.LexicalAnalyzer
                 
             }
 
-            return new Token(null);
+            return new Token();
                               
         }
         /// <summary>

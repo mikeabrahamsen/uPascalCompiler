@@ -12,23 +12,17 @@ namespace Compiler.LexicalAnalyzer
     class Token
     {
         public Token ()
-        { 
+        {
+            Tag = null;
         }
 
         /// <summary>
         /// Constructor for Token
         /// </summary>
         /// <param name="t"></param>
-        public Token(int? t)
+        public Token(int t)
         {
-            if(t == null)
-            {
-                Tag = null;
-            }
-            else
-            {
-                Tag = (Tags)t;
-            }
+            Tag = (Tags)t;
             Lexeme = Convert.ToChar(t).ToString();
         }
 
