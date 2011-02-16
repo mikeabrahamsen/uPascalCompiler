@@ -38,9 +38,15 @@ namespace Compiler.Parser
         private void ProgramHeading () 
         {
             Match((int)Tags.MP_PROGRAM);
-            Match((int)Tags.MP_IDENTIFIER);
+            Identifier();
         }
-        private void Block () { }
+
+        private void Block () 
+        {
+            VariableDeclarationPart();
+            ProcedureAndFunctionDeclarationPart();
+            StatementPart();
+        }
         private void VariableDeclarationPart () { }
         private void ProcedureAndFunctionDeclarationPart () { }
         private void StatementPart () { }
@@ -93,7 +99,10 @@ namespace Compiler.Parser
         private void VariableIdentifier () { }
         private void ProcedureIdentifier () { }
         private void IdentifierList () { }
-
+        private void Identifier ()
+        {
+            throw new NotImplementedException();
+        }
 
     }
 }
