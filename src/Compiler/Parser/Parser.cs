@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Compiler.LexicalAnalyzer;
+using Compiler.LexicalAnalyzer.Library;
 
 namespace Compiler.Parser
 {
@@ -27,7 +28,13 @@ namespace Compiler.Parser
         {
             LookAhead = scanner.GetNextToken();
         }
-        private void Program () { }
+        private void Program () 
+        {
+            ProgramHeading();
+            Match(';');
+            Block();
+            Match('.');
+        }
         private void ProgramHeading () { }
         private void Block () { }
         private void VariableDeclarationPart () { }
