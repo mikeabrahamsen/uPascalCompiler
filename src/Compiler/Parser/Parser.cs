@@ -53,8 +53,11 @@ namespace Compiler.Parser
             {
                 case Tags.MP_VAR: //"var" Variable Declaration ";" VariableDeclationTail
                     Match((int)Tags.MP_VAR);
+                    VariableDeclaration();
+                    Match(';');
+                    VariableDeclarationTail();
                     break;
-                case Tags.DUMMYTAG: //lambda
+                case Tags.DUMMYTAG1: //lambda
                     
                     break;
                 default:
@@ -62,32 +65,48 @@ namespace Compiler.Parser
                     break;
                 
             }
-            
-            VariableDeclation();
-
         }
         private void ProcedureAndFunctionDeclarationPart () { }
         private void StatementPart () { }
-        private void VariableDeclation () { }
+        private void VariableDeclarationTail () 
+        {
+            switch(LookAheadToken.Tag)
+            {
+                case Tags.DUMMYTAG1: // VariableDeclaration ";" VariableDeclarationTail
+                    VariableDeclaration();
+                    Match(';');
+                    VariableDeclarationTail();
+                    break;
+                case Tags.DUMMYTAG2: // lamda
+                    break;
+            }
+            
+        }
+        private void VariableDeclaration () { }
         private void Type () { }
         private void ProcedureDeclaration () { }
         private void FunctionDeclaration () { }
         private void ProcedureHeading () { }
         private void FuctionHeading () { }
+        private void OptionalFormalParameterList () { }
         private void FormalParameterList () { }
+        private void FormalParameterSectionTail () { }
         private void FormalParameterSection () { }
         private void ValueParameterSection () { }
         private void VariableParameterSection () { }
         private void CompoundStatement () { }
         private void StatementSequence () { }
+        private void StatementTail () { }
         private void Statement () { }
-        private void SimpleStatement () { }
-        private void StructuredStatement () { }
-        private void ConditionalStatement () { }
-        private void RepetitiveStatement () { }
+        //private void SimpleStatement () { }
+        //private void StructuredStatement () { }
+        //private void ConditionalStatement () { }
+        //private void RepetitiveStatement () { }
         private void EmptyStatement () { }
         private void ReadStatement () { }
+        private void ReadParameterTail () { }
         private void WriteStatement () { }
+        private void WriteParameterTail () { }
         private void AssignmentStatement () { }
         private void ProcedureStatement () { }
         private void IfStatement () { }
