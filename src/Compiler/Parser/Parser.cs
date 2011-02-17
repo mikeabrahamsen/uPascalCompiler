@@ -66,8 +66,26 @@ namespace Compiler.Parser
                 
             }
         }
-        private void ProcedureAndFunctionDeclarationPart () { }
-        private void StatementPart () { }
+        private void ProcedureAndFunctionDeclarationPart () 
+        {
+            switch(LookAheadToken.Tag)
+            {
+                case Tags.DUMMYTAG1: // PeocedureDeclaration ProcedureAndFunctionDeclarationPart
+                    ProcedureDeclaration();
+                    ProcedureAndFunctionDeclarationPart();
+                    break;
+                case Tags.DUMMYTAG2: // FunctionDeclaration ProcedureAndFunctionDeclarationPart
+                    FunctionDeclaration();
+                    ProcedureAndFunctionDeclarationPart();
+                    break;
+                case Tags.DUMMYTAG3: //lamda
+                    break;
+            }
+        }
+        private void StatementPart () 
+        {
+            CompoundStatement();
+        }
         private void VariableDeclarationTail () 
         {
             switch(LookAheadToken.Tag)
@@ -82,20 +100,116 @@ namespace Compiler.Parser
             }
             
         }
-        private void VariableDeclaration () { }
-        private void Type () { }
-        private void ProcedureDeclaration () { }
-        private void FunctionDeclaration () { }
-        private void ProcedureHeading () { }
-        private void FuctionHeading () { }
-        private void OptionalFormalParameterList () { }
+        private void VariableDeclaration () 
+        {
+            IdentifierList();
+            Match(':');
+            Type();
+        }
+        private void Type () 
+        {
+            switch(LookAheadToken.Tag)
+            {
+                case Tags.DUMMYTAG1: // Integer
+                    Match((int)Tags.MP_INTEGER);
+                    break;
+                case Tags.DUMMYTAG2: // Float
+                    Match((int)Tags.MP_FLOAT);
+                    break;
+            }
+        }
+        private void ProcedureDeclaration () 
+        {
+            ProcedureHeading();
+            Match(';');
+            Block();
+            Match(';');
+        }
+        private void FunctionDeclaration () 
+        {
+            FunctionHeading();
+            Match(';');
+            Block();
+            Match(';');
+        }
+        private void ProcedureHeading () 
+        {
+            Match((int)Tags.MP_PROCEDURE);
+            ProcedureIdentifier();
+            OptionalFormalParameterList();
+
+        }
+        private void FunctionHeading () 
+        {
+            Match((int)Tags.MP_FUNCTION);
+            FunctionIdentifier();
+            OptionalFormalParameterList();
+            Type();
+        }
+        private void OptionalFormalParameterList () 
+        {
+            switch(LookAheadToken.Tag)
+            {
+                case Tags.DUMMYTAG1: // "(" FormalParameterSection FormalParameterSectionTail ")"
+                    Match('(');
+                    FormalParameterSection();
+                    FormalParameterSectionTail();
+                    Match(')');
+                    break;
+                case Tags.DUMMYTAG2: // lamda
+                    break;
+            }
+        }
         private void FormalParameterList () { }
-        private void FormalParameterSectionTail () { }
-        private void FormalParameterSection () { }
-        private void ValueParameterSection () { }
-        private void VariableParameterSection () { }
-        private void CompoundStatement () { }
-        private void StatementSequence () { }
+        private void FormalParameterSectionTail () 
+        {
+            switch(LookAheadToken.Tag)
+            {
+                case Tags.DUMMYTAG1: // ";" FormalParameterSection FormalParameterSectionTail
+                    Match(';');
+                    FormalParameterSection();
+                    FormalParameterSectionTail();
+                    break;
+                case Tags.DUMMYTAG2: // lamda
+                    break;
+            }
+        }
+        private void FormalParameterSection () 
+        {
+            switch(LookAheadToken.Tag)
+            {
+                case Tags.DUMMYTAG1: // ValueParameterSection
+                    ValueParameterSection();
+                    break;
+                case Tags.DUMMYTAG2: // VariableParameterSection
+                    VariableParameterSection();
+                    break;
+            }
+        }
+        private void ValueParameterSection () 
+        {
+            IdentifierList();
+            Match(':');
+            Type();
+        }
+        private void VariableParameterSection () 
+        {
+            Match((int)Tags.MP_VAR);
+            IdentifierList();
+            Match(':');
+            Type();
+        }
+        private void CompoundStatement () 
+        {
+            Match((int)Tags.MP_BEGIN);
+            StatementSequence();
+            Match((int)Tags.MP_END);
+        }
+        private void StatementSequence () 
+        {
+            Statement();
+            StatementTail();
+        }
         private void StatementTail () { }
         private void Statement () { }
         //private void SimpleStatement () { }
