@@ -331,16 +331,13 @@ namespace Compiler.Parser
                     break;
                 
                 case Tags.MP_LEQUAL:
-                    Match('<');
-                    Match('=');
+                    Match((int)Tags.MP_LEQUAL);                    
                     break;
                 case Tags.MP_GEQUAL:
-                    Match('>');
-                    Match('=');
+                    Match((int)Tags.MP_GEQUAL);
                     break;
                 case Tags.MP_NOT:
-                    Match('<');
-                    Match('>');
+                    Match((int)Tags.MP_NOT);
                     break;
                 default:
                     //throw error
