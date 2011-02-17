@@ -269,9 +269,48 @@ namespace Compiler.Parser
         //private void StructuredStatement () { }
         //private void ConditionalStatement () { }
         //private void RepetitiveStatement () { }
-        private void EmptyStatement () { }
-        private void ReadStatement () { }
-        private void ReadParameterTail () { }
+        private void EmptyStatement () 
+        {
+            switch (LookAheadToken.Tag)
+            {
+                case Tags.DUMMYTAG1: //lambda
+                    break;
+
+                default:
+                    //throw error
+                    break;
+            }
+        }
+        private void ReadStatement () 
+        {
+            Match((int)Tags.MP_READ);
+            Match((int)Tags.MP_LPAREN);
+            ReadParameter();
+            ReadParameterTail();
+            Match((int)Tags.MP_RPAREN);
+        }
+        private void ReadParameterTail()
+        {
+            switch (LookAheadToken.Tag)
+            {
+                case Tags.MP_COMMA:  //"," ReadParameter ReadParameterTail
+                    Match((int)Tags.MP_COMMA);
+                    ReadParameter();
+                    ReadParameterTail();
+                    break;
+
+                case Tags.DUMMYTAG1: //lambda
+                    break;
+
+                default:
+                    //throw error
+                    break;
+            }
+        }
+        private void ReadParameter() 
+        {
+            VariableIdentifier();
+        }
         private void WriteStatement () { }
         private void WriteParameterTail () { }
         private void AssignmentStatement () { }
@@ -296,7 +335,6 @@ namespace Compiler.Parser
         private void OptionalActualParameterList() { }
         //private void ActualParameter () { }
         private void ReadParameterList () { }
-        private void ReadParameter () { }
         private void WriteParamaterList () { }
         private void WriteParameter () { }
         //private void BooleanExpression () { }
