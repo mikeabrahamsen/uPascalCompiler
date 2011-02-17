@@ -41,7 +41,10 @@ namespace Compiler.LexicalAnalyzer.Library
         DUMMYTAG4,
         DUMMYTAG5,
         DUMMYTAG6,
-        DUMMYTAG7
+        DUMMYTAG7,
+        DUMMYTAG8,
+        DUMMYTAG9,
+        DUMMYTAG10
     }
 
     /// <summary>

@@ -210,7 +210,24 @@ namespace Compiler.Parser
             Statement();
             StatementTail();
         }
-        private void StatementTail () { }
+        private void StatementTail () 
+        {
+            switch (LookAheadToken.Tag)
+            {
+                case Tags.MP_SCOLON:  //";" Statement StatementTail
+                    Match((int)Tags.MP_SCOLON);
+                    Statement();
+                    StatementTail();
+                    break;
+
+                case Tags.DUMMYTAG1: //lambda
+                    break;
+
+                default:
+                    //throw error
+                    break;
+            }
+        }
         private void Statement () { }
         //private void SimpleStatement () { }
         //private void StructuredStatement () { }
