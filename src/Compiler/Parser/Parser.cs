@@ -228,7 +228,43 @@ namespace Compiler.Parser
                     break;
             }
         }
-        private void Statement () { }
+        private void Statement () 
+        {
+            switch (LookAheadToken.Tag)
+            {
+                case Tags.DUMMYTAG1: // EmptyStatement
+                    EmptyStatement();
+                    break;
+                case Tags.DUMMYTAG2: // CompoundStatement
+                    CompoundStatement();
+                    break;
+                case Tags.DUMMYTAG3: //ReadStatement
+                    ReadStatement();
+                    break;
+                case Tags.DUMMYTAG4: //WriteStatement
+                    WriteStatement();
+                    break;
+                case Tags.DUMMYTAG5: //AssignmentStatement
+                    AssignmentStatement();
+                    break;
+                case Tags.DUMMYTAG6: //IfStatement
+                    IfStatement();
+                    break;
+                case Tags.DUMMYTAG7: //WhileStatement
+                    WhileStatement();
+                    break;
+                case Tags.DUMMYTAG8: //RepeatStatement
+                    RepeatStatement();
+                    break;
+                case Tags.DUMMYTAG9: //ForStatement
+                    ForStatement();
+                    break;
+                case Tags.DUMMYTAG10://ProcedureStatement
+                    ProcedureStatement();
+                    break;
+            }
+
+        }
         //private void SimpleStatement () { }
         //private void StructuredStatement () { }
         //private void ConditionalStatement () { }
