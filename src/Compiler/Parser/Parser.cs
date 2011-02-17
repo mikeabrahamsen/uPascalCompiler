@@ -399,8 +399,7 @@ namespace Compiler.Parser
                     Match('-');
                     break;
                 case Tags.MP_OR: //is this one right??
-                    Match('o');
-                    Match('r');
+                    Match((int)Tags.MP_OR);
                     break;
                 default:
                     break;
