@@ -357,14 +357,60 @@ namespace Compiler.Parser
                     break;
             }
         }
-        private void ProcedureStatement () { }
-        private void IfStatement () { }
-        private void RepeatStatement () { }
-        private void WhileStatement () { }
-        private void ForStatement () { }
+        private void IfStatement() 
+        {
+            Match((int)Tags.MP_IF);
+            BooleanExpression();
+            Match((int)Tags.MP_THEN);
+            Statement();
+            OptionalElsePart();
+        }
+        private void OptionalElsePart() 
+        {
+            switch (LookAheadToken.Tag)
+            {
+                case Tags.MP_ELSE: // "else" Statement  
+                    Match((int)Tags.MP_ELSE);
+                    Statement();
+                    break;
+                case Tags.DUMMYTAG1: // Lambda
+                    break;
+                default:
+                    //throw error
+                    break;
+            }
+        }
+        private void RepeatStatement() 
+        {
+            Match((int)Tags.MP_REPEAT);
+            StatementSequence();
+            Match((int)Tags.MP_UNTIL);
+            BooleanExpression();
+        }
+        private void WhileStatement () 
+        {
+            Match((int)Tags.MP_WHILE);
+            BooleanExpression();
+            Match((int)Tags.MP_DO);
+            Statement();
+
+        }
+        private void ForStatement () 
+        {
+            Match((int)Tags.MP_FOR);
+            ControlVariable();
+            Match((int)Tags.MP_ASSIGN);
+            InitialValue();
+            StepValue();
+            FinalValue();
+            Match((int)Tags.MP_DO);
+            Statement();
+        }
         private void ControlVariable () { }
         private void InitialValue () { }
+        private void StepValue() { }
         private void FinalValue () { }
+        private void ProcedureStatement() { }
         //private void Expression () { }
         //private void SimpleExpression () { }
         //private void Term () { }
