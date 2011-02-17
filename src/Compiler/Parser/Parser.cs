@@ -406,11 +406,59 @@ namespace Compiler.Parser
             Match((int)Tags.MP_DO);
             Statement();
         }
-        private void ControlVariable () { }
-        private void InitialValue () { }
-        private void StepValue() { }
-        private void FinalValue () { }
-        private void ProcedureStatement() { }
+        private void ControlVariable () 
+        {
+            VariableIdentifier();
+        }
+        private void InitialValue () 
+        {
+            OrdinalExpression();
+        }
+        private void StepValue() 
+        {
+            switch (LookAheadToken.Tag)
+            {
+                case Tags.MP_TO: // "to"
+                    Match((int)Tags.MP_TO);
+                    break;
+                case Tags.MP_DOWNTO: //"downto"
+                    Match((int)Tags.MP_DOWNTO);
+                    break;
+                case Tags.DUMMYTAG1: // Lambda
+                    break;
+                default:
+                    //throw error
+                    break;
+            }
+        }
+        private void FinalValue () 
+        {
+            OrdinalExpression();
+        }
+        private void ProcedureStatement() 
+        {
+            ProcedureIdentifier();
+            OptionalActualParameterList();
+        }
+
+        private void OptionalActualParameterList() 
+        {
+            switch (LookAheadToken.Tag)
+            {
+                case Tags.MP_LPAREN: // "(" ActualParameter ActualParameterTail ")" 
+                    Match((int)Tags.MP_LPAREN);
+                    ActualParameter();
+                    ActualParameterTail();
+                    Match((int)Tags.MP_RPAREN);
+                    break;
+                case Tags.DUMMYTAG1: // Lambda
+                    break;
+                default:
+                    //throw error
+                    break;
+            }
+        }
+
         //private void Expression () { }
         //private void SimpleExpression () { }
         //private void Term () { }
@@ -421,7 +469,6 @@ namespace Compiler.Parser
         private void FunctionDesignator () { }
         private void Variable () { }
         private void ActualParameterList () { }
-        private void OptionalActualParameterList() { }
         //private void ActualParameter () { }
         private void ReadParameterList () { }
         private void WriteParamaterList () { }
