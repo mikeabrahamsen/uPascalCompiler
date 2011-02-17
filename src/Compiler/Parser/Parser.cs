@@ -311,9 +311,52 @@ namespace Compiler.Parser
         {
             VariableIdentifier();
         }
-        private void WriteStatement () { }
-        private void WriteParameterTail () { }
-        private void AssignmentStatement () { }
+        private void WriteStatement () 
+        {
+            Match((int)Tags.MP_WRITE);
+            Match((int)Tags.MP_LPAREN);
+            WriteParameter();
+            WriteParameterTail();
+            Match((int)Tags.MP_RPAREN);
+        }
+        private void WriteParameterTail () 
+        {
+            switch (LookAheadToken.Tag)
+            {
+                case Tags.MP_COMMA:  //"," WriteParameter WriteParameterTail
+                    Match((int)Tags.MP_COMMA);
+                    WriteParameter();
+                    WriteParameterTail();
+                    break;
+
+                case Tags.DUMMYTAG1: //lambda
+                    break;
+
+                default:
+                    //throw error
+                    break;
+            }
+        }
+        private void WriteParameter() 
+        {
+            OrdinalExpression();
+        }
+        private void AssignmentStatement () 
+        {
+            switch (LookAheadToken.Tag)
+            {
+                case Tags.DUMMYTAG1: // VariableIdentifier ":=" Expression
+                    VariableIdentifier();
+                    Match((int)Tags.MP_ASSIGN);
+                    Expression();
+                    break;
+                case Tags.DUMMYTAG2: // FunctionIdentifier ":=" Expression
+                    FunctionIdentifier();
+                    Match((int)Tags.MP_ASSIGN);
+                    Expression();
+                    break;
+            }
+        }
         private void ProcedureStatement () { }
         private void IfStatement () { }
         private void RepeatStatement () { }
@@ -336,7 +379,6 @@ namespace Compiler.Parser
         //private void ActualParameter () { }
         private void ReadParameterList () { }
         private void WriteParamaterList () { }
-        private void WriteParameter () { }
         //private void BooleanExpression () { }
         //private void OrdinalExpression () { }
         //private void VariableIdentifier () { }
