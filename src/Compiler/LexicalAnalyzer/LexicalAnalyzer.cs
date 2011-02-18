@@ -325,7 +325,6 @@ namespace Compiler.LexicalAnalyzer
                         
                         if(NextChar.Equals('\''))
                         {
-                            sb.Append(CurrentChar);
                             ReadChar();
                             sb.Append(CurrentChar);
                             state = States.S1;
