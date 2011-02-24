@@ -514,7 +514,11 @@ namespace Compiler.Parser
 
             }
         }
-
+        /// <summary>
+        /// *******************************************************************************************************************
+        /// THIS IS WHERE I LEFT OFF - (AUSTEN) - GOING UP FROM HERE. WILL FINISH TOMORROW
+        /// *******************************************************************************************************************
+        /// </summary>
         private void RelationalOperator()
         {
             switch (LookAheadToken.Tag)
@@ -537,8 +541,8 @@ namespace Compiler.Parser
                 case Tags.MP_GEQUAL:
                     Match((int)Tags.MP_GEQUAL);
                     break;
-                case Tags.MP_NOT:
-                    Match((int)Tags.MP_NOT);
+                case Tags.MP_NEQUAL:
+                    Match((int)Tags.MP_NEQUAL);
                     break;
                 default:
                     //throw error
@@ -558,14 +562,32 @@ namespace Compiler.Parser
         {
             switch(LookAheadToken.Tag)
             {
-                case Tags.DUMMYTAG1: //AddingOperator Term TermTail
+                //AddingOperator Term TermTail
+                case Tags.MP_PLUS:
+                case Tags.MP_MINUS:
+                case Tags.MP_OR:
                     AddingOperator();
                     Term();
                     TermTail();
                     break;
 
-                case Tags.DUMMYTAG2: //lambda
-                    
+                case Tags.MP_SCOLON: 
+                case Tags.MP_RPAREN:
+                case Tags.MP_END:
+                case Tags.MP_COMMA:
+                case Tags.MP_THEN:
+                case Tags.MP_ELSE:
+                case Tags.MP_UNTIL:
+                case Tags.MP_DO:
+                case Tags.MP_TO:
+                case Tags.MP_DOWNTO:
+                // NOW JUST WTF IS COLUMN AE IN THE SPREADSHEET AGAIN? **********************************************************************************************************
+                case Tags.MP_LTHAN:
+                case Tags.MP_GTHAN:
+                case Tags.MP_LEQUAL:
+                case Tags.MP_GEQUAL:
+                case Tags.MP_NEQUAL:
+                    //lambda                    
                     break;
                 default:
                     //throw error
@@ -582,7 +604,11 @@ namespace Compiler.Parser
                 case Tags.MP_MINUS:
                     Match('-');
                     break;
-                case Tags.DUMMYTAG1: //lambda
+                case Tags.MP_LPAREN:
+                case Tags.MP_INTEGER: // IS THIS UNSIGNED INTEGER? *******************************************************************************************************************
+                case Tags.MP_NOT:
+                case Tags.MP_IDENTIFIER:
+                    //lambda
                     break;
                 default:
                     break;
@@ -613,16 +639,44 @@ namespace Compiler.Parser
             FactorTail();
         }
 
+        //HAD TO ADD THIS AGAIN IT WAS HERE \/ \/ \/ \/ \/ \|/ ************************************************ <3 Austen
+        private void MultiplyingOperator()
+        {
+        }
+
         private void FactorTail()
         {
             switch (LookAheadToken.Tag)
             {
-                case Tags.DUMMYTAG1:
+                case Tags.MP_TIMES:
+                case Tags.MP_DIV:
+                case Tags.MP_MOD:
+                case Tags.MP_AND:
                     MultiplyingOperator();
                     Factor();
                     FactorTail();
                     break;
-                case Tags.DUMMYTAG2: //lambda
+
+                case Tags.MP_SCOLON: 
+                case Tags.MP_RPAREN:
+                case Tags.MP_END:
+                case Tags.MP_COMMA:
+                case Tags.MP_THEN:
+                case Tags.MP_ELSE:
+                case Tags.MP_UNTIL:
+                case Tags.MP_DO:
+                case Tags.MP_TO:
+                case Tags.MP_DOWNTO:
+                // DOUBLE CHECK DUNNO WHAT IS SUPPOSED TO BE IN COLUMN AE on FinallLL1Table Gdoc  **************************************************************************************
+                case Tags.MP_LTHAN:
+                case Tags.MP_GTHAN:
+                case Tags.MP_LEQUAL:
+                case Tags.MP_GEQUAL:
+                case Tags.MP_NEQUAL:
+                case Tags.MP_PLUS:
+                case Tags.MP_MINUS:
+                case Tags.MP_OR:
+                    //lambda case!
                     break;
                 default:
                     break;
@@ -633,13 +687,13 @@ namespace Compiler.Parser
         {
             switch (LookAheadToken.Tag)
             {
-                case Tags.DUMMYTAG1:
+                case Tags.MP_INTEGER: //is this UNSIGNED INT? *******************************************************************
                     UnsignedInteger();
                     break;
-                case Tags.DUMMYTAG2:
+                case Tags.MP_IDENTIFIER:
                     VariableIdentifier();
                     break;
-                case Tags.DUMMYTAG3:
+                case Tags.MP_NOT:
                     Match((int)Tags.MP_NOT);
                     Factor();
                     break;
@@ -648,7 +702,7 @@ namespace Compiler.Parser
                     Expression();
                     Match((int)Tags.MP_RPAREN);
                     break;
-                case Tags.DUMMYTAG4:
+                case Tags.MP_IDENTIFIER:   ///////// WE WILL HAVE TO RESOLVE CONFLICT // USE DOUBLE LOOKAHEAD HERE PROBABALY
                     FunctionIdentifier();
                     OptionalActualParameterList();
                     break;
@@ -697,9 +751,11 @@ namespace Compiler.Parser
                     Identifier();
                     IdentifierTail();
                     break;
-                case Tags.DUMMYTAG1: //lambda
+                case Tags.MP_COLON: //lambda //Don't know if this is correct... doesn't seem right?
+                    //shouldn't it just be lambda?
                     break;
                 default:
+                    //RETURN ERROR line # col # unexpected char?
                     break;
             }
         }
