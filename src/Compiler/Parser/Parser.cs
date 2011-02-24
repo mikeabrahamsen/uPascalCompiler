@@ -57,8 +57,9 @@ namespace Compiler.Parser
                     Match(';');
                     VariableDeclarationTail();
                     break;
-                case Tags.DUMMYTAG1: //lambda
-                    
+                    //This
+                case Tags.MP_PROCEDURE: case Tags.MP_FUNCTION: case Tags.MP_BEGIN: //lambda
+                    VariableDeclarationTail();    //All of the above goto have VariableDeclarationTail()
                     break;
                 default:
                     //throw error
@@ -265,10 +266,7 @@ namespace Compiler.Parser
             }
 
         }
-        //private void SimpleStatement () { }
-        //private void StructuredStatement () { }
-        //private void ConditionalStatement () { }
-        //private void RepetitiveStatement () { }
+
         private void EmptyStatement () 
         {
             switch (LookAheadToken.Tag)
@@ -458,33 +456,10 @@ namespace Compiler.Parser
                     break;
             }
         }
-
-        //private void Expression () { }
-        //private void SimpleExpression () { }
-        //private void Term () { }
-        //private void Factor () { }
-        //private void RelationalOperator () { }
-        //private void AddingOperator () { }
-        private void MultiplyingOperator () { }
-        private void FunctionDesignator () { }
-        private void Variable () { }
-        private void ActualParameterList () { }
-        //private void ActualParameter () { }
-        private void ReadParameterList () { }
-        private void WriteParamaterList () { }
-        //private void BooleanExpression () { }
-        //private void OrdinalExpression () { }
-        //private void VariableIdentifier () { }
-        //private void ProcedureIdentifier () { }
-        //private void IdentifierList () { }
         private void Identifier ()
         {
             throw new NotImplementedException();
-        }
-
-
-
-
+        }        
 
         //austen's additions
         private void UnsignedInteger() { }
@@ -665,11 +640,6 @@ namespace Compiler.Parser
                     VariableIdentifier();
                     break;
                 case Tags.DUMMYTAG3:
-                    //Match('n');
-                    //Match('o');
-                    //Match('t');
-                    //i'm assuming for this one we don't do the above?
-                    //rather we do this: /// MAYBE the case will be not too?
                     Match((int)Tags.MP_NOT);
                     Factor();
                     break;
