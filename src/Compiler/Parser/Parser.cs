@@ -28,19 +28,27 @@ namespace Compiler.Parser
         }
         private void Match (int tag)
         {
-            if((int)LookAheadToken.Tag == tag)
+            if(LookAheadToken.Tag != null)
             {
-                Move();                                               
-            }
-            else
-            {
-                Error("Syntax Error");
+                if((int)LookAheadToken.Tag == tag)
+                {
+                    Move();
+                }
+                else
+                {
+                    Error("Syntax Error");
+                }
             }
             //else throw error
         }
         private void Move ()
         {
             LookAheadToken = scanner.GetNextToken();
+        }
+        private void SystemGoal ()
+        {
+            Program();
+            Match((int)Tags.MP_EOF);
         }
         public void Program () 
         {
@@ -85,15 +93,15 @@ namespace Compiler.Parser
         {
             switch(LookAheadToken.Tag)
             {
-                case Tags.DUMMYTAG1: // PeocedureDeclaration ProcedureAndFunctionDeclarationPart
+                case Tags.MP_PROCEDURE: // PeocedureDeclaration ProcedureAndFunctionDeclarationPart
                     ProcedureDeclaration();
                     ProcedureAndFunctionDeclarationPart();
                     break;
-                case Tags.DUMMYTAG2: // FunctionDeclaration ProcedureAndFunctionDeclarationPart
+                case Tags.MP_FUNCTION: // FunctionDeclaration ProcedureAndFunctionDeclarationPart
                     FunctionDeclaration();
                     ProcedureAndFunctionDeclarationPart();
                     break;
-                case Tags.DUMMYTAG3: //lamda
+                case Tags.MP_BEGIN: //lamda
                     break;
             }
         }
@@ -105,12 +113,14 @@ namespace Compiler.Parser
         {
             switch(LookAheadToken.Tag)
             {
-                case Tags.DUMMYTAG1: // VariableDeclaration ";" VariableDeclarationTail
+                case Tags.MP_IDENTIFIER: // VariableDeclaration ";" VariableDeclarationTail
                     VariableDeclaration();
                     Match(';');
                     VariableDeclarationTail();
                     break;
-                case Tags.DUMMYTAG2: // lamda
+                case Tags.MP_PROCEDURE:
+                case Tags.MP_FUNCTION:
+                case Tags.MP_BEGIN:// lamda
                     break;
             }
             
@@ -125,10 +135,10 @@ namespace Compiler.Parser
         {
             switch(LookAheadToken.Tag)
             {
-                case Tags.DUMMYTAG1: // Integer
+                case Tags.MP_INTEGER: // Integer
                     Match((int)Tags.MP_INTEGER);
                     break;
-                case Tags.DUMMYTAG2: // Float
+                case Tags.MP_FLOAT: // Float
                     Match((int)Tags.MP_FLOAT);
                     break;
             }
@@ -165,27 +175,28 @@ namespace Compiler.Parser
         {
             switch(LookAheadToken.Tag)
             {
-                case Tags.DUMMYTAG1: // "(" FormalParameterSection FormalParameterSectionTail ")"
+                case Tags.MP_LPAREN: // "(" FormalParameterSection FormalParameterSectionTail ")"
                     Match('(');
                     FormalParameterSection();
                     FormalParameterSectionTail();
                     Match(')');
                     break;
-                case Tags.DUMMYTAG2: // lamda
+                case Tags.MP_SCOLON:
+                case Tags.MP_INTEGER:
+                case Tags.MP_FLOAT:// lamda
                     break;
             }
         }
-        private void FormalParameterList () { }
         private void FormalParameterSectionTail () 
         {
             switch(LookAheadToken.Tag)
             {
-                case Tags.DUMMYTAG1: // ";" FormalParameterSection FormalParameterSectionTail
+                case Tags.MP_SCOLON: // ";" FormalParameterSection FormalParameterSectionTail
                     Match(';');
                     FormalParameterSection();
                     FormalParameterSectionTail();
                     break;
-                case Tags.DUMMYTAG2: // lamda
+                case Tags.MP_RPAREN: // lamda
                     break;
             }
         }
@@ -193,10 +204,10 @@ namespace Compiler.Parser
         {
             switch(LookAheadToken.Tag)
             {
-                case Tags.DUMMYTAG1: // ValueParameterSection
+                case Tags.MP_IDENTIFIER: // ValueParameterSection
                     ValueParameterSection();
                     break;
-                case Tags.DUMMYTAG2: // VariableParameterSection
+                case Tags.MP_VAR: // VariableParameterSection
                     VariableParameterSection();
                     break;
             }
@@ -235,7 +246,8 @@ namespace Compiler.Parser
                     StatementTail();
                     break;
 
-                case Tags.DUMMYTAG1: //lambda
+                case Tags.MP_END:
+                case Tags.MP_UNTIL://lambda
                     break;
 
                 default:
@@ -247,34 +259,38 @@ namespace Compiler.Parser
         {
             switch (LookAheadToken.Tag)
             {
-                case Tags.DUMMYTAG1: // EmptyStatement
+                case Tags.MP_SCOLON:
+                case Tags.MP_END:
+                case Tags.MP_ELSE:
+                case Tags.MP_UNTIL:// EmptyStatement
                     EmptyStatement();
                     break;
-                case Tags.DUMMYTAG2: // CompoundStatement
+                case Tags.MP_BEGIN: // CompoundStatement
                     CompoundStatement();
                     break;
-                case Tags.DUMMYTAG3: //ReadStatement
+                case Tags.MP_READ: //ReadStatement
                     ReadStatement();
                     break;
-                case Tags.DUMMYTAG4: //WriteStatement
+                case Tags.MP_WRITE: //WriteStatement
                     WriteStatement();
                     break;
                 case Tags.DUMMYTAG5: //AssignmentStatement
                     AssignmentStatement();
                     break;
-                case Tags.DUMMYTAG6: //IfStatement
+                case Tags.MP_IF: //IfStatement
                     IfStatement();
                     break;
-                case Tags.DUMMYTAG7: //WhileStatement
+                case Tags.MP_WHILE: //WhileStatement
                     WhileStatement();
                     break;
-                case Tags.DUMMYTAG8: //RepeatStatement
+                case Tags.MP_REPEAT: //RepeatStatement
                     RepeatStatement();
                     break;
-                case Tags.DUMMYTAG9: //ForStatement
+                case Tags.MP_FOR: //ForStatement
                     ForStatement();
                     break;
-                case Tags.DUMMYTAG10://ProcedureStatement
+                    //There is a conflict with 36 and 41 here
+                case Tags.MP_IDENTIFIER://ProcedureStatement
                     ProcedureStatement();
                     break;
             }

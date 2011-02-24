@@ -17,7 +17,6 @@ namespace Compiler
 
             scanner.OpenFile(args[0]);
 
-            string output;
             Token token = new Token();
             Parser.Parser parser = new Parser.Parser(scanner);
             /*
@@ -36,9 +35,9 @@ namespace Compiler
                     }
                 }
             }
-             * */
+            */
             parser.Program();
-                Console.WriteLine("yay we made it");
+                Console.WriteLine("Program Parsed Correctly");
              
             //Added to hold console window open for viewing
             Console.ReadLine();
