@@ -19,7 +19,8 @@ namespace Compiler
 
             string output;
             Token token = new Token();
-
+            Parser.Parser parser = new Parser.Parser(scanner);
+            /*
             while(!scanner.Finished)
             {
                 scanner.ErrorFound = false;
@@ -35,6 +36,10 @@ namespace Compiler
                     }
                 }
             }
+             * */
+            parser.Program();
+                Console.WriteLine("yay we made it");
+             
             //Added to hold console window open for viewing
             Console.ReadLine();
         }

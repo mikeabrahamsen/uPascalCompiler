@@ -63,6 +63,7 @@
     <Compile Include="LexicalAnalyzer\Token.cs" />
     <Compile Include="LexicalAnalyzer\Word.cs" />
     <Compile Include="Parser\Parser.cs" />
+    <Compile Include="Parser\SyntaxException.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

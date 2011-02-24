@@ -10,17 +10,31 @@ namespace Compiler.Parser
     class Parser
     {
         private LexicalAnalyzer.LexicalAnalyzer scanner;
-        
+
+        public Parser (LexicalAnalyzer.LexicalAnalyzer scanner)
+        {
+            this.scanner = scanner;
+            Move();
+        }
         private Token LookAheadToken
         {
             get;
             set;
         }
+        private void Error (string errorString)
+        {
+            throw new SyntaxException("Error at line: " + scanner.Line + " Column: " + 
+                (scanner.Column - LookAheadToken.Lexeme.Length-1) + " " + errorString);
+        }
         private void Match (int tag)
         {
             if((int)LookAheadToken.Tag == tag)
             {
-                Move();
+                Move();                                               
+            }
+            else
+            {
+                Error("Syntax Error");
             }
             //else throw error
         }
@@ -28,7 +42,7 @@ namespace Compiler.Parser
         {
             LookAheadToken = scanner.GetNextToken();
         }
-        private void Program () 
+        public void Program () 
         {
             ProgramHeading();
             Match(';');
@@ -38,7 +52,7 @@ namespace Compiler.Parser
         private void ProgramHeading () 
         {
             Match((int)Tags.MP_PROGRAM);
-            Identifier();
+            ProgramIdentifier();
         }
 
         private void Block () 
@@ -458,7 +472,8 @@ namespace Compiler.Parser
         }
         private void Identifier ()
         {
-            throw new NotImplementedException();
+            Match((int)Tags.MP_IDENTIFIER);
+            //throw new NotImplementedException();
         }        
 
         //austen's additions
@@ -702,10 +717,11 @@ namespace Compiler.Parser
                     Expression();
                     Match((int)Tags.MP_RPAREN);
                     break;
+                    /*
                 case Tags.MP_IDENTIFIER:   ///////// WE WILL HAVE TO RESOLVE CONFLICT // USE DOUBLE LOOKAHEAD HERE PROBABALY
                     FunctionIdentifier();
                     OptionalActualParameterList();
-                    break;
+                    break;*/
                 default:
                     break;
             }
