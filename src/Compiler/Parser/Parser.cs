@@ -59,7 +59,7 @@ namespace Compiler.Parser
                     break;
                     //This
                 case Tags.MP_PROCEDURE: case Tags.MP_FUNCTION: case Tags.MP_BEGIN: //lambda
-                    VariableDeclarationTail();    //All of the above goto have VariableDeclarationTail()
+                    //this will be null????
                     break;
                 default:
                     //throw error
