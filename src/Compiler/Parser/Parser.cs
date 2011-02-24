@@ -84,7 +84,7 @@ namespace Compiler.Parser
                     //this will be null????
                     break;
                 default:
-                    //throw error
+                    Error("SyntaxError");
                     break;
                 
             }
@@ -102,6 +102,9 @@ namespace Compiler.Parser
                     ProcedureAndFunctionDeclarationPart();
                     break;
                 case Tags.MP_BEGIN: //lamda
+                    break;
+                default:
+                    Error("SyntaxError");
                     break;
             }
         }
@@ -122,6 +125,9 @@ namespace Compiler.Parser
                 case Tags.MP_FUNCTION:
                 case Tags.MP_BEGIN:// lamda
                     break;
+                default:
+                    Error("SyntaxError");
+                    break;
             }
             
         }
@@ -140,6 +146,9 @@ namespace Compiler.Parser
                     break;
                 case Tags.MP_FLOAT: // Float
                     Match((int)Tags.MP_FLOAT);
+                    break;
+                default:
+                    Error("SyntaxError");
                     break;
             }
         }
@@ -185,6 +194,9 @@ namespace Compiler.Parser
                 case Tags.MP_INTEGER:
                 case Tags.MP_FLOAT:// lamda
                     break;
+                default:
+                    Error("SyntaxError");
+                    break;
             }
         }
         private void FormalParameterSectionTail () 
@@ -198,6 +210,9 @@ namespace Compiler.Parser
                     break;
                 case Tags.MP_RPAREN: // lamda
                     break;
+                default:
+                    Error("SyntaxError");
+                    break;
             }
         }
         private void FormalParameterSection () 
@@ -209,6 +224,9 @@ namespace Compiler.Parser
                     break;
                 case Tags.MP_VAR: // VariableParameterSection
                     VariableParameterSection();
+                    break;
+                default:
+                    Error("SyntaxError");
                     break;
             }
         }
@@ -249,9 +267,8 @@ namespace Compiler.Parser
                 case Tags.MP_END:
                 case Tags.MP_UNTIL://lambda
                     break;
-
                 default:
-                    //throw error
+                    Error("SyntaxError");
                     break;
             }
         }
@@ -292,6 +309,9 @@ namespace Compiler.Parser
                     //There is a conflict with 36 and 41 here
                 case Tags.MP_IDENTIFIER://ProcedureStatement
                     ProcedureStatement();
+                    break;
+                default:
+                    Error("SyntaxError");
                     break;
             }
 
