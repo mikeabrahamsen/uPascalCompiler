@@ -44,6 +44,10 @@ namespace Compiler.Parser
         private void Move ()
         {
             LookAheadToken = scanner.GetNextToken();
+            while (LookAheadToken.Tag == null)
+            {
+                LookAheadToken = scanner.GetNextToken();
+            }
         }
         private void SystemGoal ()
         {
@@ -291,7 +295,7 @@ namespace Compiler.Parser
                 case Tags.MP_WRITE: //WriteStatement
                     WriteStatement();
                     break;
-                case Tags.DUMMYTAG5: //AssignmentStatement
+                case Tags.MP_IDENTIFIER: //AssignmentStatement
                     AssignmentStatement();
                     break;
                 case Tags.MP_IF: //IfStatement
@@ -307,7 +311,7 @@ namespace Compiler.Parser
                     ForStatement();
                     break;
                     //There is a conflict with 36 and 41 here
-                case Tags.MP_IDENTIFIER://ProcedureStatement
+                case Tags.DUMMYTAG1://ProcedureStatement
                     ProcedureStatement();
                     break;
                 default:
@@ -321,11 +325,13 @@ namespace Compiler.Parser
         {
             switch (LookAheadToken.Tag)
             {
-                case Tags.DUMMYTAG1: //lambda
+                case Tags.MP_SCOLON:
+                case Tags.MP_END:
+                case Tags.MP_ELSE:
+                case Tags.MP_UNTIL://lambda
                     break;
-
                 default:
-                    //throw error
+                    Error("SyntaxError");
                     break;
             }
         }
@@ -347,11 +353,10 @@ namespace Compiler.Parser
                     ReadParameterTail();
                     break;
 
-                case Tags.DUMMYTAG1: //lambda
+                case Tags.MP_RPAREN: //lambda
                     break;
-
                 default:
-                    //throw error
+                    Error("SyntaxError");
                     break;
             }
         }
@@ -377,11 +382,10 @@ namespace Compiler.Parser
                     WriteParameterTail();
                     break;
 
-                case Tags.DUMMYTAG1: //lambda
+                case Tags.MP_RPAREN: //lambda
                     break;
-
                 default:
-                    //throw error
+                    Error("SyntaxError");
                     break;
             }
         }
@@ -393,15 +397,19 @@ namespace Compiler.Parser
         {
             switch (LookAheadToken.Tag)
             {
-                case Tags.DUMMYTAG1: // VariableIdentifier ":=" Expression
+                    //COnflict
+                case Tags.MP_IDENTIFIER: // VariableIdentifier ":=" Expression
                     VariableIdentifier();
                     Match((int)Tags.MP_ASSIGN);
                     Expression();
                     break;
-                case Tags.DUMMYTAG2: // FunctionIdentifier ":=" Expression
+                case Tags.DUMMYTAG1: // FunctionIdentifier ":=" Expression
                     FunctionIdentifier();
                     Match((int)Tags.MP_ASSIGN);
                     Expression();
+                    break;
+                default:
+                    Error("SyntaxError");
                     break;
             }
         }
@@ -499,10 +507,32 @@ namespace Compiler.Parser
                     ActualParameterTail();
                     Match((int)Tags.MP_RPAREN);
                     break;
-                case Tags.DUMMYTAG1: // Lambda
+                case Tags.MP_SCOLON:
+                case Tags.MP_RPAREN:
+                case Tags.MP_END:
+                case Tags.MP_COMMA:
+                case Tags.MP_THEN:
+                case Tags.MP_ELSE:
+                case Tags.MP_UNTIL:
+                case Tags.MP_DO:
+                case Tags.MP_TO:
+                case Tags.MP_DOWNTO:
+                case Tags.MP_EQUAL:
+                case Tags.MP_LTHAN:
+                case Tags.MP_GTHAN:
+                case Tags.MP_LEQUAL:
+                case Tags.MP_GEQUAL:
+                case Tags.MP_NEQUAL:
+                case Tags.MP_PLUS:
+                case Tags.MP_MINUS:
+                case Tags.MP_OR:
+                case Tags.MP_TIMES:
+                case Tags.MP_DIV:
+                case Tags.MP_MOD:
+                case Tags.MP_AND:// Lambda
                     break;
                 default:
-                    //throw error
+                    Error("SyntaxError");
                     break;
             }
         }
@@ -526,7 +556,7 @@ namespace Compiler.Parser
                     ActualParameterTail();
                     break;
 
-                case Tags.DUMMYTAG1: //lambda
+                case Tags.MP_RPAREN: //lambda
                     
                     break;
                 default:
@@ -551,12 +581,26 @@ namespace Compiler.Parser
         {
             switch (LookAheadToken.Tag)
             {
-                case Tags.DUMMYTAG1: //RelationalOperator SimpleExpression 
+                case Tags.MP_EQUAL:
+                case Tags.MP_LTHAN:
+                case Tags.MP_GTHAN:
+                case Tags.MP_LEQUAL:
+                case Tags.MP_GEQUAL:
+                case Tags.MP_NEQUAL://RelationalOperator SimpleExpression 
                     RelationalOperator();
                     SimpleExpression();
                     break;
 
-                case Tags.DUMMYTAG2: //lambda
+                case Tags.MP_SCOLON:
+                case Tags.MP_RPAREN:
+                case Tags.MP_END:
+                case Tags.MP_COMMA:
+                case Tags.MP_THEN:
+                case Tags.MP_ELSE:
+                case Tags.MP_UNTIL:
+                case Tags.MP_DO:
+                case Tags.MP_TO:
+                case Tags.MP_DOWNTO://lambda
 
                     break;
                 default:
