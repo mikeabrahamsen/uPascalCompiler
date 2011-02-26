@@ -28,22 +28,22 @@ namespace Compiler.Parser
         }
         private void Match (int tag)
         {
-            if(LookAheadToken.Tag != null)
+           
+            if((int)LookAheadToken.Tag == tag)
             {
-                if((int)LookAheadToken.Tag == tag)
-                {
-                    Move();
-                }
-                else
-                {
-                    Error("Syntax Error");
-                }
+                Move();
             }
-            //else throw error
+            else
+            {
+                Error("Syntax Error");
+            }
+            
         }
         private void Move ()
         {
             LookAheadToken = scanner.GetNextToken();
+
+            //This while is to ensure that no comments get entered as the lookahead token
             while (LookAheadToken.Tag == null)
             {
                 LookAheadToken = scanner.GetNextToken();
