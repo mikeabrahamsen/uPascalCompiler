@@ -295,7 +295,8 @@ namespace Compiler.Parser
                 case Tags.MP_WRITE: //WriteStatement
                     WriteStatement();
                     break;
-                case Tags.MP_IDENTIFIER: //AssignmentStatement
+                case Tags.MP_IDENTIFIER: //AssignmentStatement                  ///conflict with procedure statement
+                    
                     AssignmentStatement();
                     break;
                 case Tags.MP_IF: //IfStatement
@@ -397,7 +398,7 @@ namespace Compiler.Parser
         {
             switch (LookAheadToken.Tag)
             {
-                    //COnflict
+                    //Conflict
                 case Tags.MP_IDENTIFIER: // VariableIdentifier ":=" Expression
                     VariableIdentifier();
                     Match((int)Tags.MP_ASSIGN);
@@ -542,8 +543,7 @@ namespace Compiler.Parser
             //throw new NotImplementedException();
         }        
 
-        //austen's additions
-        private void UnsignedInteger() { }
+
 
         private void ActualParameterTail()
         {
@@ -700,7 +700,7 @@ namespace Compiler.Parser
                     Match('-');
                     break;
                 case Tags.MP_LPAREN:
-                case Tags.MP_INTEGER: // IS THIS UNSIGNED INTEGER? *******************************************************************************************************************
+                case Tags.MP_INTEGER_LIT:
                 case Tags.MP_NOT:
                 case Tags.MP_IDENTIFIER:
                     //lambda
@@ -782,8 +782,8 @@ namespace Compiler.Parser
         {
             switch (LookAheadToken.Tag)
             {
-                case Tags.MP_INTEGER: //is this UNSIGNED INT? *******************************************************************
-                    UnsignedInteger();
+                case Tags.MP_INTEGER_LIT:
+                    Match((int)Tags.MP_INTEGER_LIT);
                     break;
                 case Tags.MP_IDENTIFIER:
                     VariableIdentifier();
