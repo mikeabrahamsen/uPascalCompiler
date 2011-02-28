@@ -11,9 +11,10 @@ namespace Compiler
     /// </summary>
     class Driver
     {
+        public static Queue<Token> TokenQueue;
         static void Main(string[] args)
         {
-            Queue<Token> TokenQueue = new Queue<Token>();
+            TokenQueue = new Queue<Token>();
 
             LexicalAnalyzer.LexicalAnalyzer scanner = new LexicalAnalyzer.LexicalAnalyzer();
 
@@ -38,7 +39,7 @@ namespace Compiler
                     TokenQueue.Enqueue(token);
                 }
             }
-            Parser.Parser parser = new Parser.Parser(scanner);
+            Parser.Parser parser = new Parser.Parser(TokenQueue,scanner);
             parser.Program();
                 Console.WriteLine("Program Parsed Correctly");
              

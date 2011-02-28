@@ -9,10 +9,11 @@ namespace Compiler.Parser
 {
     class Parser
     {
+        private Queue<Token> TokenQueue;
         private LexicalAnalyzer.LexicalAnalyzer scanner;
-
-        public Parser (LexicalAnalyzer.LexicalAnalyzer scanner)
+        public Parser (Queue<Token> TokenQueue,LexicalAnalyzer.LexicalAnalyzer scanner)
         {
+            this.TokenQueue = TokenQueue;
             this.scanner = scanner;
             Move();
         }
@@ -41,13 +42,8 @@ namespace Compiler.Parser
         }
         private void Move ()
         {
-            LookAheadToken = scanner.GetNextToken();
+            LookAheadToken = TokenQueue.Dequeue();
 
-            //This while is to ensure that no comments get entered as the lookahead token
-            while (LookAheadToken.Tag == null)
-            {
-                LookAheadToken = scanner.GetNextToken();
-            }
         }
         private void SystemGoal ()
         {
@@ -296,8 +292,14 @@ namespace Compiler.Parser
                     WriteStatement();
                     break;
                 case Tags.MP_IDENTIFIER: //AssignmentStatement                  ///conflict with procedure statement
-                    
-                    AssignmentStatement();
+                    if(TokenQueue.Peek().Tag == Tags.MP_ASSIGN)
+                    {
+                        AssignmentStatement();
+                    }
+                    else
+                    {
+                        ProcedureStatement();
+                    }
                     break;
                 case Tags.MP_IF: //IfStatement
                     IfStatement();
@@ -310,11 +312,7 @@ namespace Compiler.Parser
                     break;
                 case Tags.MP_FOR: //ForStatement
                     ForStatement();
-                    break;
-                    //There is a conflict with 36 and 41 here
-                case Tags.DUMMYTAG1://ProcedureStatement
-                    ProcedureStatement();
-                    break;
+                    break;                    
                 default:
                     Error("SyntaxError");
                     break;
