@@ -427,7 +427,7 @@ namespace Compiler.Parser
                 case Tags.DUMMYTAG1: // Lambda
                     break;
                 default:
-                    //throw error
+                    Error("SyntaxError");
                     break;
             }
         }
@@ -478,7 +478,7 @@ namespace Compiler.Parser
                 case Tags.DUMMYTAG1: // Lambda
                     break;
                 default:
-                    //throw error
+                    Error("SyntaxError");
                     break;
             }
         }
@@ -534,10 +534,7 @@ namespace Compiler.Parser
         private void Identifier ()
         {
             Match((int)Tags.MP_IDENTIFIER);
-            //throw new NotImplementedException();
         }        
-
-
 
         private void ActualParameterTail()
         {
@@ -554,10 +551,9 @@ namespace Compiler.Parser
                     
                     break;
                 default:
-                    //throw error
+                    Error("SyntaxError");
                     break;
             }
-
         }
 
         private void ActualParameter()
@@ -598,7 +594,7 @@ namespace Compiler.Parser
 
                     break;
                 default:
-                    //throw error
+                    Error("SyntaxError");
                     break;
 
             }
@@ -634,7 +630,7 @@ namespace Compiler.Parser
                     Match((int)Tags.MP_NEQUAL);
                     break;
                 default:
-                    //throw error
+                    Error("SyntaxError");
                     break;
 
             }
@@ -700,6 +696,7 @@ namespace Compiler.Parser
                     //lambda
                     break;
                 default:
+                    Error("SyntaxError");
                     break;
             }
         }
@@ -718,6 +715,7 @@ namespace Compiler.Parser
                     Match((int)Tags.MP_OR);
                     break;
                 default:
+                    Error("SyntaxError");
                     break;
             }
         }
@@ -768,6 +766,7 @@ namespace Compiler.Parser
                     //lambda case!
                     break;
                 default:
+                    Error("SyntaxError");
                     break;
             }
         }
@@ -793,6 +792,7 @@ namespace Compiler.Parser
                     OptionalActualParameterList();
                     break;
                 default:
+                    Error("SyntaxError");
                     break;
             }
         }
@@ -821,11 +821,10 @@ namespace Compiler.Parser
                     Identifier();
                     IdentifierTail();
                     break;
-                case Tags.MP_COLON: //lambda //Don't know if this is correct... doesn't seem right?
-                    //shouldn't it just be lambda?
+                case Tags.MP_COLON: //lambda 
                     break;
                 default:
-                    //RETURN ERROR line # col # unexpected char?
+                    Error("SyntaxError");
                     break;
             }
         }

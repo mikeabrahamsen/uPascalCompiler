@@ -13,13 +13,15 @@ namespace Compiler
     {
         static void Main(string[] args)
         {
+            Queue<Token> TokenQueue = new Queue<Token>();
+
             LexicalAnalyzer.LexicalAnalyzer scanner = new LexicalAnalyzer.LexicalAnalyzer();
 
             scanner.OpenFile(args[0]);
 
             Token token = new Token();
-            Parser.Parser parser = new Parser.Parser(scanner);
-            /*
+            string output;
+            
             while(!scanner.Finished)
             {
                 scanner.ErrorFound = false;
@@ -33,9 +35,10 @@ namespace Compiler
                     {
                        Console.WriteLine(scanner.ErrorMessage);
                     }
+                    TokenQueue.Enqueue(token);
                 }
             }
-            */
+            Parser.Parser parser = new Parser.Parser(scanner);
             parser.Program();
                 Console.WriteLine("Program Parsed Correctly");
              
