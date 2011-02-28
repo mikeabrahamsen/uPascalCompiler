@@ -1,0 +1,103 @@
+﻿1 SystemGoal -> Program $ 
+2 Program -> ProgramHeading ; Block . 
+3 ProgramHeading -> program Identifer 
+4 Block -> VariableDeclarationPart ProcedureAndFunctionDeclarationPart StatementPart 
+5 VariableDeclarationPart -> var VariableDeclaration ; VariableDeclarationTail 
+6 VariableDeclarationPart -> lambda 
+7 VariableDeclarationTail -> VariableDeclaration ; VariableDeclarationTail 
+8 VariableDeclarationTail -> lambda 
+9 VariableDeclaration -> IdentifierList : Type 
+10 Type -> Integer 
+11 Type -> Float 
+12 ProcedureAndFunctionDeclarationPart -> ProcedureDeclaration ProcedureAndFunctionDeclarationPart 
+13 ProcedureAndFunctionDeclarationPart -> FunctionDeclaration ProcedureAndFunctionDeclarationPart 
+14 ProcedureAndFunctionDeclarationPart -> lambda 
+15 ProcedureDeclaration -> ProcedureHeading ; Block ; 
+16 FunctionDeclaration -> FunctionHeading ; Block ; 
+17 ProcedureHeading -> procedure Identifer OptionalFormalParameterList 
+18 FunctionHeading -> function Identifer OptionalFormalParameterList Type 
+19 OptionalFormalParameterList -> ( FormalParameterSection FormalParameterSectionTail ) 
+20 OptionalFormalParameterList -> lambda 
+21 FormalParameterSectionTail -> ; FormalParameterSection FormalParameterSectionTail 
+22 FormalParameterSectionTail -> lambda 
+23 FormalParameterSection -> ValueParameterSection 
+24 FormalParameterSection -> VariableParameterSection 
+25 ValueParameterSection -> IdentifierList : Type 
+26 VariableParameterSection -> var IdentifierList : Type 
+27 StatementPart -> CompoundStatement 
+28 CompoundStatement -> begin StatementSequence end 
+29 StatementSequence -> Statement StatementTail 
+30 StatementTail -> ; Statement StatementTail 
+31 StatementTail -> lambda 
+32 Statement -> EmptyStatement 
+33 Statement -> CompoundStatement 
+34 Statement -> ReadStatement 
+35 Statement -> WriteStatement 
+36 Statement -> AssignmentStatement 
+37 Statement -> IfStatement 
+38 Statement -> WhileStatement 
+39 Statement -> RepeatStatement 
+40 Statement -> ForStatement 
+41 Statement -> ProcedureStatement 
+42 EmptyStatement -> lambda 
+43 ReadStatement -> read ( ReadParameter ReadParameterTail ) 
+44 ReadParameterTail -> , ReadParameter ReadParameterTail 
+45 ReadParameterTail -> lambda 
+46 ReadParameter -> Identifer 
+47 WriteStatement -> write ( WriteParameter WriteParameterTail ) 
+48 WriteParameterTail -> , WriteParameter WriteParameterTail 
+49 WriteParameterTail -> lambda 
+50 WriteParameter -> OrdinalExpression 
+51 AssignmentStatement -> Identifer := Expression
+53 IfStatement -> if BooleanExpression then Statement OptionalElsePart 
+54 OptionalElsePart -> else Statement 
+55 OptionalElsePart -> lambda 
+56 RepeatStatement -> repeat StatementSequence until BooleanExpression 
+57 WhileStatement -> while BooleanExpression do Statement 
+58 ForStatement -> for ControlVariable := InitialValue StepValue FinalValue do Statement 
+59 ControlVariable -> Identifer 
+60 InitialValue -> OrdinalExpression 
+61 StepValue -> to 
+62 StepValue -> downto 
+63 FinalValue -> OrdinalExpression 
+64 ProcedureStatement -> Identifer OptionalActualParameterList 
+65 OptionalActualParameterList -> ( ActualParameter ActualParameterTail ) 
+66 OptionalActualParameterList -> lambda 
+67 ActualParameterTail -> , ActualParameter ActualParameterTail 
+68 ActualParameterTail -> lambda 
+69 ActualParameter -> OrdinalExpression 
+70 Expression -> SimpleExpression OptionalRelationalPart 
+71 OptionalRelationalPart -> RelationalOperator SimpleExpression 
+72 OptionalRelationalPart -> lambda 
+73 RelationalOperator -> = 
+74 RelationalOperator -> < 
+75 RelationalOperator -> > 
+76 RelationalOperator -> <= 
+77 RelationalOperator -> >= 
+78 RelationalOperator -> <> 
+79 SimpleExpression -> OptionalSign Term TermTail 
+80 TermTail -> AddingOperator Term TermTail 
+81 TermTail -> lambda 
+82 OptionalSign -> + 
+83 OptionalSign -> - 
+84 OptionalSign -> lambda 
+85 AddingOperator -> + 
+86 AddingOperator -> - 
+87 AddingOperator -> or 
+88 Term -> Factor FactorTail 
+89 FactorTail -> MultiplyingOperator Factor FactorTail 
+90 FactorTail -> lambda 
+91 MultiplyingOperator -> * 
+92 MultiplyingOperator -> div 
+93 MultiplyingOperator -> mod 
+94 MultiplyingOperator -> and 
+95 Factor -> UnsignedInteger 
+97 Factor -> not Factor 
+98 Factor -> ( Expression ) 
+99 Factor -> Identifer OptionalActualParameterList 
+104 BooleanExpression -> Expression 
+105 OrdinalExpression -> Expression 
+106 IdentifierList -> Identifier IdentifierTail 
+107 IdentifierTail -> , Identifier IdentifierTail 
+108 IdentifierTail -> lambda 
+	

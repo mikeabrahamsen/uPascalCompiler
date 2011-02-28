@@ -64,7 +64,7 @@ namespace Compiler.Parser
         private void ProgramHeading () 
         {
             Match((int)Tags.MP_PROGRAM);
-            ProgramIdentifier();
+            Identifier();
         }
 
         private void Block () 
@@ -173,14 +173,14 @@ namespace Compiler.Parser
         private void ProcedureHeading () 
         {
             Match((int)Tags.MP_PROCEDURE);
-            ProcedureIdentifier();
+            Identifier();
             OptionalFormalParameterList();
 
         }
         private void FunctionHeading () 
         {
             Match((int)Tags.MP_FUNCTION);
-            FunctionIdentifier();
+            Identifier();
             OptionalFormalParameterList();
             Type();
         }
@@ -363,7 +363,7 @@ namespace Compiler.Parser
         }
         private void ReadParameter() 
         {
-            VariableIdentifier();
+            Identifier();
         }
         private void WriteStatement () 
         {
@@ -398,14 +398,8 @@ namespace Compiler.Parser
         {
             switch (LookAheadToken.Tag)
             {
-                    //Conflict
-                case Tags.MP_IDENTIFIER: // VariableIdentifier ":=" Expression
-                    VariableIdentifier();
-                    Match((int)Tags.MP_ASSIGN);
-                    Expression();
-                    break;
-                case Tags.DUMMYTAG1: // FunctionIdentifier ":=" Expression
-                    FunctionIdentifier();
+                case Tags.MP_IDENTIFIER: // Identifier ":=" Expression
+                    Identifier();
                     Match((int)Tags.MP_ASSIGN);
                     Expression();
                     break;
@@ -465,7 +459,7 @@ namespace Compiler.Parser
         }
         private void ControlVariable () 
         {
-            VariableIdentifier();
+            Identifier();
         }
         private void InitialValue () 
         {
@@ -494,7 +488,7 @@ namespace Compiler.Parser
         }
         private void ProcedureStatement() 
         {
-            ProcedureIdentifier();
+            Identifier();
             OptionalActualParameterList();
         }
 
@@ -785,9 +779,6 @@ namespace Compiler.Parser
                 case Tags.MP_INTEGER_LIT:
                     Match((int)Tags.MP_INTEGER_LIT);
                     break;
-                case Tags.MP_IDENTIFIER:
-                    VariableIdentifier();
-                    break;
                 case Tags.MP_NOT:
                     Match((int)Tags.MP_NOT);
                     Factor();
@@ -796,33 +787,16 @@ namespace Compiler.Parser
                     Match((int)Tags.MP_LPAREN);
                     Expression();
                     Match((int)Tags.MP_RPAREN);
-                    break;
-                    /*
-                case Tags.MP_IDENTIFIER:   ///////// WE WILL HAVE TO RESOLVE CONFLICT // USE DOUBLE LOOKAHEAD HERE PROBABALY
-                    FunctionIdentifier();
+                    break;                    
+                case Tags.MP_IDENTIFIER:
+                    Identifier();
                     OptionalActualParameterList();
-                    break;*/
+                    break;
                 default:
                     break;
             }
         }
 
-        private void ProgramIdentifier()
-        {
-            Identifier();
-        }
-        private void VariableIdentifier()
-        {
-            Identifier();
-        }
-        private void ProcedureIdentifier()
-        {
-            Identifier();
-        }
-        private void FunctionIdentifier()
-        {
-            Identifier();
-        }
         private void BooleanExpression()
         {
             Expression();
