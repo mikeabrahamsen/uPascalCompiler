@@ -666,7 +666,7 @@ namespace Compiler.Parser
                 case Tags.MP_DO:
                 case Tags.MP_TO:
                 case Tags.MP_DOWNTO:
-                // NOW JUST WTF IS COLUMN AE IN THE SPREADSHEET AGAIN? **********************************************************************************************************
+                case Tags.MP_EQUAL:
                 case Tags.MP_LTHAN:
                 case Tags.MP_GTHAN:
                 case Tags.MP_LEQUAL:
