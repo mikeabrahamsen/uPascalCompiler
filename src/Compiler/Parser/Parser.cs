@@ -291,7 +291,7 @@ namespace Compiler.Parser
                 case Tags.MP_WRITE: //WriteStatement
                     WriteStatement();
                     break;
-                case Tags.MP_IDENTIFIER: //AssignmentStatement                  ///conflict with procedure statement
+                case Tags.MP_IDENTIFIER: //AssignmentStatement
                     if(TokenQueue.Peek().Tag == Tags.MP_ASSIGN)
                     {
                         AssignmentStatement();
@@ -421,8 +421,6 @@ namespace Compiler.Parser
                 case Tags.MP_ELSE: // "else" Statement  
                     Match((int)Tags.MP_ELSE);
                     Statement();
-                    break;
-                case Tags.DUMMYTAG1: // Lambda
                     break;
                 default:
                     Error("SyntaxError");
