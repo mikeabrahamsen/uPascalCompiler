@@ -595,11 +595,7 @@ namespace Compiler.Parser
 
             }
         }
-        /// <summary>
-        /// *******************************************************************************************************************
-        /// THIS IS WHERE I LEFT OFF - (AUSTEN) - GOING UP FROM HERE. WILL FINISH TOMORROW
-        /// *******************************************************************************************************************
-        /// </summary>
+        
         private void RelationalOperator()
         {
             switch (LookAheadToken.Tag)
@@ -671,7 +667,7 @@ namespace Compiler.Parser
                     //lambda                    
                     break;
                 default:
-                    //throw error
+                    Error("SyntaxError");
                     break;
             }
         }
@@ -685,11 +681,10 @@ namespace Compiler.Parser
                 case Tags.MP_MINUS:
                     Match('-');
                     break;
-                case Tags.MP_LPAREN:
+                case Tags.MP_LPAREN: //lambda
                 case Tags.MP_INTEGER_LIT:
                 case Tags.MP_NOT:
                 case Tags.MP_IDENTIFIER:
-                    //lambda
                     break;
                 default:
                     Error("SyntaxError");
@@ -707,7 +702,7 @@ namespace Compiler.Parser
                 case Tags.MP_MINUS:
                     Match('-');
                     break;
-                case Tags.MP_OR: //is this one right??
+                case Tags.MP_OR:
                     Match((int)Tags.MP_OR);
                     break;
                 default:
@@ -722,9 +717,26 @@ namespace Compiler.Parser
             FactorTail();
         }
 
-        //HAD TO ADD THIS AGAIN IT WAS HERE \/ \/ \/ \/ \/ \|/ ************************************************ <3 Austen
         private void MultiplyingOperator()
         {
+            switch(LookAheadToken.Tag)
+            {
+                case Tags.MP_TIMES:
+                    Match('*');
+                    break;
+                case Tags.MP_DIV:
+                    Match((int)Tags.MP_DIV);
+                    break;
+                case Tags.MP_MOD:
+                    Match((int)Tags.MP_MOD);
+                    break;
+                case Tags.MP_AND: 
+                    Match((int)Tags.MP_AND);
+                    break;                
+                default:
+                    Error("SyntaxError");
+                    break;
+            }
         }
 
         private void FactorTail()
@@ -740,7 +752,7 @@ namespace Compiler.Parser
                     FactorTail();
                     break;
 
-                case Tags.MP_SCOLON: 
+                case Tags.MP_SCOLON://lambda case!
                 case Tags.MP_RPAREN:
                 case Tags.MP_END:
                 case Tags.MP_COMMA:
@@ -759,7 +771,6 @@ namespace Compiler.Parser
                 case Tags.MP_PLUS:
                 case Tags.MP_MINUS:
                 case Tags.MP_OR:
-                    //lambda case!
                     break;
                 default:
                     Error("SyntaxError");
