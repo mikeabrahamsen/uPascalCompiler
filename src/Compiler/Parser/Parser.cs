@@ -123,15 +123,13 @@ namespace Compiler.Parser
                     break;
             }
         }
-        private void StatementPart () 
-        {
-            CompoundStatement();
-        }
+
         private void VariableDeclarationTail () 
         {
             switch(LookAheadToken.Tag)
             {
                 case Tags.MP_IDENTIFIER: // VariableDeclaration ";" VariableDeclarationTail
+                    UsedRules.WriteLine("Rule 7");
                     VariableDeclaration();
                     Match(';');
                     VariableDeclarationTail();
@@ -139,6 +137,7 @@ namespace Compiler.Parser
                 case Tags.MP_PROCEDURE:
                 case Tags.MP_FUNCTION:
                 case Tags.MP_BEGIN:// lamda
+                    UsedRules.WriteLine("Rule 8");
                     break;
                 default:
                     Error("SyntaxError");
@@ -148,6 +147,7 @@ namespace Compiler.Parser
         }
         private void VariableDeclaration () 
         {
+            UsedRules.WriteLine("Rule 9");
             IdentifierList();
             Match(':');
             Type();
@@ -157,9 +157,11 @@ namespace Compiler.Parser
             switch(LookAheadToken.Tag)
             {
                 case Tags.MP_INTEGER: // Integer
+                    UsedRules.WriteLine("Rule 10");
                     Match((int)Tags.MP_INTEGER);
                     break;
                 case Tags.MP_FLOAT: // Float
+                    UsedRules.WriteLine("Rule 11");
                     Match((int)Tags.MP_FLOAT);
                     break;
                 default:
@@ -169,6 +171,7 @@ namespace Compiler.Parser
         }
         private void ProcedureDeclaration () 
         {
+            UsedRules.WriteLine("Rule 15");
             ProcedureHeading();
             Match(';');
             Block();
@@ -176,6 +179,7 @@ namespace Compiler.Parser
         }
         private void FunctionDeclaration () 
         {
+            UsedRules.WriteLine("Rule 16");
             FunctionHeading();
             Match(';');
             Block();
@@ -183,6 +187,7 @@ namespace Compiler.Parser
         }
         private void ProcedureHeading () 
         {
+            UsedRules.WriteLine("Rule 17");
             Match((int)Tags.MP_PROCEDURE);
             Identifier();
             OptionalFormalParameterList();
@@ -190,6 +195,7 @@ namespace Compiler.Parser
         }
         private void FunctionHeading () 
         {
+            UsedRules.WriteLine("Rule 18");
             Match((int)Tags.MP_FUNCTION);
             Identifier();
             OptionalFormalParameterList();
@@ -200,6 +206,7 @@ namespace Compiler.Parser
             switch(LookAheadToken.Tag)
             {
                 case Tags.MP_LPAREN: // "(" FormalParameterSection FormalParameterSectionTail ")"
+                    UsedRules.WriteLine("Rule 19");
                     Match('(');
                     FormalParameterSection();
                     FormalParameterSectionTail();
@@ -208,6 +215,7 @@ namespace Compiler.Parser
                 case Tags.MP_SCOLON:
                 case Tags.MP_INTEGER:
                 case Tags.MP_FLOAT:// lamda
+                    UsedRules.WriteLine("Rule 20");
                     break;
                 default:
                     Error("SyntaxError");
@@ -219,11 +227,13 @@ namespace Compiler.Parser
             switch(LookAheadToken.Tag)
             {
                 case Tags.MP_SCOLON: // ";" FormalParameterSection FormalParameterSectionTail
+                    UsedRules.WriteLine("Rule 21");
                     Match(';');
                     FormalParameterSection();
                     FormalParameterSectionTail();
                     break;
                 case Tags.MP_RPAREN: // lamda
+                    UsedRules.WriteLine("Rule 22");
                     break;
                 default:
                     Error("SyntaxError");
@@ -235,9 +245,11 @@ namespace Compiler.Parser
             switch(LookAheadToken.Tag)
             {
                 case Tags.MP_IDENTIFIER: // ValueParameterSection
+                    UsedRules.WriteLine("Rule 23");
                     ValueParameterSection();
                     break;
                 case Tags.MP_VAR: // VariableParameterSection
+                    UsedRules.WriteLine("Rule 24");
                     VariableParameterSection();
                     break;
                 default:
@@ -247,25 +259,34 @@ namespace Compiler.Parser
         }
         private void ValueParameterSection () 
         {
+            UsedRules.WriteLine("Rule 25");
             IdentifierList();
             Match(':');
             Type();
         }
         private void VariableParameterSection () 
         {
+            UsedRules.WriteLine("Rule 26");
             Match((int)Tags.MP_VAR);
             IdentifierList();
             Match(':');
             Type();
         }
+        private void StatementPart ()
+        {
+            UsedRules.WriteLine("Rule 27");
+            CompoundStatement();
+        }
         private void CompoundStatement () 
         {
+            UsedRules.WriteLine("Rule 28");
             Match((int)Tags.MP_BEGIN);
             StatementSequence();
             Match((int)Tags.MP_END);
         }
         private void StatementSequence () 
         {
+            UsedRules.WriteLine("Rule 29");
             Statement();
             StatementTail();
         }
@@ -274,6 +295,7 @@ namespace Compiler.Parser
             switch (LookAheadToken.Tag)
             {
                 case Tags.MP_SCOLON:  //";" Statement StatementTail
+                    UsedRules.WriteLine("Rule 30");
                     Match((int)Tags.MP_SCOLON);
                     Statement();
                     StatementTail();
@@ -281,6 +303,7 @@ namespace Compiler.Parser
 
                 case Tags.MP_END:
                 case Tags.MP_UNTIL://lambda
+                    UsedRules.WriteLine("Rule 31");
                     break;
                 default:
                     Error("SyntaxError");
@@ -295,37 +318,47 @@ namespace Compiler.Parser
                 case Tags.MP_END:
                 case Tags.MP_ELSE:
                 case Tags.MP_UNTIL:// EmptyStatement
+                    UsedRules.WriteLine("Rule 32");
                     EmptyStatement();
                     break;
                 case Tags.MP_BEGIN: // CompoundStatement
+                    UsedRules.WriteLine("Rule 33");
                     CompoundStatement();
                     break;
                 case Tags.MP_READ: //ReadStatement
+                    UsedRules.WriteLine("Rule 34");
                     ReadStatement();
                     break;
                 case Tags.MP_WRITE: //WriteStatement
+                    UsedRules.WriteLine("Rule 35");
                     WriteStatement();
                     break;
                 case Tags.MP_IDENTIFIER: //AssignmentStatement
                     if(TokenQueue.Peek().Tag == Tags.MP_ASSIGN)
                     {
+                        UsedRules.WriteLine("Rule 36");
                         AssignmentStatement();
                     }
                     else
                     {
+                        UsedRules.WriteLine("Rule 41");
                         ProcedureStatement();
                     }
                     break;
                 case Tags.MP_IF: //IfStatement
+                    UsedRules.WriteLine("Rule 7");
                     IfStatement();
                     break;
                 case Tags.MP_WHILE: //WhileStatement
+                    UsedRules.WriteLine("Rule 38");
                     WhileStatement();
                     break;
                 case Tags.MP_REPEAT: //RepeatStatement
+                    UsedRules.WriteLine("Rule 39");
                     RepeatStatement();
                     break;
                 case Tags.MP_FOR: //ForStatement
+                    UsedRules.WriteLine("Rule 40");
                     ForStatement();
                     break;                    
                 default:
@@ -343,6 +376,7 @@ namespace Compiler.Parser
                 case Tags.MP_END:
                 case Tags.MP_ELSE:
                 case Tags.MP_UNTIL://lambda
+                    UsedRules.WriteLine("Rule 42");
                     break;
                 default:
                     Error("SyntaxError");
@@ -351,6 +385,7 @@ namespace Compiler.Parser
         }
         private void ReadStatement () 
         {
+            UsedRules.WriteLine("Rule 43");
             Match((int)Tags.MP_READ);
             Match((int)Tags.MP_LPAREN);
             ReadParameter();
@@ -362,12 +397,14 @@ namespace Compiler.Parser
             switch (LookAheadToken.Tag)
             {
                 case Tags.MP_COMMA:  //"," ReadParameter ReadParameterTail
+                    UsedRules.WriteLine("Rule 44");
                     Match((int)Tags.MP_COMMA);
                     ReadParameter();
                     ReadParameterTail();
                     break;
 
                 case Tags.MP_RPAREN: //lambda
+                    UsedRules.WriteLine("Rule 45");
                     break;
                 default:
                     Error("SyntaxError");
@@ -376,10 +413,12 @@ namespace Compiler.Parser
         }
         private void ReadParameter() 
         {
+            UsedRules.WriteLine("Rule 46");
             Identifier();
         }
         private void WriteStatement () 
         {
+            UsedRules.WriteLine("Rule 47");
             Match((int)Tags.MP_WRITE);
             Match((int)Tags.MP_LPAREN);
             WriteParameter();
@@ -391,12 +430,14 @@ namespace Compiler.Parser
             switch (LookAheadToken.Tag)
             {
                 case Tags.MP_COMMA:  //"," WriteParameter WriteParameterTail
+                    UsedRules.WriteLine("Rule 48");
                     Match((int)Tags.MP_COMMA);
                     WriteParameter();
                     WriteParameterTail();
                     break;
 
                 case Tags.MP_RPAREN: //lambda
+                    UsedRules.WriteLine("Rule 49");
                     break;
                 default:
                     Error("SyntaxError");
@@ -405,6 +446,7 @@ namespace Compiler.Parser
         }
         private void WriteParameter() 
         {
+            UsedRules.WriteLine("Rule 50");
             OrdinalExpression();
         }
         private void AssignmentStatement () 
@@ -412,6 +454,7 @@ namespace Compiler.Parser
             switch (LookAheadToken.Tag)
             {
                 case Tags.MP_IDENTIFIER: // Identifier ":=" Expression
+                    UsedRules.WriteLine("Rule 51");
                     Identifier();
                     Match((int)Tags.MP_ASSIGN);
                     Expression();
@@ -423,6 +466,7 @@ namespace Compiler.Parser
         }
         private void IfStatement() 
         {
+            UsedRules.WriteLine("Rule 52");
             Match((int)Tags.MP_IF);
             BooleanExpression();
             Match((int)Tags.MP_THEN);
