@@ -40,7 +40,7 @@ namespace Compiler
                 }
             }
             Parser.Parser parser = new Parser.Parser(TokenQueue,scanner);
-            parser.Program();
+            parser.SystemGoal();
                 Console.WriteLine("Program Parsed Correctly");
              
             //Added to hold console window open for viewing

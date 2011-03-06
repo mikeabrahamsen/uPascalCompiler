@@ -72,7 +72,6 @@
     <None Include="LexicalAnalyzer\Program1.mp" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="LexicalAnalyzer\Library\ModifiedGrammar.txt" />
     <Content Include="LexicalAnalyzer\mpTokens.txt" />
   </ItemGroup>
   <ItemGroup>

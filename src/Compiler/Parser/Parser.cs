@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Compiler.LexicalAnalyzer;
 using Compiler.LexicalAnalyzer.Library;
+using System.IO;
 
 namespace Compiler.Parser
 {
@@ -11,6 +12,8 @@ namespace Compiler.Parser
     {
         private Queue<Token> TokenQueue;
         private LexicalAnalyzer.LexicalAnalyzer scanner;
+        private TextWriter UsedRules = new StreamWriter("UsedRules.txt");
+
         public Parser (Queue<Token> TokenQueue,LexicalAnalyzer.LexicalAnalyzer scanner)
         {
             this.TokenQueue = TokenQueue;
@@ -32,7 +35,10 @@ namespace Compiler.Parser
            
             if((int)LookAheadToken.Tag == tag)
             {
-                Move();
+                if(LookAheadToken.Tag != Tags.MP_EOF)
+                {
+                    Move();
+                }
             }
             else
             {
@@ -43,15 +49,18 @@ namespace Compiler.Parser
         private void Move ()
         {
             LookAheadToken = TokenQueue.Dequeue();
-
         }
-        private void SystemGoal ()
+
+        public void SystemGoal ()
         {
+            UsedRules.WriteLine("Rule 1");
             Program();
             Match((int)Tags.MP_EOF);
+            UsedRules.Close();
         }
-        public void Program () 
+        private void Program ()
         {
+            UsedRules.WriteLine("Rule 2");
             ProgramHeading();
             Match(';');
             Block();
@@ -59,12 +68,14 @@ namespace Compiler.Parser
         }
         private void ProgramHeading () 
         {
+            UsedRules.WriteLine("Rule 3");
             Match((int)Tags.MP_PROGRAM);
             Identifier();
         }
 
         private void Block () 
         {
+            UsedRules.WriteLine("Rule 4:");
             VariableDeclarationPart();
             ProcedureAndFunctionDeclarationPart();
             StatementPart();
@@ -74,6 +85,7 @@ namespace Compiler.Parser
             switch(LookAheadToken.Tag)
             {
                 case Tags.MP_VAR: //"var" Variable Declaration ";" VariableDeclationTail
+                    UsedRules.WriteLine("Rule 5");
                     Match((int)Tags.MP_VAR);
                     VariableDeclaration();
                     Match(';');
@@ -81,7 +93,7 @@ namespace Compiler.Parser
                     break;
                     //This
                 case Tags.MP_PROCEDURE: case Tags.MP_FUNCTION: case Tags.MP_BEGIN: //lambda
-                    //this will be null????
+                    UsedRules.WriteLine("Rule 6");
                     break;
                 default:
                     Error("SyntaxError");
@@ -94,14 +106,17 @@ namespace Compiler.Parser
             switch(LookAheadToken.Tag)
             {
                 case Tags.MP_PROCEDURE: // PeocedureDeclaration ProcedureAndFunctionDeclarationPart
+                    UsedRules.WriteLine("Rule 12");
                     ProcedureDeclaration();
                     ProcedureAndFunctionDeclarationPart();
                     break;
                 case Tags.MP_FUNCTION: // FunctionDeclaration ProcedureAndFunctionDeclarationPart
+                    UsedRules.WriteLine("Rule 13");
                     FunctionDeclaration();
                     ProcedureAndFunctionDeclarationPart();
                     break;
                 case Tags.MP_BEGIN: //lamda
+                    UsedRules.WriteLine("Rule 14");
                     break;
                 default:
                     Error("SyntaxError");
