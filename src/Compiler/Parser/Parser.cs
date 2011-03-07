@@ -35,10 +35,7 @@ namespace Compiler.Parser
            
             if((int)LookAheadToken.Tag == tag)
             {
-                if(LookAheadToken.Tag != Tags.MP_EOF)
-                {
-                    Move();
-                }
+                Move();
             }
             else
             {
@@ -55,8 +52,12 @@ namespace Compiler.Parser
         {
             UsedRules.WriteLine("1");
             Program();
-            Match((int)Tags.MP_EOF);
             UsedRules.Close();
+            if(LookAheadToken.Tag != Tags.MP_EOF)
+            {
+                Error("Expecting EOF but found " + LookAheadToken.Lexeme);
+            }
+            
         }
         private void Program ()
         {
