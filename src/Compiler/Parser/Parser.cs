@@ -53,6 +53,8 @@ namespace Compiler.Parser
             UsedRules.WriteLine("1");
             Program();
             UsedRules.Close();
+
+            //If we find the EOF then the parser is done here, if not then there was an error
             if(LookAheadToken.Tag != Tags.MP_EOF)
             {
                 Error("Expecting EOF but found " + LookAheadToken.Lexeme);
@@ -63,7 +65,7 @@ namespace Compiler.Parser
         {
             UsedRules.WriteLine("2");
             ProgramHeading();
-            Match(';');
+            Match(';');            
             Block();
             Match('.');
         }
@@ -537,8 +539,6 @@ namespace Compiler.Parser
                 case Tags.MP_DOWNTO: //"downto"
                     UsedRules.WriteLine("61");
                     Match((int)Tags.MP_DOWNTO);
-                    break;
-                case Tags.DUMMYTAG1: // Lambda
                     break;
                 default:
                     Error("Expecting StepValue but found " + LookAheadToken.Lexeme);
