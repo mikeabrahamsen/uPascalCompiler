@@ -478,6 +478,7 @@ namespace Compiler.Parser
             switch (LookAheadToken.Tag)
             {
                 case Tags.MP_ELSE: // "else" Statement  
+                    UsedRules.WriteLine("53");
                     Match((int)Tags.MP_ELSE);
                     Statement();
                     break;
@@ -488,6 +489,7 @@ namespace Compiler.Parser
         }
         private void RepeatStatement() 
         {
+            UsedRules.WriteLine("55");
             Match((int)Tags.MP_REPEAT);
             StatementSequence();
             Match((int)Tags.MP_UNTIL);
@@ -495,6 +497,7 @@ namespace Compiler.Parser
         }
         private void WhileStatement () 
         {
+            UsedRules.WriteLine("56");
             Match((int)Tags.MP_WHILE);
             BooleanExpression();
             Match((int)Tags.MP_DO);
@@ -503,6 +506,7 @@ namespace Compiler.Parser
         }
         private void ForStatement () 
         {
+            UsedRules.WriteLine("57");
             Match((int)Tags.MP_FOR);
             ControlVariable();
             Match((int)Tags.MP_ASSIGN);
@@ -514,10 +518,12 @@ namespace Compiler.Parser
         }
         private void ControlVariable () 
         {
+            UsedRules.WriteLine("58");
             Identifier();
         }
         private void InitialValue () 
         {
+            UsedRules.WriteLine("59");
             OrdinalExpression();
         }
         private void StepValue() 
@@ -525,9 +531,11 @@ namespace Compiler.Parser
             switch (LookAheadToken.Tag)
             {
                 case Tags.MP_TO: // "to"
+                    UsedRules.WriteLine("60");
                     Match((int)Tags.MP_TO);
                     break;
                 case Tags.MP_DOWNTO: //"downto"
+                    UsedRules.WriteLine("61");
                     Match((int)Tags.MP_DOWNTO);
                     break;
                 case Tags.DUMMYTAG1: // Lambda
@@ -539,10 +547,12 @@ namespace Compiler.Parser
         }
         private void FinalValue () 
         {
+            UsedRules.WriteLine("62");
             OrdinalExpression();
         }
         private void ProcedureStatement() 
         {
+            UsedRules.WriteLine("63");
             Identifier();
             OptionalActualParameterList();
         }
@@ -552,6 +562,7 @@ namespace Compiler.Parser
             switch (LookAheadToken.Tag)
             {
                 case Tags.MP_LPAREN: // "(" ActualParameter ActualParameterTail ")" 
+                    UsedRules.WriteLine("64");
                     Match((int)Tags.MP_LPAREN);
                     ActualParameter();
                     ActualParameterTail();
@@ -580,6 +591,7 @@ namespace Compiler.Parser
                 case Tags.MP_DIV:
                 case Tags.MP_MOD:
                 case Tags.MP_AND:// Lambda
+                    UsedRules.WriteLine("65");
                     break;
                 default:
                     Error("SyntaxError");
@@ -596,14 +608,14 @@ namespace Compiler.Parser
             switch(LookAheadToken.Tag)
             {
                 case Tags.MP_COMMA: //"," ActualParameter ActualParameterTail
+                    UsedRules.WriteLine("66");
                     Match((int)Tags.MP_COMMA);
-                    ActualParameter(); 
-
+                    ActualParameter();
                     ActualParameterTail();
                     break;
 
                 case Tags.MP_RPAREN: //lambda
-                    
+                    UsedRules.WriteLine("67");
                     break;
                 default:
                     Error("SyntaxError");
@@ -613,11 +625,13 @@ namespace Compiler.Parser
 
         private void ActualParameter()
         {
+            UsedRules.WriteLine("68");
             OrdinalExpression();
         }
 
         private void Expression()
         {
+            UsedRules.WriteLine("69");
             SimpleExpression();
             OptionalRelationalPart();
         }
@@ -632,6 +646,7 @@ namespace Compiler.Parser
                 case Tags.MP_LEQUAL:
                 case Tags.MP_GEQUAL:
                 case Tags.MP_NEQUAL://RelationalOperator SimpleExpression 
+                    UsedRules.WriteLine("70");
                     RelationalOperator();
                     SimpleExpression();
                     break;
@@ -646,7 +661,7 @@ namespace Compiler.Parser
                 case Tags.MP_DO:
                 case Tags.MP_TO:
                 case Tags.MP_DOWNTO://lambda
-
+                    UsedRules.WriteLine("71");
                     break;
                 default:
                     Error("SyntaxError");
@@ -660,24 +675,30 @@ namespace Compiler.Parser
             switch (LookAheadToken.Tag)
             {
                 case Tags.MP_EQUAL:
+                    UsedRules.WriteLine("72");
                     Match('=');
                     break;
 
                 case Tags.MP_LTHAN:
+                    UsedRules.WriteLine("73");
                     Match('<');
                     break;
 
                 case Tags.MP_GTHAN:
+                    UsedRules.WriteLine("74");
                     Match('>');
                     break;
                 
                 case Tags.MP_LEQUAL:
+                    UsedRules.WriteLine("75");
                     Match((int)Tags.MP_LEQUAL);                    
                     break;
                 case Tags.MP_GEQUAL:
+                    UsedRules.WriteLine("76");
                     Match((int)Tags.MP_GEQUAL);
                     break;
                 case Tags.MP_NEQUAL:
+                    UsedRules.WriteLine("77");
                     Match((int)Tags.MP_NEQUAL);
                     break;
                 default:
@@ -689,6 +710,7 @@ namespace Compiler.Parser
 
         private void SimpleExpression()
         {
+            UsedRules.WriteLine("78");
             OptionalSign();
             Term();
             TermTail();
@@ -702,6 +724,7 @@ namespace Compiler.Parser
                 case Tags.MP_PLUS:
                 case Tags.MP_MINUS:
                 case Tags.MP_OR:
+                    UsedRules.WriteLine("79");
                     AddingOperator();
                     Term();
                     TermTail();
@@ -723,6 +746,7 @@ namespace Compiler.Parser
                 case Tags.MP_LEQUAL:
                 case Tags.MP_GEQUAL:
                 case Tags.MP_NEQUAL:
+                    UsedRules.WriteLine("80");
                     //lambda                    
                     break;
                 default:
@@ -735,15 +759,18 @@ namespace Compiler.Parser
             switch(LookAheadToken.Tag)
             {
                 case Tags.MP_PLUS:
+                    UsedRules.WriteLine("81");
                     Match('+');
                     break;
                 case Tags.MP_MINUS:
+                    UsedRules.WriteLine("82");
                     Match('-');
                     break;
                 case Tags.MP_LPAREN: //lambda
                 case Tags.MP_INTEGER_LIT:
                 case Tags.MP_NOT:
                 case Tags.MP_IDENTIFIER:
+                    UsedRules.WriteLine("83");
                     break;
                 default:
                     Error("SyntaxError");
@@ -756,12 +783,15 @@ namespace Compiler.Parser
             switch (LookAheadToken.Tag)
             {
                 case Tags.MP_PLUS:
+                    UsedRules.WriteLine("84");
                     Match('+');
                     break;
                 case Tags.MP_MINUS:
+                    UsedRules.WriteLine("85");
                     Match('-');
                     break;
                 case Tags.MP_OR:
+                    UsedRules.WriteLine("86");
                     Match((int)Tags.MP_OR);
                     break;
                 default:
@@ -772,6 +802,7 @@ namespace Compiler.Parser
 
         private void Term()
         {
+            UsedRules.WriteLine("87");
             Factor();
             FactorTail();
         }
@@ -781,15 +812,19 @@ namespace Compiler.Parser
             switch(LookAheadToken.Tag)
             {
                 case Tags.MP_TIMES:
+                    UsedRules.WriteLine("90");
                     Match('*');
                     break;
                 case Tags.MP_DIV:
+                    UsedRules.WriteLine("91");
                     Match((int)Tags.MP_DIV);
                     break;
                 case Tags.MP_MOD:
+                    UsedRules.WriteLine("92");
                     Match((int)Tags.MP_MOD);
                     break;
-                case Tags.MP_AND: 
+                case Tags.MP_AND:
+                    UsedRules.WriteLine("93");
                     Match((int)Tags.MP_AND);
                     break;                
                 default:
@@ -806,6 +841,7 @@ namespace Compiler.Parser
                 case Tags.MP_DIV:
                 case Tags.MP_MOD:
                 case Tags.MP_AND:
+                    UsedRules.WriteLine("88");
                     MultiplyingOperator();
                     Factor();
                     FactorTail();
@@ -830,6 +866,7 @@ namespace Compiler.Parser
                 case Tags.MP_PLUS:
                 case Tags.MP_MINUS:
                 case Tags.MP_OR:
+                    UsedRules.WriteLine("89");
                     break;
                 default:
                     Error("SyntaxError");
@@ -842,18 +879,22 @@ namespace Compiler.Parser
             switch (LookAheadToken.Tag)
             {
                 case Tags.MP_INTEGER_LIT:
+                    UsedRules.WriteLine("94");
                     Match((int)Tags.MP_INTEGER_LIT);
                     break;
                 case Tags.MP_NOT:
+                    UsedRules.WriteLine("95");
                     Match((int)Tags.MP_NOT);
                     Factor();
                     break;
                 case Tags.MP_LPAREN:
+                    UsedRules.WriteLine("96");
                     Match((int)Tags.MP_LPAREN);
                     Expression();
                     Match((int)Tags.MP_RPAREN);
                     break;                    
                 case Tags.MP_IDENTIFIER:
+                    UsedRules.WriteLine("97");
                     Identifier();
                     OptionalActualParameterList();
                     break;
@@ -865,15 +906,18 @@ namespace Compiler.Parser
 
         private void BooleanExpression()
         {
+            UsedRules.WriteLine("98");
             Expression();
         }
         private void OrdinalExpression()
         {
+            UsedRules.WriteLine("99");
             Expression();
         }
 
         private void IdentifierList()
         {
+            UsedRules.WriteLine("100");
             Identifier();
             IdentifierTail();
         }
@@ -883,11 +927,13 @@ namespace Compiler.Parser
             switch (LookAheadToken.Tag)
             {
                 case Tags.MP_COMMA:
+                    UsedRules.WriteLine("101");
                     Match((int)Tags.MP_COMMA);
                     Identifier();
                     IdentifierTail();
                     break;
                 case Tags.MP_COLON: //lambda 
+                    UsedRules.WriteLine("102");
                     break;
                 default:
                     Error("SyntaxError");
