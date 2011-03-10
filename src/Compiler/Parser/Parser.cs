@@ -14,10 +14,11 @@ namespace Compiler.Parser
         private LexicalAnalyzer.LexicalAnalyzer scanner;
         private TextWriter UsedRules = new StreamWriter("parse-tree.txt");
 
-        public Parser (Queue<Token> TokenQueue,LexicalAnalyzer.LexicalAnalyzer scanner)
+        public Parser (Queue<Token> TokenQueue,LexicalAnalyzer.LexicalAnalyzer scanner, string fileName)
         {
             this.TokenQueue = TokenQueue;
             this.scanner = scanner;
+            UsedRules.WriteLine(fileName);
             Move();
         }
         private Token LookAheadToken

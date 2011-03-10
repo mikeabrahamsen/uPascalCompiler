@@ -39,7 +39,7 @@ namespace Compiler
                     TokenQueue.Enqueue(token);
                 }
             }
-            Parser.Parser parser = new Parser.Parser(TokenQueue,scanner);
+            Parser.Parser parser = new Parser.Parser(TokenQueue,scanner,args[0]);
             parser.SystemGoal();
                 Console.WriteLine("Program Parsed Correctly");
              
