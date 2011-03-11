@@ -485,6 +485,8 @@ namespace Compiler.Parser
                     Match((int)Tags.MP_ELSE);
                     Statement();
                     break;
+                case Tags.MP_SCOLON: case Tags.MP_END: case Tags.MP_UNTIL:
+                    break;
                 default:
                     Error("Expecting OptionalElsePart but found " + LookAheadToken.Lexeme);
                     break;
