@@ -59,13 +59,18 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="LexicalAnalyzer\LexicalAnalyzer.cs" />
-    <Compile Include="LexicalAnalyzer\Library\Enumerations.cs" />
+    <Compile Include="Library\Enumerations.cs" />
     <Compile Include="LexicalAnalyzer\Token.cs" />
     <Compile Include="LexicalAnalyzer\Word.cs" />
     <Compile Include="Parser\Parser.cs" />
     <Compile Include="Parser\SyntaxException.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SymbolTable\FunctionSymbol.cs" />
+    <Compile Include="SymbolTable\ParameterSymbol.cs" />
+    <Compile Include="SymbolTable\ProcedureSymbol.cs" />
+    <Compile Include="SymbolTable\Symbol.cs" />
+    <Compile Include="SymbolTable\VariableSymbol.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

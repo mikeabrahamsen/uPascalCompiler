@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Compiler.LexicalAnalyzer;
-using Compiler.LexicalAnalyzer.Library;
+using Compiler.Library;
 using System.IO;
 
 namespace Compiler.Parser
