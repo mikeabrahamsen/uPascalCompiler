@@ -32,6 +32,7 @@ namespace Compiler
                 bool done = false;
                 while (!done)
                 {
+
                     token = scanner.GetNextToken();
                     if (token.tag != null)
                     {

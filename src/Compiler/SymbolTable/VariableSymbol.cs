@@ -20,7 +20,7 @@ namespace Compiler.SymbolTable
             set;
         }
 
-        public int variableType
+        public VariableType variableType
         {
             get;
             set;
@@ -35,11 +35,13 @@ namespace Compiler.SymbolTable
         {
             this.size = size;
             this.offset = offset;
+            this.variableType = var;
         }
 
+        
         public override string ToString ()
         {
-            return name + " " + symbolType + " " +size + " " + offset + " " + variableType ;
+            return name + " symbolType" + symbolType + " size:" +size + " offset:" + offset + " vartype:" + variableType ;
         }
     }
 }
