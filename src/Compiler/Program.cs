@@ -24,8 +24,7 @@ namespace Compiler
             scanner.OpenFile(args[0]);
 
             Token token = new Token();
-            string output;
-            
+            string output;            
             
             try
             {
@@ -54,7 +53,6 @@ namespace Compiler
             {
                 Console.WriteLine(e.ErrorMessage);
             }
-
             //Added to hold console window open for viewing
             Console.ReadLine();
         }        

@@ -41,7 +41,7 @@ namespace Compiler.SymbolTable
         
         public override string ToString ()
         {
-            return name + " symbolType" + symbolType + " size:" +size + " offset:" + offset + " vartype:" + variableType ;
+            return String.Format("{0,-10}{1,-20}{2,-10}{3,-10}{4,-10}",name,symbolType,variableType,size,offset);
         }
     }
 }
