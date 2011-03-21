@@ -5,6 +5,25 @@ using System.Text;
 
 namespace Compiler.Library
 {
+    public enum IOMode
+    {
+        In = 1,
+        InOut
+    }
+    public enum VariableType
+    {
+        Integer = 1,
+        Float,
+        String,
+        Fixed
+    }
+    public enum SymbolType
+    {
+        VariableSymbol = 1,
+        ProcedureSymbol,
+        ParameterSymbol,
+        FunctionSymbol
+    }
     /// <summary>
     /// Enum values for all of the tokens
     /// </summary>

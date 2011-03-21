@@ -5,6 +5,8 @@ using System.Text;
 using Compiler.Lexer;
 using Compiler.Parse;
 using Compiler.Library;
+
+
 namespace Compiler
 {
     /// <summary>
@@ -41,9 +43,9 @@ namespace Compiler
                     if(token.tag.Equals(Tags.MP_EOF))
                     {
                         done = true;
-                    }
+                    }                
                 }
-                Parser parser = new Parse.Parser(TokenQueue, scanner, args[0]);
+                Parser parser = new Parser(TokenQueue, scanner, args[0]);
                 parser.SystemGoal();
                 Console.WriteLine("Program Parsed Correctly");
             }
@@ -51,10 +53,9 @@ namespace Compiler
             {
                 Console.WriteLine(e.ErrorMessage);
             }
+
             //Added to hold console window open for viewing
             Console.ReadLine();
-        }
-
-        
+        }        
     }
 }
