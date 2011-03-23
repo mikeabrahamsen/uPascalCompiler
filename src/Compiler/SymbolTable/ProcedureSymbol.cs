@@ -8,16 +8,22 @@ namespace Compiler.SymbolTable
 {
     class ProcedureSymbol : Symbol
     {
-        public IOMode mode
+
+        public List<Parameter> paramList
         {
             get;
             set;
         }
-
-        public ProcedureSymbol (string name, SymbolType symbolType, IOMode mode)
+        public string label
+        {
+            get;
+            set;
+        }
+        public ProcedureSymbol (string name, SymbolType symbolType,string label,List<Parameter> paramList)
             : base(name, symbolType)
         {
-            this.mode = mode;
+            this.label = label;
+            this.paramList = paramList;
         }
     }
 }

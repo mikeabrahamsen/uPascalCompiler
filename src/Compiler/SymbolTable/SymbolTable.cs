@@ -28,7 +28,12 @@ namespace Compiler.SymbolTable
             get;
             set;
         }
-
+        /// <summary>
+        /// Symbol table constructor
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="nestingLevel"></param>
+        /// <param name="activationRecordSize"></param>
         public SymbolTable (string name,int nestingLevel,int activationRecordSize)
         {
             this.name = name;
@@ -37,11 +42,31 @@ namespace Compiler.SymbolTable
             symbolTable = new List<Symbol>();
         }
 
+        /// <summary>
+        /// Inserts a symbol into the symbol tabls
+        /// </summary>
+        /// <param name="symbol"></param>
         public void Insert (Symbol symbol)
         {
             symbolTable.Add(symbol);
         }
 
+        /// <summary>
+        /// Find a symbol based on the name
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public Symbol Find (string name)
+        {
+            foreach(Symbol symbol in symbolTable)
+            {
+                if (name.Equals(symbol.name))
+                {
+                    return symbol;
+                }
+            }
+            return null;
+        }
         public override string ToString ()
         {
             StringBuilder sb = new StringBuilder();
