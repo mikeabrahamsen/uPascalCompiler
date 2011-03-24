@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Compiler.LexicalAnalyzer;
-using Compiler.SymbolTable;
-
+using Compiler.Parser;
 namespace Compiler
 {
     /// <summary>
@@ -40,14 +39,17 @@ namespace Compiler
                     TokenQueue.Enqueue(token);
                 }
             }
-            Parser.Parser parser = new Parser.Parser(TokenQueue,scanner,args[0]);
-            parser.SystemGoal();
-            Console.WriteLine("Program Parsed Correctly");
+            try
+            {
+                Parser.Parser parser = new Parser.Parser(TokenQueue, scanner, args[0]);
+                parser.SystemGoal();
+                Console.WriteLine("Program Parsed Correctly");
+            }
+            catch(SyntaxException e)
+            {
+                Console.WriteLine(e.ErrorMessage);
+            }
 
-            Symbol test1 = new FunctionSymbol();
-            Symbol test2 = new ParameterSymbol();
-
-            Console.WriteLine(test1.GetType());
             //Added to hold console window open for viewing
             Console.ReadLine();
         }
