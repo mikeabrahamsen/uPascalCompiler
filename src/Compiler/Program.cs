@@ -53,7 +53,6 @@ namespace Compiler
             {
                 Console.WriteLine(e.ErrorMessage);
             }
-            //Added to hold console window open for viewing
             Console.ReadLine();
         }        
     }
