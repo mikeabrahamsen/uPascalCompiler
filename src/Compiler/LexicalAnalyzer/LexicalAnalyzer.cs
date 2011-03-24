@@ -5,6 +5,8 @@ using System.Text;
 using System.IO;
 using System.Text.RegularExpressions;
 using Compiler.Library;
+using System.Reflection;
+
 
 namespace Compiler.LexicalAnalyzer
 {
@@ -81,22 +83,33 @@ namespace Compiler.LexicalAnalyzer
         /// <param name="filename"></param>
         private void LoadTokens (string filename)
         {
-            StreamReader tokens = new StreamReader(filename);
-            string s, name, lexeme;
-
-            while(!tokens.EndOfStream)
+            Assembly assembly = Assembly.GetExecutingAssembly();
+            try
             {
-                s = tokens.ReadLine();
+              StreamReader tokens = new StreamReader(assembly.GetManifestResourceStream("Compiler.LexicalAnalyzer.mpTokens.txt"));
 
-                MatchCollection matchTokenName = Regex.Matches(s, "(?<name>[a-zA-Z_]+).+\"(?<lexeme>.+)\"");
+              //StreamReader tokens = new StreamReader(stream);
+              string s, name, lexeme;
 
-                Match token = matchTokenName[0];
-                name = token.Groups["name"].ToString();
-                lexeme = token.Groups["lexeme"].ToString();
+              while(!tokens.EndOfStream)
+              {
+                  s = tokens.ReadLine();
 
-                // Add all of the tokens to the word list
-                ReservedWords.Add(new Word(lexeme, (int)(Tags)Enum.Parse(typeof(Tags), name, false)));
+                  MatchCollection matchTokenName = Regex.Matches(s, "(?<name>[a-zA-Z_]+).+\"(?<lexeme>.+)\"");
+
+                  Match token = matchTokenName[0];
+                  name = token.Groups["name"].ToString();
+                  lexeme = token.Groups["lexeme"].ToString();
+
+                  // Add all of the tokens to the word list
+                  ReservedWords.Add(new Word(lexeme, (int)(Tags)Enum.Parse(typeof(Tags), name, false)));
+              }
             }
+            catch(Exception e)
+            {
+                Console.WriteLine(e);
+            }
+            
         }
 
         /// <summary>
