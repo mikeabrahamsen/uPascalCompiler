@@ -34,16 +34,15 @@ namespace Compiler.SymbolTable
         /// <param name="name"></param>
         /// <param name="nestingLevel"></param>
         /// <param name="activationRecordSize"></param>
-        public SymbolTable (string name,int nestingLevel,int activationRecordSize)
+        public SymbolTable (string name,int nestingLevel)
         {
             this.name = name;
             this.nestingLevel = nestingLevel;
-            this.activationRecordSize = activationRecordSize;
             symbolTable = new List<Symbol>();
         }
 
         /// <summary>
-        /// Inserts a symbol into the symbol tabls
+        /// Inserts a symbol into the symbol table
         /// </summary>
         /// <param name="symbol"></param>
         public void Insert (Symbol symbol)

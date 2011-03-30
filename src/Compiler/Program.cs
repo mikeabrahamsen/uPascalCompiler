@@ -53,7 +53,7 @@ namespace Compiler
             {
                 Console.WriteLine(e.ErrorMessage);
             }
-            Console.ReadLine();
+
         }        
     }
 }
