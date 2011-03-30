@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Compiler.LexicalAnalyzer;
-using Compiler.Parser;
+using Compiler.Lexer;
+using Compiler.Parse;
 
 namespace Compiler
 {
@@ -17,7 +17,7 @@ namespace Compiler
         {
             TokenQueue = new Queue<Token>();
 
-            LexicalAnalyzer.LexicalAnalyzer scanner = new LexicalAnalyzer.LexicalAnalyzer();
+            LexicalAnalyzer scanner = new Lexer.LexicalAnalyzer();
 
             scanner.OpenFile(args[0]);
 
@@ -42,7 +42,7 @@ namespace Compiler
             }
             try
             {
-                Parser.Parser parser = new Parser.Parser(TokenQueue, scanner, args[0]);
+                Parser parser = new Parse.Parser(TokenQueue, scanner, args[0]);
                 parser.SystemGoal();
                 Console.WriteLine("Program Parsed Correctly");
             }

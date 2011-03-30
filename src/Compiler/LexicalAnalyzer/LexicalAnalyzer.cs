@@ -8,7 +8,7 @@ using Compiler.Library;
 using System.Reflection;
 
 
-namespace Compiler.LexicalAnalyzer
+namespace Compiler.Lexer
 {
 
     /// <summary>

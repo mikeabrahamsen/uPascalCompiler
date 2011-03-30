@@ -2,19 +2,19 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Compiler.LexicalAnalyzer;
+using Compiler.Lexer;
 using Compiler.Library;
 using System.IO;
 
-namespace Compiler.Parser
+namespace Compiler.Parse
 {
     class Parser
     {
         private Queue<Token> TokenQueue;
-        private LexicalAnalyzer.LexicalAnalyzer scanner;
+        private LexicalAnalyzer scanner;
         private TextWriter UsedRules = new StreamWriter("parse-tree.txt");
 
-        public Parser (Queue<Token> TokenQueue,LexicalAnalyzer.LexicalAnalyzer scanner, string fileName)
+        public Parser (Queue<Token> TokenQueue,LexicalAnalyzer scanner, string fileName)
         {
             this.TokenQueue = TokenQueue;
             this.scanner = scanner;

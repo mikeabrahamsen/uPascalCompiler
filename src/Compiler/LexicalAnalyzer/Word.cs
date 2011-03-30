@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Compiler.LexicalAnalyzer
+namespace Compiler.Lexer
 {
     /// <summary>
     /// A word is made up of a string and a tag

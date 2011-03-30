@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using Compiler.Library;
 
-namespace Compiler.LexicalAnalyzer
+namespace Compiler.Lexer
 {
     /// <summary>
     /// A token to associate a tag to
