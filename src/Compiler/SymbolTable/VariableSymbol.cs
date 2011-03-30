@@ -5,7 +5,7 @@ using System.Text;
 using Compiler.LexicalAnalyzer;
 using Compiler.Library;
 
-namespace Compiler.SymbolTable
+namespace Compiler.SymbolTbl
 {
     class VariableSymbol : Symbol
     {

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using Compiler.Library;
 
-namespace Compiler.SymbolTable
+namespace Compiler.SymbolTbl
 {
     class FunctionSymbol : ProcedureSymbol
     {

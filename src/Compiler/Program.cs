@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Compiler.Lexer;
 using Compiler.Parse;
+using Compiler.SymbolTbl;
 using Compiler.Library;
 
 
@@ -19,7 +20,7 @@ namespace Compiler
         {
             TokenQueue = new Queue<Token>();
 
-            LexicalAnalyzer scanner = new Lexer.LexicalAnalyzer();
+            LexicalAnalyzer scanner = new LexicalAnalyzer();
 
             scanner.OpenFile(args[0]);
 
@@ -53,7 +54,7 @@ namespace Compiler
             {
                 Console.WriteLine(e.ErrorMessage);
             }
-
-        }        
+        }    
     }
 }
+
