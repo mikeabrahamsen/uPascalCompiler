@@ -15,7 +15,8 @@ namespace Compiler.Library
         Integer = 1,
         Float,
         String,
-        Fixed
+        Fixed,
+        Null
     }
     public enum SymbolType
     {

@@ -7,6 +7,7 @@ using Compiler.Library;
 using System.IO;
 using Compiler.SymAnalyzer;
 using Compiler.SymbolTbl;
+
 namespace Compiler.Parse
 {
     class Parser
@@ -185,14 +186,15 @@ namespace Compiler.Parse
         private void VariableDeclaration () 
         {
             List<string> identifierRecordList = new List<string>();
-
+            TypeRecord typeRecord = new TypeRecord(SymbolType.VariableSymbol, VariableType.Null);
             switch(lookAheadToken.Tag)
             {
                 case Tags.MP_IDENTIFIER:
                     UsedRules.WriteLine("9");
-                    IdentifierList();
+                    IdentifierList(ref identifierRecordList);
                     Match(':');
-                    Type();
+                    Type(ref typeRecord);
+                    analyzer.SymbolTableInsert(identifierRecordList, typeRecord); 
                     break;
                 default:
                     Error("Expecting VariableDeclaration but found " + lookAheadToken.Lexeme);
@@ -200,17 +202,19 @@ namespace Compiler.Parse
             }
             
         }
-        private void Type () 
+        private void Type (ref TypeRecord typeRecord) 
         {
             switch(lookAheadToken.Tag)
             {
                 case Tags.MP_INTEGER: // Integer
                     UsedRules.WriteLine("10");
                     Match((int)Tags.MP_INTEGER);
+                    typeRecord.variableType = VariableType.Integer;
                     break;
                 case Tags.MP_FLOAT: // Float
                     UsedRules.WriteLine("11");
                     Match((int)Tags.MP_FLOAT);
+                    typeRecord.variableType = VariableType.Float;
                     break;
                 default:
                     Error("Expecting Type but found " + lookAheadToken.Lexeme);
@@ -256,12 +260,13 @@ namespace Compiler.Parse
         }
         private void FunctionHeading () 
         {
+            TypeRecord typeRecord = new TypeRecord(SymbolType.FunctionSymbol, VariableType.Null);
             string procedureIdentifier = null;
             UsedRules.WriteLine("18");
             Match((int)Tags.MP_FUNCTION);
             Identifier(ref procedureIdentifier);
             OptionalFormalParameterList();
-            Type();
+            Type(ref typeRecord);
         }
         private void OptionalFormalParameterList () 
         {
@@ -321,18 +326,22 @@ namespace Compiler.Parse
         }
         private void ValueParameterSection () 
         {
+            TypeRecord typeRecord = new TypeRecord(SymbolType.ParameterSymbol, VariableType.Null);
+            List<string> identifierList = new List<string>();
             UsedRules.WriteLine("25");
-            IdentifierList();
+            IdentifierList(ref identifierList);
             Match(':');
-            Type();
+            Type(ref typeRecord);
         }
         private void VariableParameterSection () 
         {
+            TypeRecord typeRecord = new TypeRecord(SymbolType.ParameterSymbol, VariableType.Null);
+            List<string> identifierList = new List<string>();
             UsedRules.WriteLine("26");
             Match((int)Tags.MP_VAR);
-            IdentifierList();
+            IdentifierList(ref identifierList);
             Match(':');
-            Type();
+            Type(ref typeRecord);
         }
         private void StatementPart ()
         {
@@ -982,24 +991,26 @@ namespace Compiler.Parse
             Expression();
         }
 
-        private void IdentifierList()
-        {
-            string procedureIdentifier = null;
+        private void IdentifierList (ref List<string> identifierRecordList)
+        {            
+            string identifierRecord = null;            
             UsedRules.WriteLine("100");
-            Identifier(ref procedureIdentifier);
-            IdentifierTail();
+            Identifier(ref identifierRecord);
+            analyzer.ProcessId(identifierRecord, identifierRecordList);
+            IdentifierTail(ref identifierRecordList);
         }
 
-        private void IdentifierTail()
+        private void IdentifierTail(ref List<string>identifierRecordList)
         {
-            string procedureIdentifier = null;
+            string identifierRecord = null;
             switch (lookAheadToken.Tag)
             {
                 case Tags.MP_COMMA:
                     UsedRules.WriteLine("101");
                     Match((int)Tags.MP_COMMA);
-                    Identifier(ref procedureIdentifier);
-                    IdentifierTail();
+                    Identifier(ref identifierRecord);
+                    analyzer.ProcessId(identifierRecord, identifierRecordList);
+                    IdentifierTail(ref identifierRecordList);
                     break;
                 case Tags.MP_COLON: //lambda 
                     UsedRules.WriteLine("102");

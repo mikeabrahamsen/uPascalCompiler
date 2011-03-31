@@ -66,13 +66,16 @@
     <Compile Include="Parser\SyntaxException.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SymbolTable\FunctionSymbol.cs" />
-    <Compile Include="SymbolTable\Parameter.cs" />
-    <Compile Include="SymbolTable\ParameterSymbol.cs" />
-    <Compile Include="SymbolTable\ProcedureSymbol.cs" />
-    <Compile Include="SymbolTable\Symbol.cs" />
-    <Compile Include="SymbolTable\SymbolTable.cs" />
-    <Compile Include="SymbolTable\VariableSymbol.cs" />
+    <Compile Include="SymAnalyzer\IdentifierRecord.cs" />
+    <Compile Include="SymAnalyzer\SymanticAnalyzer.cs" />
+    <Compile Include="SymAnalyzer\TypeRecord.cs" />
+    <Compile Include="SymbolTbl\FunctionSymbol.cs" />
+    <Compile Include="SymbolTbl\Parameter.cs" />
+    <Compile Include="SymbolTbl\ParameterSymbol.cs" />
+    <Compile Include="SymbolTbl\ProcedureSymbol.cs" />
+    <Compile Include="SymbolTbl\Symbol.cs" />
+    <Compile Include="SymbolTbl\SymbolTable.cs" />
+    <Compile Include="SymbolTbl\VariableSymbol.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
