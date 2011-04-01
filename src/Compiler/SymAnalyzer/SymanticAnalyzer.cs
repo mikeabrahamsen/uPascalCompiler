@@ -27,6 +27,25 @@ namespace Compiler.SymAnalyzer
         {
             idRecordList.Add(idRecord);
         }
+        public void ProcessId (IdentifierRecord idRecord)
+        {
+            FindSymbol(idRecord);
+        }
+        public IdentifierRecord FindSymbol (IdentifierRecord idRecord)
+        {
+            Symbol symbol;
+            foreach(SymbolTable st in symbolTableStack)
+            {
+                symbol = st.Find(idRecord.lexeme);
+                if(symbol != null)
+                {
+                    idRecord.symbolTable = st;
+                    idRecord.symbol = symbol;
+                    return idRecord;
+                }
+            }
+            return idRecord;
+        }
         public void SymbolTableInsert (List<string> idRecordList, TypeRecord typeRecord)
         {
             Symbol symbol = null;
@@ -47,8 +66,12 @@ namespace Compiler.SymAnalyzer
                 }
                 symbolTableStack.Peek().activationRecordSize += size; //increment activation record size
                 symbolTableStack.Peek().Insert(symbol);
-            }
-           
+            }           
+        }
+        
+        public void GenerateReadStatement (IdentifierRecord idRecord)
+        {
+            Console.WriteLine("RD " + idRecord.symbol.offset + "(D" + idRecord.symbolTable.nestingLevel + ")");
         }
     }
 }

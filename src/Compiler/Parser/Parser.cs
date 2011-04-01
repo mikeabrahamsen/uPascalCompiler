@@ -458,21 +458,34 @@ namespace Compiler.Parse
         }
         private void ReadStatement () 
         {
-            UsedRules.WriteLine("43");
-            Match((int)Tags.MP_READ);
-            Match((int)Tags.MP_LPAREN);
-            ReadParameter();
-            ReadParameterTail();
-            Match((int)Tags.MP_RPAREN);
+            IdentifierRecord idRecord = new IdentifierRecord();
+            switch(lookAheadToken.Tag)
+            {
+                case Tags.MP_READ:
+                    UsedRules.WriteLine("43");
+                    Match((int)Tags.MP_READ);
+                    Match((int)Tags.MP_LPAREN);
+                    ReadParameter(idRecord);
+                    analyzer.GenerateReadStatement(idRecord);
+                    ReadParameterTail();
+                    Match((int)Tags.MP_RPAREN);
+                    break;
+                default:
+                    Error("Expecting Read but found " + lookAheadToken.Tag);
+                    break;
+            }
+                    
         }
         private void ReadParameterTail()
         {
+            IdentifierRecord idRecord = new IdentifierRecord();
             switch (lookAheadToken.Tag)
             {
                 case Tags.MP_COMMA:  //"," ReadParameter ReadParameterTail
                     UsedRules.WriteLine("44");
                     Match((int)Tags.MP_COMMA);
-                    ReadParameter();
+                    ReadParameter(idRecord);
+                    analyzer.GenerateReadStatement(idRecord);
                     ReadParameterTail();
                     break;
 
@@ -484,11 +497,21 @@ namespace Compiler.Parse
                     break;
             }
         }
-        private void ReadParameter() 
+        private void ReadParameter (IdentifierRecord idRecord) 
         {
-            string procedureIdentifier = null;
-            UsedRules.WriteLine("46");
-            Identifier(ref procedureIdentifier);
+            switch(lookAheadToken.Tag)
+            {
+                case Tags.MP_IDENTIFIER:
+                    string idRecName = null;
+                    UsedRules.WriteLine("46");
+                    Identifier(ref idRecName);
+                    idRecord.lexeme = idRecName;
+                    analyzer.ProcessId(idRecord);
+                    break;
+                default:
+                    Error("Expecting ID found " + lookAheadToken.Tag);
+                    break;
+             }
         }
         private void WriteStatement () 
         {

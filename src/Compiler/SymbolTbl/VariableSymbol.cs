@@ -14,7 +14,7 @@ namespace Compiler.SymbolTbl
             get;
             set;
         }
-        public int offset
+        public override int offset
         {
             get;
             set;
