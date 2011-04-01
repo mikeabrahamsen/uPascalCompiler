@@ -115,8 +115,11 @@ namespace Compiler.Parse
         {
             UsedRules.WriteLine("4");
             VariableDeclarationPart();
+
+            Console.WriteLine(analyzer.symbolTableStack.Peek());
             ProcedureAndFunctionDeclarationPart();
             StatementPart();
+
         }
         private void VariableDeclarationPart () 
         {
@@ -194,7 +197,7 @@ namespace Compiler.Parse
                     IdentifierList(ref identifierRecordList);
                     Match(':');
                     Type(ref typeRecord);
-                    analyzer.SymbolTableInsert(identifierRecordList, typeRecord); 
+                    analyzer.SymbolTableInsert(identifierRecordList, typeRecord);
                     break;
                 default:
                     Error("Expecting VariableDeclaration but found " + lookAheadToken.Lexeme);

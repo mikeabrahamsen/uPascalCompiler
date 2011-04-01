@@ -30,21 +30,25 @@ namespace Compiler.SymAnalyzer
         public void SymbolTableInsert (List<string> idRecordList, TypeRecord typeRecord)
         {
             Symbol symbol = null;
+            int size = 0;
             foreach(string lexeme in idRecordList)
             {
                 switch(typeRecord.symbolType)
                 {
                     case SymbolType.VariableSymbol:
+                        size = 1; //choose size based on variabletype
                         symbol = new VariableSymbol(lexeme, typeRecord.symbolType, typeRecord.variableType, 
-                                    1, symbolTableStack.Peek().activationRecordSize);
+                                    size, symbolTableStack.Peek().activationRecordSize);
+                         
                         break;
                     default:
                         //throw exception
                         break;
                 }
+                symbolTableStack.Peek().activationRecordSize += size; //increment activation record size
                 symbolTableStack.Peek().Insert(symbol);
             }
-            Console.WriteLine(symbolTableStack.Peek());
+           
         }
     }
 }
