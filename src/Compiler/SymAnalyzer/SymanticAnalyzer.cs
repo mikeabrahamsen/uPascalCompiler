@@ -73,5 +73,58 @@ namespace Compiler.SymAnalyzer
         {
             Console.WriteLine("RD " + idRecord.symbol.offset + "(D" + idRecord.symbolTable.nestingLevel + ")");
         }
+
+        internal void GenerateWriteStatement ()
+        {
+            Console.WriteLine("WRTS");
+        }
+
+        internal void GeneratePush (LiteralRecord litRecord, ref VariableType factorRecord)
+        {
+            Console.WriteLine("PUSH #" + litRecord.lexeme);
+            factorRecord = litRecord.type;
+        }
+
+        internal void GenerateIdPush (IdentifierRecord idRecord, ref VariableType factorRecord)
+        {
+            Console.WriteLine("PUSH " + idRecord.symbol.offset + "(D" + idRecord.symbolTable.nestingLevel + ")");
+            //factorRecord = idRecord.symbol.symbolType;
+        }
+
+        internal void GenerateArithmetic (VariableType termTailRecord, string addOpRecord, VariableType termRecord, ref VariableType resultRecord)
+        {
+            switch(termTailRecord)
+            {
+                case VariableType.Integer:
+                    if (addOpRecord.Equals("+"))
+                    {
+                        Console.WriteLine("ADDS");
+                    }
+                    else if(addOpRecord.Equals("-"))
+                    {
+                        Console.WriteLine("SUBS");
+                    }
+                    else if(addOpRecord.Equals("*"))
+                    {
+                        Console.WriteLine("MULS");
+                    }
+                    resultRecord = VariableType.Integer;
+                break;
+                default:
+                Console.WriteLine("Not Assigned");
+                    break;
+
+            }
+        }
+
+        internal void GenerateAssign (IdentifierRecord idRecord, VariableType expressionRecord)
+        {
+            Console.WriteLine("POP " + idRecord.symbol.offset + "(D" + idRecord.symbolTable.nestingLevel + ")");
+        }
+
+        internal void GenerateHalt ()
+        {
+            Console.WriteLine("HLT");
+        }
     }
 }

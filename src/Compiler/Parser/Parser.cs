@@ -100,6 +100,7 @@ namespace Compiler.Parse
             Match(';');            
             Block();
             Match('.');
+            analyzer.GenerateHalt();
         }
         private void ProgramHeading () 
         {
@@ -515,12 +516,21 @@ namespace Compiler.Parse
         }
         private void WriteStatement () 
         {
-            UsedRules.WriteLine("47");
-            Match((int)Tags.MP_WRITE);
-            Match((int)Tags.MP_LPAREN);
-            WriteParameter();
-            WriteParameterTail();
-            Match((int)Tags.MP_RPAREN);
+            switch(lookAheadToken.Tag)
+            {
+                case Tags.MP_WRITE:
+                    UsedRules.WriteLine("47");
+                    Match((int)Tags.MP_WRITE);
+                    Match((int)Tags.MP_LPAREN);
+                    WriteParameter();
+                    analyzer.GenerateWriteStatement();
+                    WriteParameterTail();
+                    Match((int)Tags.MP_RPAREN);
+                break;
+                default:
+                    Error("Expecting Write, found " + lookAheadToken.Tag);
+                break;
+            }
         }
         private void WriteParameterTail () 
         {
@@ -530,9 +540,9 @@ namespace Compiler.Parse
                     UsedRules.WriteLine("48");
                     Match((int)Tags.MP_COMMA);
                     WriteParameter();
+                    analyzer.GenerateWriteStatement();
                     WriteParameterTail();
                     break;
-
                 case Tags.MP_RPAREN: //lambda
                     UsedRules.WriteLine("49");
                     break;
@@ -548,14 +558,19 @@ namespace Compiler.Parse
         }
         private void AssignmentStatement () 
         {
-            string procedureIdentifier = null;
+            IdentifierRecord idRecord = new IdentifierRecord();
+            VariableType expressionRecord = VariableType.Null;
+            string idRecName = null;
             switch (lookAheadToken.Tag)
             {
                 case Tags.MP_IDENTIFIER: // Identifier ":=" Expression
                     UsedRules.WriteLine("51");
-                    Identifier(ref procedureIdentifier);
+                    Identifier(ref idRecName);
+                    idRecord.lexeme = idRecName;
+                    analyzer.ProcessId(idRecord);
                     Match((int)Tags.MP_ASSIGN);
-                    Expression();
+                    Expression(ref expressionRecord);
+                    analyzer.GenerateAssign(idRecord, expressionRecord);
                     break;
                 default:
                     Error("Expecting AssignmentStatement but found " + lookAheadToken.Lexeme);
@@ -730,15 +745,29 @@ namespace Compiler.Parse
             OrdinalExpression();
         }
 
-        private void Expression()
+        private void Expression(ref VariableType expressionRecord)
         {
-            UsedRules.WriteLine("69");
-            SimpleExpression();
-            OptionalRelationalPart();
+            switch(lookAheadToken.Tag)
+            {
+                case Tags.MP_LPAREN:
+                case Tags.MP_PLUS:
+                case Tags.MP_MINUS:
+                case Tags.MP_INTEGER_LIT:
+                case Tags.MP_NOT:
+                case Tags.MP_IDENTIFIER:
+                    UsedRules.WriteLine("69");
+                    SimpleExpression(ref expressionRecord);
+                    OptionalRelationalPart();
+                break;
+                default:
+                    Error("Expecting Expression Args found " + lookAheadToken.Lexeme);
+                break;
+            }
         }
 
         private void OptionalRelationalPart()
         {
+            VariableType simpleExpressionRecord = VariableType.Null;
             switch (lookAheadToken.Tag)
             {
                 case Tags.MP_EQUAL:
@@ -749,7 +778,7 @@ namespace Compiler.Parse
                 case Tags.MP_NEQUAL://RelationalOperator SimpleExpression 
                     UsedRules.WriteLine("70");
                     RelationalOperator();
-                    SimpleExpression();
+                    SimpleExpression(ref simpleExpressionRecord);
                     break;
 
                 case Tags.MP_SCOLON:
@@ -809,16 +838,35 @@ namespace Compiler.Parse
             }
         }
 
-        private void SimpleExpression()
+        private void SimpleExpression(ref VariableType simpleExpressionRecord)
         {
-            UsedRules.WriteLine("78");
-            OptionalSign();
-            Term();
-            TermTail();
+
+            switch(lookAheadToken.Tag)
+            {
+                case Tags.MP_LPAREN:
+                case Tags.MP_PLUS:
+                case Tags.MP_MINUS:
+                case Tags.MP_INTEGER_LIT:
+                case Tags.MP_NOT:
+                case Tags.MP_IDENTIFIER:
+                    UsedRules.WriteLine("78");
+                    OptionalSign();
+                    Term(ref simpleExpressionRecord);
+                    TermTail(ref simpleExpressionRecord);
+                break;
+                default:
+                    Error("Expecting Simple Expression found " + lookAheadToken.Lexeme);
+                break;
+
+            }
         }
 
-        private void TermTail()
+        private void TermTail(ref VariableType termTailRecord)
         {
+            string addOpRecord = null;
+            VariableType termRecord = VariableType.Null;
+            VariableType resultRecord = VariableType.Null;
+
             switch(lookAheadToken.Tag)
             {
                 //AddingOperator Term TermTail
@@ -826,9 +874,10 @@ namespace Compiler.Parse
                 case Tags.MP_MINUS:
                 case Tags.MP_OR:
                     UsedRules.WriteLine("79");
-                    AddingOperator();
-                    Term();
-                    TermTail();
+                    AddingOperator(ref addOpRecord);
+                    Term(ref termRecord);
+                    analyzer.GenerateArithmetic(termTailRecord, addOpRecord, termRecord, ref resultRecord);
+                    TermTail(ref resultRecord);
                     break;
 
                 case Tags.MP_SCOLON: 
@@ -879,8 +928,9 @@ namespace Compiler.Parse
             }
         }
 
-        private void AddingOperator()
+        private void AddingOperator(ref string addOpRecord)
         {
+            addOpRecord = lookAheadToken.Lexeme;
             switch (lookAheadToken.Tag)
             {
                 case Tags.MP_PLUS:
@@ -901,15 +951,28 @@ namespace Compiler.Parse
             }
         }
 
-        private void Term()
+        private void Term(ref VariableType termRecord)
         {
-            UsedRules.WriteLine("87");
-            Factor();
-            FactorTail();
+            switch(lookAheadToken.Tag)
+            {
+                case Tags.MP_LPAREN:
+                case Tags.MP_IDENTIFIER:
+                case Tags.MP_INTEGER_LIT:
+                case Tags.MP_NOT:
+                    UsedRules.WriteLine("87");
+                    Factor(ref termRecord);
+                    FactorTail(ref termRecord);
+                break;
+                default:
+                    Error("Expecting Term found " + lookAheadToken.Tag);
+                break;
+            }
         }
 
-        private void MultiplyingOperator()
+        private void MultiplyingOperator(ref string mulOpRecord)
         {
+
+            mulOpRecord = lookAheadToken.Lexeme;
             switch(lookAheadToken.Tag)
             {
                 case Tags.MP_TIMES:
@@ -934,8 +997,10 @@ namespace Compiler.Parse
             }
         }
 
-        private void FactorTail()
+        private void FactorTail(ref VariableType factorTailRecord)
         {
+            string mulOpRecord = null;
+            VariableType factorRecord = VariableType.Null, resultRecord = VariableType.Null;
             switch (lookAheadToken.Tag)
             {
                 case Tags.MP_TIMES:
@@ -943,9 +1008,10 @@ namespace Compiler.Parse
                 case Tags.MP_MOD:
                 case Tags.MP_AND:
                     UsedRules.WriteLine("88");
-                    MultiplyingOperator();
-                    Factor();
-                    FactorTail();
+                    MultiplyingOperator(ref mulOpRecord);
+                    Factor(ref factorTailRecord);
+                    analyzer.GenerateArithmetic(factorTailRecord, mulOpRecord, factorRecord,ref resultRecord);
+                    FactorTail(ref factorTailRecord);
                     break;
 
                 case Tags.MP_SCOLON://lambda case!
@@ -975,29 +1041,37 @@ namespace Compiler.Parse
             }
         }
 
-        private void Factor()
+        private void Factor(ref VariableType factorRecord)
         {
-            string procedureIdentifier = null;
+            IdentifierRecord idRecord = new IdentifierRecord();
+            LiteralRecord litRecord = new LiteralRecord();
+            string idRecName = null;
             switch (lookAheadToken.Tag)
             {
                 case Tags.MP_INTEGER_LIT:
                     UsedRules.WriteLine("94");
-                    Match((int)Tags.MP_INTEGER_LIT);
+                    litRecord.lexeme = lookAheadToken.Lexeme;
+                    litRecord.type = VariableType.Integer;
+                    Match((int)Tags.MP_INTEGER_LIT);                    
+                    analyzer.GeneratePush(litRecord, ref factorRecord);
                     break;
                 case Tags.MP_NOT:
                     UsedRules.WriteLine("95");
                     Match((int)Tags.MP_NOT);
-                    Factor();
+                    Factor(ref factorRecord);
                     break;
                 case Tags.MP_LPAREN:
                     UsedRules.WriteLine("96");
                     Match((int)Tags.MP_LPAREN);
-                    Expression();
+                    Expression(ref factorRecord);
                     Match((int)Tags.MP_RPAREN);
                     break;                    
                 case Tags.MP_IDENTIFIER:
                     UsedRules.WriteLine("97");
-                    Identifier(ref procedureIdentifier);
+                    Identifier(ref idRecName);
+                    idRecord.lexeme = idRecName;
+                    analyzer.ProcessId(idRecord);
+                    analyzer.GenerateIdPush(idRecord, ref factorRecord);
                     OptionalActualParameterList();
                     break;
                 default:
@@ -1008,13 +1082,15 @@ namespace Compiler.Parse
 
         private void BooleanExpression()
         {
+            VariableType expressionRecord = VariableType.Null;
             UsedRules.WriteLine("98");
-            Expression();
+            Expression(ref expressionRecord);
         }
         private void OrdinalExpression()
         {
+            VariableType expressionRecord = VariableType.Null;
             UsedRules.WriteLine("99");
-            Expression();
+            Expression(ref expressionRecord);
         }
 
         private void IdentifierList (ref List<string> identifierRecordList)
