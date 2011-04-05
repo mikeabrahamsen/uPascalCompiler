@@ -100,7 +100,7 @@ namespace Compiler.Parse
             Match(';');            
             Block();
             Match('.');
-            analyzer.GenerateHalt();
+            analyzer.GenerateReturn();
         }
         private void ProgramHeading () 
         {

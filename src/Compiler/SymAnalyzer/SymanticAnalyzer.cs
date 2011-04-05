@@ -12,16 +12,32 @@ namespace Compiler.SymAnalyzer
         {
             get;
             set;
-        } 
+        }
+
+        /// <summary>
+        /// Gets and sets the label count
+        /// </summary>
+        public int labelCount
+        {
+            get;
+            set;
+        }
         public SymanticAnalyzer ()
         {
             symbolTableStack = new Stack<SymbolTable>();
+            labelCount = 0;
         }
-        
+        /// <summary>
+        /// Return the next label
+        /// </summary>
+        public string NextLabel 
+        {
+            get { return "L" + labelCount++; }
+        }
         public void CreateSymbolTable(string recordName)
         {
             SymbolTable symbolTable = new SymbolTable(recordName, symbolTableStack.Count);
-            symbolTableStack.Push(symbolTable);
+            symbolTableStack.Push(symbolTable);            
         }
         public void ProcessId(string idRecord,List<string>idRecordList)
         {
@@ -71,24 +87,26 @@ namespace Compiler.SymAnalyzer
         
         public void GenerateReadStatement (IdentifierRecord idRecord)
         {
-            Console.WriteLine("RD " + idRecord.symbol.offset + "(D" + idRecord.symbolTable.nestingLevel + ")");
+            Console.WriteLine("call       string [mscorlib]System.Console::ReadLine()");
+            Console.WriteLine("call       int32 [mscorlib]System.Int32::Parse(string)");
+            Console.WriteLine("stloc. " + idRecord.symbol.offset);
         }
 
         internal void GenerateWriteStatement ()
         {
-            Console.WriteLine("WRTS");
+            Console.WriteLine("call void [mscorlib]System.Console::WriteLine(int32)");
         }
 
         internal void GeneratePush (LiteralRecord litRecord, ref VariableType factorRecord)
         {
-            Console.WriteLine("PUSH #" + litRecord.lexeme);
+            Console.WriteLine("ldc.i4.s " + litRecord.lexeme);
             factorRecord = litRecord.type;
         }
 
         internal void GenerateIdPush (IdentifierRecord idRecord, ref VariableType factorRecord)
         {
-            Console.WriteLine("PUSH " + idRecord.symbol.offset + "(D" + idRecord.symbolTable.nestingLevel + ")");
-            //factorRecord = idRecord.symbol.symbolType;
+            Console.WriteLine("ldloc." + idRecord.symbol.offset);
+            //factorRecord = idRecord.symbol.type;
         }
 
         internal void GenerateArithmetic (VariableType termTailRecord, string addOpRecord, VariableType termRecord, ref VariableType resultRecord)
@@ -98,15 +116,15 @@ namespace Compiler.SymAnalyzer
                 case VariableType.Integer:
                     if (addOpRecord.Equals("+"))
                     {
-                        Console.WriteLine("ADDS");
+                        Console.WriteLine("add");
                     }
                     else if(addOpRecord.Equals("-"))
                     {
-                        Console.WriteLine("SUBS");
+                        Console.WriteLine("sub");
                     }
                     else if(addOpRecord.Equals("*"))
                     {
-                        Console.WriteLine("MULS");
+                        Console.WriteLine("mul");
                     }
                     resultRecord = VariableType.Integer;
                 break;
@@ -119,12 +137,12 @@ namespace Compiler.SymAnalyzer
 
         internal void GenerateAssign (IdentifierRecord idRecord, VariableType expressionRecord)
         {
-            Console.WriteLine("POP " + idRecord.symbol.offset + "(D" + idRecord.symbolTable.nestingLevel + ")");
+            Console.WriteLine("stloc." + idRecord.symbol.offset);
         }
 
-        internal void GenerateHalt ()
+        internal void GenerateReturn ()
         {
-            Console.WriteLine("HLT");
+            Console.WriteLine("ret");
         }
     }
 }
