@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using Compiler.SymbolTbl;
 using Compiler.Library;
-namespace Compiler.SymAnalyzer
+namespace Compiler.SemAnalyzer
 {
     class TypeRecord
     {

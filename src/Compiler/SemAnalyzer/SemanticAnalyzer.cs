@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using Compiler.SymbolTbl;
 using Compiler.Library;
-namespace Compiler.SymAnalyzer
+namespace Compiler.SemAnalyzer
 {
-    class SymanticAnalyzer
+    class SemanticAnalyzer
     {
         /// <summary>
         /// Gets and sets the symbolTableStack
@@ -29,7 +29,7 @@ namespace Compiler.SymAnalyzer
         /// <summary>
         /// Semantic Analyzer Constructor
         /// </summary>
-        public SymanticAnalyzer ()
+        public SemanticAnalyzer ()
         {
             symbolTableStack = new Stack<SymbolTable>();
             labelCount = 0;

@@ -2,25 +2,21 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Compiler.SymbolTbl;
-namespace Compiler.SymAnalyzer
+using Compiler.Library;
+namespace Compiler.SemAnalyzer
 {
-    class IdentifierRecord
+    class LiteralRecord
     {
         public string lexeme
         {
             get;
-            set;            
+            set;
         }
-        public SymbolTable symbolTable
+        public VariableType type
         {
             get;
             set;
         }
-        public Symbol symbol
-        {
-            get;
-            set;
-        }
+
     }
 }

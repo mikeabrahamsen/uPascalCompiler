@@ -5,7 +5,7 @@ using System.Text;
 using Compiler.Lexer;
 using Compiler.Library;
 using System.IO;
-using Compiler.SymAnalyzer;
+using Compiler.SemAnalyzer;
 using Compiler.SymbolTbl;
 
 namespace Compiler.Parse
@@ -19,11 +19,11 @@ namespace Compiler.Parse
         {
             this.tokenQueue = TokenQueue;
             this.scanner = scanner;
-            analyzer = new SymanticAnalyzer();
+            analyzer = new SemanticAnalyzer();
             UsedRules.WriteLine(fileName);
             Move();
         }
-        private SymanticAnalyzer analyzer
+        private SemanticAnalyzer analyzer
         {
             get;
             set;
