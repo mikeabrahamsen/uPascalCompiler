@@ -167,13 +167,43 @@ namespace Compiler.SemAnalyzer
                     {
                         Console.WriteLine("add");
                     }
-                    else if(addOpRecord.Equals("-"))
+                    else if (addOpRecord.Equals("-"))
                     {
                         Console.WriteLine("sub");
                     }
-                    else if(addOpRecord.Equals("*"))
+                    else if (addOpRecord.Equals("*"))
                     {
                         Console.WriteLine("mul");
+                    }
+                    else if (addOpRecord.Equals("<"))
+                    {
+                        Console.WriteLine("clt");
+                    }
+                    else if (addOpRecord.Equals(">"))
+                    {
+                        Console.WriteLine("cgt");
+                    }
+                    else if (addOpRecord.Equals("<="))
+                    {
+                        Console.WriteLine("clt");
+                        Console.WriteLine("ldc.i4 0");
+                        Console.WriteLine("ceq");
+                    }
+                    else if (addOpRecord.Equals(">="))
+                    {
+                        Console.WriteLine("cgt");
+                        Console.WriteLine("ldc.i4 0");
+                        Console.WriteLine("ceq");
+                    }
+                    else if (addOpRecord.Equals("<>"))
+                    {
+                        Console.WriteLine("ceq");
+                        Console.WriteLine("ldc.i4 0");
+                        Console.WriteLine("ceq");
+                    }
+                    else if (addOpRecord.Equals("="))
+                    {
+                        Console.WriteLine("ceq");
                     }
                     resultRecord = VariableType.Integer;
                 break;
