@@ -213,7 +213,17 @@ namespace Compiler.SemAnalyzer
 
             }
         }
-
+        /// <summary>
+        /// Generates code for initilizing a program
+        /// </summary>
+        /// <param name="name"></param>
+        internal void GenerateProgramInitialize(string name)
+        {
+            Console.WriteLine(".assembly extern mscorlib {}");
+            Console.WriteLine(".assembly " + name + " {}\n");
+            Console.WriteLine(".method static void Main()");
+            Console.WriteLine(".entrypoint");
+        }
         /// <summary>
         /// Generates code for assignment statements
         /// </summary>

@@ -105,11 +105,19 @@ namespace Compiler.Parse
         private void ProgramHeading () 
         {
             string programIdentifierRecord = null;
-
-            UsedRules.WriteLine("3");
-            Match((int)Tags.MP_PROGRAM);
-            Identifier(ref programIdentifierRecord);
-            analyzer.CreateSymbolTable(programIdentifierRecord);
+            switch(lookAheadToken.Tag)
+            {
+                case Tags.MP_PROGRAM:
+                    UsedRules.WriteLine("3");
+                    Match((int)Tags.MP_PROGRAM);
+                    Identifier(ref programIdentifierRecord);
+                    analyzer.CreateSymbolTable(programIdentifierRecord);
+                    analyzer.GenerateProgramInitialize(programIdentifierRecord);
+                    break;
+                default:
+                    Error("Expecting Program found " + lookAheadToken.Lexeme);
+                break;
+            }
         }
 
         private void Block () 
