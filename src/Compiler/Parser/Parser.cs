@@ -765,7 +765,7 @@ namespace Compiler.Parse
                 case Tags.MP_IDENTIFIER:
                     UsedRules.WriteLine("69");
                     SimpleExpression(ref expressionRecord);
-                    OptionalRelationalPart();
+                    OptionalRelationalPart(ref expressionRecord);
                 break;
                 default:
                     Error("Expecting Expression Args found " + lookAheadToken.Lexeme);
@@ -773,9 +773,12 @@ namespace Compiler.Parse
             }
         }
 
-        private void OptionalRelationalPart()
+        private void OptionalRelationalPart(ref VariableType expressionRecord)
         {
             VariableType simpleExpressionRecord = VariableType.Null;
+            VariableType resultRecord = VariableType.Null;
+            string relationalOpRecord = string.Empty;
+
             switch (lookAheadToken.Tag)
             {
                 case Tags.MP_EQUAL:
@@ -785,8 +788,10 @@ namespace Compiler.Parse
                 case Tags.MP_GEQUAL:
                 case Tags.MP_NEQUAL://RelationalOperator SimpleExpression 
                     UsedRules.WriteLine("70");
-                    RelationalOperator();
+                    RelationalOperator(ref relationalOpRecord);
                     SimpleExpression(ref simpleExpressionRecord);
+                    analyzer.GenerateArithmetic(expressionRecord, relationalOpRecord, 
+                        simpleExpressionRecord, ref resultRecord);
                     break;
 
                 case Tags.MP_SCOLON:
@@ -808,8 +813,9 @@ namespace Compiler.Parse
             }
         }
         
-        private void RelationalOperator()
+        private void RelationalOperator(ref string relationalOpRecord)
         {
+            relationalOpRecord = lookAheadToken.Lexeme;
             switch (lookAheadToken.Tag)
             {
                 case Tags.MP_EQUAL:
