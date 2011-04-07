@@ -8,16 +8,27 @@ namespace Compiler.SymbolTbl
 {
     class Parameter
     {
+        /// <summary>
+        /// Gets and sets the IO mode
+        /// </summary>
         public IOMode mode
         {
             get;
             set;
         }
+        /// <summary>
+        /// Gets and sets the variable type
+        /// </summary>
         public VariableType variableType
         {
             get;
             set;
         }
+        /// <summary>
+        /// Constructor for a parameter
+        /// </summary>
+        /// <param name="mode"></param>
+        /// <param name="variableType"></param>
         public Parameter (IOMode mode, VariableType variableType)
         {
             this.mode = mode;

@@ -66,6 +66,10 @@ namespace Compiler.SymbolTbl
             }
             return null;
         }
+        /// <summary>
+        /// overrides the ToString method to a formatted output
+        /// </summary>
+        /// <returns></returns>
         public override string ToString ()
         {
             StringBuilder sb = new StringBuilder();
