@@ -1053,7 +1053,7 @@ namespace Compiler.Parse
                     litRecord.lexeme = lookAheadToken.Lexeme;
                     litRecord.type = VariableType.Integer;
                     Match((int)Tags.MP_INTEGER_LIT);                    
-                    analyzer.GeneratePush(litRecord, ref factorRecord);
+                    analyzer.GenerateLitPush(litRecord, ref factorRecord);
                     break;
                 case Tags.MP_NOT:
                     UsedRules.WriteLine("95");
@@ -1098,7 +1098,7 @@ namespace Compiler.Parse
             string identifierRecord = null;            
             UsedRules.WriteLine("100");
             Identifier(ref identifierRecord);
-            analyzer.ProcessId(identifierRecord, identifierRecordList);
+            analyzer.AddId(identifierRecord, identifierRecordList);
             IdentifierTail(ref identifierRecordList);
         }
 
@@ -1111,7 +1111,7 @@ namespace Compiler.Parse
                     UsedRules.WriteLine("101");
                     Match((int)Tags.MP_COMMA);
                     Identifier(ref identifierRecord);
-                    analyzer.ProcessId(identifierRecord, identifierRecordList);
+                    analyzer.AddId(identifierRecord, identifierRecordList);
                     IdentifierTail(ref identifierRecordList);
                     break;
                 case Tags.MP_COLON: //lambda 

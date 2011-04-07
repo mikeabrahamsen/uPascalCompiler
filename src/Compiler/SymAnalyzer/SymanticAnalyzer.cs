@@ -8,6 +8,9 @@ namespace Compiler.SymAnalyzer
 {
     class SymanticAnalyzer
     {
+        /// <summary>
+        /// Gets and sets the symbolTableStack
+        /// </summary>
         public Stack<SymbolTable> symbolTableStack
         {
             get;
@@ -22,11 +25,16 @@ namespace Compiler.SymAnalyzer
             get;
             set;
         }
+
+        /// <summary>
+        /// Semantic Analyzer Constructor
+        /// </summary>
         public SymanticAnalyzer ()
         {
             symbolTableStack = new Stack<SymbolTable>();
             labelCount = 0;
         }
+
         /// <summary>
         /// Return the next label
         /// </summary>
@@ -34,21 +42,33 @@ namespace Compiler.SymAnalyzer
         {
             get { return "L" + labelCount++; }
         }
+
+        /// <summary>
+        /// Creates a new symbol table given a name
+        /// </summary>
+        /// <param name="recordName"></param>
         public void CreateSymbolTable(string recordName)
         {
             SymbolTable symbolTable = new SymbolTable(recordName, symbolTableStack.Count);
             symbolTableStack.Push(symbolTable);            
         }
-        public void ProcessId(string idRecord,List<string>idRecordList)
+
+        /// <summary>
+        /// Adds an id to a record list
+        /// </summary>
+        /// <param name="idRecord"></param>
+        /// <param name="idRecordList"></param>
+        public void AddId(string idRecord,List<string>idRecordList)
         {
             idRecordList.Add(idRecord);
         }
+
+       /// <summary>
+       /// finds the correct symbol and sets the attributes of the idRecord
+       /// </summary>
+       /// <param name="idRecord"></param>
         public void ProcessId (IdentifierRecord idRecord)
-        {
-            FindSymbol(idRecord);
-        }
-        public IdentifierRecord FindSymbol (IdentifierRecord idRecord)
-        {
+        {            
             Symbol symbol;
             foreach(SymbolTable st in symbolTableStack)
             {
@@ -57,11 +77,16 @@ namespace Compiler.SymAnalyzer
                 {
                     idRecord.symbolTable = st;
                     idRecord.symbol = symbol;
-                    return idRecord;
                 }
             }
-            return idRecord;
+            
         }
+
+        /// <summary>
+        /// inserts symbols into the symboltable
+        /// </summary>
+        /// <param name="idRecordList"></param>
+        /// <param name="typeRecord"></param>
         public void SymbolTableInsert (List<string> idRecordList, TypeRecord typeRecord)
         {
             Symbol symbol = null;
@@ -85,30 +110,54 @@ namespace Compiler.SymAnalyzer
             }           
         }
         
-        public void GenerateReadStatement (IdentifierRecord idRecord)
+        /// <summary>
+        /// Generates code for a read statement
+        /// </summary>
+        /// <param name="idRecord"></param>
+        internal void GenerateReadStatement (IdentifierRecord idRecord)
         {
             Console.WriteLine("call       string [mscorlib]System.Console::ReadLine()");
             Console.WriteLine("call       int32 [mscorlib]System.Int32::Parse(string)");
             Console.WriteLine("stloc. " + idRecord.symbol.offset);
         }
 
+        /// <summary>
+        /// Generates code for write statements
+        /// </summary>
         internal void GenerateWriteStatement ()
         {
             Console.WriteLine("call void [mscorlib]System.Console::WriteLine(int32)");
         }
 
-        internal void GeneratePush (LiteralRecord litRecord, ref VariableType factorRecord)
+        /// <summary>
+        /// Generates code for a push statement for literal type
+        /// </summary>
+        /// <param name="litRecord"></param>
+        /// <param name="factorRecord"></param>
+        internal void GenerateLitPush (LiteralRecord litRecord, ref VariableType factorRecord)
         {
             Console.WriteLine("ldc.i4.s " + litRecord.lexeme);
             factorRecord = litRecord.type;
         }
 
+        /// <summary>
+        /// Generates code for pushing an Identifier
+        /// </summary>
+        /// <param name="idRecord"></param>
+        /// <param name="factorRecord"></param>
         internal void GenerateIdPush (IdentifierRecord idRecord, ref VariableType factorRecord)
         {
             Console.WriteLine("ldloc." + idRecord.symbol.offset);
             //factorRecord = idRecord.symbol.type;
         }
 
+        /// <summary>
+        /// Generates code for arithmetic operations
+        /// </summary>
+        /// <param name="termTailRecord"></param>
+        /// <param name="addOpRecord"></param>
+        /// <param name="termRecord"></param>
+        /// <param name="resultRecord"></param>
         internal void GenerateArithmetic (VariableType termTailRecord, string addOpRecord, VariableType termRecord, ref VariableType resultRecord)
         {
             switch(termTailRecord)
@@ -135,11 +184,19 @@ namespace Compiler.SymAnalyzer
             }
         }
 
+        /// <summary>
+        /// Generates code for assignment statements
+        /// </summary>
+        /// <param name="idRecord"></param>
+        /// <param name="expressionRecord"></param>
         internal void GenerateAssign (IdentifierRecord idRecord, VariableType expressionRecord)
         {
             Console.WriteLine("stloc." + idRecord.symbol.offset);
         }
 
+        /// <summary>
+        /// Generates code for return statements
+        /// </summary>
         internal void GenerateReturn ()
         {
             Console.WriteLine("ret");
