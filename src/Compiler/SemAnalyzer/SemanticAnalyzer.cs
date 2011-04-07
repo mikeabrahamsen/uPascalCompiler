@@ -69,10 +69,10 @@ namespace Compiler.SemAnalyzer
        /// <param name="idRecord"></param>
         public void ProcessId (IdentifierRecord idRecord)
         {            
-            Symbol symbol;
+            VariableSymbol symbol;
             foreach(SymbolTable st in symbolTableStack)
             {
-                symbol = st.Find(idRecord.lexeme);
+                symbol = st.Find(idRecord.lexeme) as VariableSymbol;
                 if(symbol != null)
                 {
                     idRecord.symbolTable = st;
@@ -148,7 +148,7 @@ namespace Compiler.SemAnalyzer
         internal void GenerateIdPush (IdentifierRecord idRecord, ref VariableType factorRecord)
         {
             Console.WriteLine("ldloc." + idRecord.symbol.offset);
-            //factorRecord = idRecord.symbol.type;
+            factorRecord = idRecord.symbol.variableType;
         }
 
         /// <summary>

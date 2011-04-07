@@ -18,11 +18,6 @@ namespace Compiler.SymbolTbl
             get;
             private set;
         }
-        public virtual int offset
-        {
-            get;
-            set;
-        }
         public Symbol ()
         { }
         public Symbol (string name,SymbolType symbolType)
