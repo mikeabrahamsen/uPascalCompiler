@@ -12,14 +12,14 @@ namespace Compiler.Lexer
     class Word : Token
     {
         
-        public Word(string s, int tag) : base(tag)
+        public Word(string s, int tag,int line,int column) : base(tag,line,column)
         {
-            Lexeme = s;
+            lexeme = s;
         }
         
         public override string ToString()
         {
-            return Lexeme;
+            return lexeme;
         }
 
 

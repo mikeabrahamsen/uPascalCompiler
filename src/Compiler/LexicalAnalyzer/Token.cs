@@ -13,23 +13,41 @@ namespace Compiler.Lexer
     {
         public Token ()
         {
-            Tag = null;
+            tag = null;
         }
 
         /// <summary>
         /// Constructor for Token
         /// </summary>
         /// <param name="t"></param>
-        public Token(int t)
+        public Token(int t,int line,int column)
         {
-            Tag = (Tags)t;
-            Lexeme = Convert.ToChar(t).ToString();
+            tag = (Tags)t;
+            lexeme = Convert.ToChar(t).ToString();
+            this.line = line;
+            this.column = column;
+            
         }
-
+        /// <summary>
+        /// Gets and sets the column
+        /// </summary>
+        public int column
+        {
+            get;
+            set;
+        }
+        /// <summary>
+        /// Gets and sets the column
+        /// </summary>
+        public int line
+        {
+            get;
+            set;
+        }
         /// <summary>
         /// Get and Set tag
         /// </summary>
-        public Tags? Tag
+        public Tags? tag
         {
             get;
             set;
@@ -37,7 +55,7 @@ namespace Compiler.Lexer
         /// <summary>
         /// Get and set the Lexeme
         /// </summary>
-        public string Lexeme
+        public string lexeme
         {
             get;
             set;
@@ -48,7 +66,7 @@ namespace Compiler.Lexer
         /// <returns>Tag</returns>
         public override string ToString()
         {
-            return Tag.ToString();
+            return tag.ToString();
         }
     }
 }

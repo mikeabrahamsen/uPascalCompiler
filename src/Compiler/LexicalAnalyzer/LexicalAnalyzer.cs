@@ -6,6 +6,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 using Compiler.Library;
 using System.Reflection;
+using Compiler.Parse;
 
 
 namespace Compiler.Lexer
@@ -19,7 +20,7 @@ namespace Compiler.Lexer
         /// <summary>
         /// Get and set the line number
         /// </summary>
-        public int Line
+        public int line
         {
             get;
             private set;
@@ -27,12 +28,12 @@ namespace Compiler.Lexer
         /// <summary>
         /// Get and set the column number
         /// </summary>
-        public int Column
+        public int column
         {
             get;
             private set;
         }
-        public int TokenStartColumn
+        public int tokenStartColumn
         {
             get;
             private set;
@@ -40,7 +41,7 @@ namespace Compiler.Lexer
         /// <summary>
         /// Get and set the CurrentCharacter
         /// </summary>
-        public char CurrentChar
+        public char currentChar
         {
             get;
             private set;
@@ -48,7 +49,7 @@ namespace Compiler.Lexer
         /// <summary>
         /// Get and set the NextCharacter
         /// </summary>
-        public char NextChar
+        public char nextChar
         {
             get;
             private set;
@@ -56,17 +57,10 @@ namespace Compiler.Lexer
         private StreamReader file;
         private List<Word> ReservedWords = new List<Word>();
         
-
-        public bool Finished
-        {
-            get;
-            private set;
-        }
         public LexicalAnalyzer ()
         {
-            Finished = false;
-            Column = 1;
-            Line = 1;
+            column = 1;
+            line = 1;
             LoadTokens("mpTokens.txt");
         }
        
@@ -102,7 +96,7 @@ namespace Compiler.Lexer
                   lexeme = token.Groups["lexeme"].ToString();
 
                   // Add all of the tokens to the word list
-                  ReservedWords.Add(new Word(lexeme, (int)(Tags)Enum.Parse(typeof(Tags), name, false)));
+                  ReservedWords.Add(new Word(lexeme, (int)(Tags)Enum.Parse(typeof(Tags), name, false), line, column));
               }
             }
             catch(Exception e)
@@ -113,29 +107,28 @@ namespace Compiler.Lexer
         }
 
         /// <summary>
+        /// 
         /// Reads one char at a time from the file
         /// </summary>
         private void ReadChar ()
         {
-            Column++;
+            column++;
             if(!file.EndOfStream)
             {
-                CurrentChar = Convert.ToChar(file.Read());
+                currentChar = Convert.ToChar(file.Read());
                 if(!file.EndOfStream)
-                {
-                    NextChar = Convert.ToChar(file.Peek());
+                {                    
+                    nextChar = Convert.ToChar(file.Peek());
                 }
                 else
                 {
-                    NextChar = (char)3;
-                }
-                
+                    nextChar = (char)3;
+                }                
             }
             else
             {
-                CurrentChar = (char)3;
-            }
-            
+                currentChar = (char)3;
+            }            
         }
 
         /// <summary>
@@ -144,7 +137,7 @@ namespace Compiler.Lexer
         private bool ReadChar (char c)
         {
             ReadChar();
-            return c.Equals(CurrentChar);
+            return c.Equals(currentChar);
         }
 
         /// <summary>
@@ -153,13 +146,13 @@ namespace Compiler.Lexer
         /// <returns></returns>
         public Token GetNextToken ()
         {
+            tokenStartColumn = column - 1;
             SkipWhiteSpace();
-            TokenStartColumn = Column + 1;
-            if(CurrentChar.Equals('{'))
+            if(currentChar.Equals('{'))
             {
                 return ScanComment();                
             }
-            switch(CurrentChar)
+            switch(currentChar)
             {
                 case '(':
                     return ScanLeftParen();
@@ -191,24 +184,20 @@ namespace Compiler.Lexer
                     return ScanEndOfFile();
             }
             //If currentchar is an underscore and next is a letter or digit
-            if(CurrentChar.Equals((char)95) && char.IsLetterOrDigit(NextChar))
+            if(currentChar.Equals((char)95) && char.IsLetterOrDigit(nextChar))
             {
                 return ScanIdentifier();
             }
-            if(Regex.IsMatch(CurrentChar.ToString(), @"^[a-zA-Z]+$"))
+            if(Regex.IsMatch(currentChar.ToString(), @"^[a-zA-Z]+$"))
             {
                 return ScanIdentifier();
             }
-            if(char.IsDigit(CurrentChar))
+            if(char.IsDigit(currentChar))
             {
                 return ScanNumericLiteral();
             }
 
-            ErrorFound = true;
-            ErrorMessage = string.Format("invalid character found on line: {0} starting position: {1}", Line, Column -1);
-            Word word = new Word(CurrentChar.ToString(), (int)Tags.MP_ERROR);
-            ReadChar();
-            return word;
+            throw new SyntaxException("invalid character found on line: " + line + "starting position: " + (column - 1));
         }
         /// <summary>
         /// Create token for '*'
@@ -217,7 +206,7 @@ namespace Compiler.Lexer
         private Token ScanMultiply ()
         {
             ReadChar();
-            return new Token((int)Tags.MP_TIMES);
+            return new Token((int)Tags.MP_TIMES,line,column);
         }
         /// <summary>
         /// Create token for '='
@@ -226,7 +215,7 @@ namespace Compiler.Lexer
         private Token ScanEqual ()
         {
             ReadChar();
-            return new Token((int)Tags.MP_EQUAL);
+            return new Token((int)Tags.MP_EQUAL, line, column);
         }
         /// <summary>
         /// Create token for '+'
@@ -235,7 +224,7 @@ namespace Compiler.Lexer
         private Token ScanPlusOperator ()
         {
             ReadChar();
-            return new Token((int)Tags.MP_PLUS);
+            return new Token((int)Tags.MP_PLUS, line, column);
         }
         /// <summary>
         /// Create token for '-'
@@ -244,7 +233,7 @@ namespace Compiler.Lexer
         private Token ScanMinusOperator ()
         {
             ReadChar();
-            return new Token((int)Tags.MP_MINUS);
+            return new Token((int)Tags.MP_MINUS, line, column);
         }
         /// <summary>
         /// Create token for '.'
@@ -253,39 +242,33 @@ namespace Compiler.Lexer
         private Token ScanPeriod ()
         {
             ReadChar();
-            return new Token((int)Tags.MP_PERIOD);
+            return new Token((int)Tags.MP_PERIOD, line, column);
         }
         /// <summary>
         /// Skips over comments. 
-        /// TODO: Prints an error if EOF was found before closing comment
         /// </summary>
         private Token ScanComment ()
         {
             StringBuilder sb = new StringBuilder();
-            string s;
-            while(!(NextChar == (char)3)) // or EOF6
+            int count = 1;
+            while(!(nextChar == (char)3)) // or EOF6
             {
+                
                 ReadChar();
-                sb.Append(CurrentChar);
-                if (CurrentChar.Equals('}'))
+                sb.Append(currentChar);
+                if (currentChar.Equals('}'))
                 {
                     ReadChar();
                     return new Token();
                 }
+                count++;
             }
-
             ReadChar();
 
-            if(CurrentChar == (char)3)
+            if(currentChar == (char)3)
             {
-                ErrorFound = true;
-                ErrorMessage = string.Format("run comment found on line: {0} starting position: {1}", Line, TokenStartColumn );
-
-                s = sb.ToString();
-                return new Word(s,(int)Tags.MP_RUN_COMMENT);
-                
+                throw new SyntaxException("run comment found on line: " + line + " at position " + (column - count));                                
             }
-
             return new Token();
                               
         }
@@ -296,7 +279,7 @@ namespace Compiler.Lexer
         private Token ScanComma ()
         {
             ReadChar();
-            return new Token(',');
+            return new Token(',', line, column);
         }
         /// <summary>
         /// Create token(word) for a string
@@ -318,28 +301,28 @@ namespace Compiler.Lexer
                         break;
                     case States.S1:                        
                         ReadChar();
-                        if(CurrentChar == 13)
+                        if(currentChar == 13)
                         {
                             state = States.S3;
                             break;
                         }
-                        if(CurrentChar.Equals('\''))
+                        if(currentChar.Equals('\''))
                         {
                             state = States.S2;
                             break;
                         }
                         else
                         {
-                            sb.Append(CurrentChar);
+                            sb.Append(currentChar);
                             state = States.S1;
                             break;
                         }
                     case States.S2:
                         
-                        if(NextChar.Equals('\''))
+                        if(nextChar.Equals('\''))
                         {
                             ReadChar();
-                            sb.Append(CurrentChar);
+                            sb.Append(currentChar);
                             state = States.S1;
                             break;
                         }
@@ -350,16 +333,13 @@ namespace Compiler.Lexer
                         }
                     case States.S3:
                         //return error token
-                        ErrorFound = true;
-                        ErrorMessage = string.Format("run string found on line: {0} starting position: {1}", Line, TokenStartColumn);
                         finishState = true;
-                        s = sb.ToString();
-                        return new Word(s,(int)Tags.MP_RUN_STRING);                        
+                        throw new SyntaxException("run comment string on line: " + line + " starting position: " +tokenStartColumn);                                                                    
                 }
             }
             s = sb.ToString();
             ReadChar();
-            return new Word(s, (int)Tags.MP_STRING_LIT);            
+            return new Word(s, (int)Tags.MP_STRING_LIT, line, column);            
         }
         /// <summary>
         /// Create token for EOF
@@ -367,8 +347,7 @@ namespace Compiler.Lexer
         /// <returns>Token</returns>
         private Token ScanEndOfFile ()
         {
-            Finished = true;
-            return new Token((int)Tags.MP_EOF);
+            return new Token((int)Tags.MP_EOF, line, column);
         }
         /// <summary>
         /// Create token for Numeric Literal
@@ -386,23 +365,23 @@ namespace Compiler.Lexer
                 switch(state)
                 {
                     case States.S0:
-                        sb.Append(CurrentChar);
+                        sb.Append(currentChar);
                         state = States.S1;
                         break;
                     case States.S1:
-                        while(char.IsDigit(NextChar))
+                        while(char.IsDigit(nextChar))
                         {
                             finishState = true;
                             ReadChar();
-                            sb.Append(CurrentChar);
+                            sb.Append(currentChar);
                         }
-                        if(NextChar.Equals('e') || NextChar.Equals('E'))
+                        if(nextChar.Equals('e') || nextChar.Equals('E'))
                         {
                             finishState = false;
                             state = States.S3;
                             break;
                         }
-                        if(NextChar.Equals('.'))
+                        if(nextChar.Equals('.'))
                         {
                             finishState = false;
                             state = States.S2;
@@ -413,15 +392,15 @@ namespace Compiler.Lexer
 
                         if(s.Contains("."))
                         {
-                            return new Word(s, (int)Tags.MP_FIXED_LIT);
+                            return new Word(s, (int)Tags.MP_FIXED_LIT, line, column);
                         }
-                        return new Word(s, (int)Tags.MP_INTEGER_LIT);
+                        return new Word(s, (int)Tags.MP_INTEGER_LIT, line, column);
                     case States.S2:
                         ReadChar();
-                        sb.Append(CurrentChar);
+                        sb.Append(currentChar);
 
                         finishState = false;
-                        if(char.IsDigit(NextChar))
+                        if(char.IsDigit(nextChar))
                         {
                             state = States.S1;
                             break;
@@ -430,13 +409,13 @@ namespace Compiler.Lexer
                     case States.S3:
                         finishState = false;
                         ReadChar();
-                        sb.Append(CurrentChar);
-                        if(char.IsDigit(NextChar))
+                        sb.Append(currentChar);
+                        if(char.IsDigit(nextChar))
                         {
                             state = States.S5;
                             break;
                         }
-                        if(NextChar.Equals('+') || NextChar.Equals('-'))
+                        if(nextChar.Equals('+') || nextChar.Equals('-'))
                         {
                             state = States.S4;
                             break;
@@ -444,29 +423,29 @@ namespace Compiler.Lexer
                         break;
                     case States.S4:
                         ReadChar();
-                        sb.Append(CurrentChar);
+                        sb.Append(currentChar);
                         finishState = false;
                         //TODO: this is messy - what if it's not a digit?
-                        if(char.IsDigit(NextChar))
+                        if(char.IsDigit(nextChar))
                         {
                             state = States.S5;
                             break;
                         }
                         break;
                     case States.S5:                        
-                        while(char.IsDigit(NextChar))
+                        while(char.IsDigit(nextChar))
                         {
                             ReadChar();
                             finishState = true;
-                            sb.Append(CurrentChar);
+                            sb.Append(currentChar);
                         }
                         s = sb.ToString();
                         ReadChar();
-                        return new Word(s, (int)Tags.MP_FLOAT_LIT);                   
+                        return new Word(s, (int)Tags.MP_FLOAT_LIT, line, column);                   
                 }
             }
             ReadChar();
-            return new Token(CurrentChar);
+            return new Token(currentChar, line, column);
         }
         /// <summary>
         /// Create token for ID
@@ -485,12 +464,12 @@ namespace Compiler.Lexer
                     case States.S0:
 
                         finishState = true;
-                        while(char.IsLetterOrDigit(CurrentChar))
+                        while(char.IsLetterOrDigit(currentChar))
                         {
-                            sb.Append(CurrentChar);
+                            sb.Append(currentChar);
                             ReadChar();
                         }
-                        if(CurrentChar == '_')
+                        if(currentChar == '_')
                         {
                             finishState = false;
                             state = States.S1;
@@ -498,9 +477,9 @@ namespace Compiler.Lexer
                             break;
                     case States.S1:
                             finishState = false;
-                            if(char.IsLetterOrDigit(NextChar))
+                            if(char.IsLetterOrDigit(nextChar))
                             {
-                                sb.Append(CurrentChar);
+                                sb.Append(currentChar);
                                 ReadChar();
 
                                 state = States.S0;
@@ -517,13 +496,13 @@ namespace Compiler.Lexer
             string s = sb.ToString();
             foreach(Word w in ReservedWords)
             {  
-                if(w.Lexeme.Equals(s,StringComparison.OrdinalIgnoreCase))
+                if(w.lexeme.Equals(s,StringComparison.OrdinalIgnoreCase))
                 {
                     return w;
                 }
             }
-            
-            return new Word(s, (int)Tags.MP_IDENTIFIER);                           
+
+            return new Word(s, (int)Tags.MP_IDENTIFIER, line, column);                           
         }
         /// <summary>
         /// Create token for '>' or '>='
@@ -534,11 +513,11 @@ namespace Compiler.Lexer
             if(ReadChar('='))
             {
                 ReadChar();
-                return new Word(">=", (int)Tags.MP_GEQUAL);
+                return new Word(">=", (int)Tags.MP_GEQUAL, line, column);
             }
             else
             {
-                return new Token('>');
+                return new Token('>', line, column);
             }
         }
         /// <summary>
@@ -547,26 +526,26 @@ namespace Compiler.Lexer
         /// <returns>Token</returns>
         private Token ScanLessThanOrNotEqual ()
         {
-            if(NextChar.Equals('='))
+            if(nextChar.Equals('='))
             {
                 //Read In Next Character
                 ReadChar();
                 //Put file pointer to next character
                 ReadChar();
-                return new Word("<=", (int)Tags.MP_LEQUAL);
+                return new Word("<=", (int)Tags.MP_LEQUAL, line, column);
             }
-            if(NextChar.Equals('>'))
+            if(nextChar.Equals('>'))
             {
                 //Read Next Character
                 ReadChar();
                 //Put file pointer to next character
                 ReadChar();
-                return new Word("<>", (int)Tags.MP_NEQUAL);
+                return new Word("<>", (int)Tags.MP_NEQUAL, line, column);
             }
             else
             {
                 ReadChar();
-                return new Token('<');
+                return new Token('<', line, column);
             }
         }
         /// <summary>
@@ -578,11 +557,11 @@ namespace Compiler.Lexer
             if(ReadChar('='))
             {
                 ReadChar();
-                return new Word(":=", (int)Tags.MP_ASSIGN);
+                return new Word(":=", (int)Tags.MP_ASSIGN, line, column);
             }
             else
             {
-                return new Token(':');
+                return new Token(':', line, column);
             }
         }
         /// <summary>
@@ -592,7 +571,7 @@ namespace Compiler.Lexer
         private Token ScanSemicolon ()
         {
             ReadChar();
-            return new Token(';');
+            return new Token(';', line, column);
         }
         /// <summary>
         /// Create token for ')'
@@ -601,7 +580,7 @@ namespace Compiler.Lexer
         private Token ScanRightParen ()
         {
             ReadChar();
-            return new Token(')');
+            return new Token(')', line, column);
         }
         /// <summary>
         /// Create token for '('
@@ -610,18 +589,9 @@ namespace Compiler.Lexer
         private Token ScanLeftParen ()
         {
             ReadChar();
-            return new Token('(');
+            return new Token('(', line, column);
         }
-        public bool ErrorFound
-        {
-            get;
-            set;
-        }
-        public string ErrorMessage
-        {
-            get;
-            set;
-        }
+        
         /// <summary>
         /// Scan to the next character
         /// </summary>
@@ -629,14 +599,14 @@ namespace Compiler.Lexer
         {
             for(; ; ReadChar())
             {
-                if(CurrentChar == 32 || CurrentChar == '\t' || CurrentChar == 10)
+                if(currentChar == 32 || currentChar == '\t' || currentChar == 10)
                 {
                     continue;
                 }
-                else if(CurrentChar == 13)
+                else if(currentChar == 13)
                 {
-                    Line++;
-                    Column = 0;
+                    line++;
+                    column = 0;
                 }
                 else
                 {

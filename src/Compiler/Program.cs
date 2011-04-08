@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using Compiler.Lexer;
 using Compiler.Parse;
-
+using Compiler.Library;
 namespace Compiler
 {
     /// <summary>
@@ -24,24 +24,25 @@ namespace Compiler
             Token token = new Token();
             string output;
             
-            while(!scanner.Finished)
-            {
-                scanner.ErrorFound = false;
-                token = scanner.GetNextToken();
-                if(token.Tag != null)
-                {
-                    output = string.Format("{0,-20} {1,-5} {2,-5} {3}",
-                        token.Tag, scanner.Line, (scanner.Column - token.Lexeme.Length-1), token.Lexeme);
-                    Console.WriteLine(output);
-                    if(scanner.ErrorFound)
-                    {
-                       Console.WriteLine(scanner.ErrorMessage);
-                    }
-                    TokenQueue.Enqueue(token);
-                }
-            }
+            
             try
             {
+                bool done = false;
+                while (!done)
+                {
+                    token = scanner.GetNextToken();
+                    if (token.tag != null)
+                    {
+                        output = string.Format("{0,-20} {1,-5} {2,-5} {3}",
+                            token.tag, scanner.line, (scanner.column - token.lexeme.Length - 1), token.lexeme);
+                        Console.WriteLine(output);
+                        TokenQueue.Enqueue(token);
+                    }
+                    if(token.tag.Equals(Tags.MP_EOF))
+                    {
+                        done = true;
+                    }
+                }
                 Parser parser = new Parse.Parser(TokenQueue, scanner, args[0]);
                 parser.SystemGoal();
                 Console.WriteLine("Program Parsed Correctly");
@@ -50,7 +51,6 @@ namespace Compiler
             {
                 Console.WriteLine(e.ErrorMessage);
             }
-
             //Added to hold console window open for viewing
             Console.ReadLine();
         }
