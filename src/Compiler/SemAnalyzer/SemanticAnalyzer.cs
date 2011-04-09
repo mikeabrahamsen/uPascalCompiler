@@ -177,6 +177,10 @@ namespace Compiler.SemAnalyzer
                     {
                         Console.WriteLine("mul");
                     }
+                    else if(addOpRecord.Equals("div"))
+                    {
+                        Console.WriteLine("div");
+                    }
                     else if (addOpRecord.Equals("<"))
                     {
                         Console.WriteLine("clt");
@@ -187,13 +191,13 @@ namespace Compiler.SemAnalyzer
                     }
                     else if (addOpRecord.Equals("<="))
                     {
-                        Console.WriteLine("clt");
+                        Console.WriteLine("cgt");
                         Console.WriteLine("ldc.i4 0");
                         Console.WriteLine("ceq");
                     }
                     else if (addOpRecord.Equals(">="))
                     {
-                        Console.WriteLine("cgt");
+                        Console.WriteLine("clt");
                         Console.WriteLine("ldc.i4 0");
                         Console.WriteLine("ceq");
                     }
@@ -206,6 +210,26 @@ namespace Compiler.SemAnalyzer
                     else if (addOpRecord.Equals("="))
                     {
                         Console.WriteLine("ceq");
+                    }
+                    else if (addOpRecord.Equals("or"))
+                    {
+                        Console.WriteLine("or");
+                    }
+                    else if (addOpRecord.Equals("and"))
+                    {
+                        Console.WriteLine("and");
+                    }
+                    else if (addOpRecord.Equals(""))
+                    {
+                        Console.WriteLine("and");
+                    }
+                    else if (addOpRecord.Equals("mod"))
+                    {
+                        Console.WriteLine("rem");
+                    }
+                    else if (addOpRecord.Equals("not"))
+                    {
+                        Console.WriteLine("not");
                     }
                     resultRecord = VariableType.Integer;
                 break;
@@ -289,7 +313,7 @@ namespace Compiler.SemAnalyzer
         /// <param name="branchType"></param>
         internal void GenerateBranch(ref string branchLabelRecord, BranchType branchType)
         {
-            branchLabelRecord = nextLabel;
+            
             if (branchLabelRecord.Equals(string.Empty))
             {
                 branchLabelRecord = nextLabel;

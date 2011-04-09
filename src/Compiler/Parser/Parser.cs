@@ -640,19 +640,49 @@ namespace Compiler.Parse
         }
         private void RepeatStatement() 
         {
-            UsedRules.WriteLine("55");
-            Match((int)Tags.MP_REPEAT);
-            StatementSequence();
-            Match((int)Tags.MP_UNTIL);
-            BooleanExpression();
+            string controlLabelRecord = string.Empty;
+            string loopLabel = string.Empty;
+
+            switch(lookAheadToken.tag)
+            {
+                case Tags.MP_REPEAT:
+                    UsedRules.WriteLine("55");
+                    Match((int)Tags.MP_REPEAT);
+                    analyzer.GenerateLabel(ref controlLabelRecord);
+                    StatementSequence();
+                    Match((int)Tags.MP_UNTIL);                    
+                    BooleanExpression();  
+                    analyzer.GenerateBranch(ref controlLabelRecord, BranchType.brfalse);
+                    break;
+                default:
+                    Error("Expecting RepeatStatement but found " + lookAheadToken.lexeme);
+                    break;
+            }
+            
         }
         private void WhileStatement () 
         {
-            UsedRules.WriteLine("56");
-            Match((int)Tags.MP_WHILE);
-            BooleanExpression();
-            Match((int)Tags.MP_DO);
-            Statement();
+            string controlLabelRecord = string.Empty;
+            string loopLabel = string.Empty;
+
+            switch(lookAheadToken.tag)
+            {
+                case Tags.MP_WHILE:
+                    UsedRules.WriteLine("56");
+                    Match((int)Tags.MP_WHILE);
+                    analyzer.GenerateLabel(ref controlLabelRecord);
+                    BooleanExpression();
+                    Match((int)Tags.MP_DO);
+                    analyzer.GenerateBranch(ref loopLabel, BranchType.brfalse);
+                    Statement();
+                    analyzer.GenerateBranch(ref controlLabelRecord, BranchType.br);
+                    analyzer.GenerateLabel(ref loopLabel);
+                    break;
+                default:
+                    Error("Expecting WhileStatement but found " + lookAheadToken.lexeme);
+                    break;
+
+        }
 
         }
         private void ForStatement () 
