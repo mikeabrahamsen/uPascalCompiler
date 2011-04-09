@@ -138,7 +138,7 @@ namespace Compiler.SemAnalyzer
         /// <param name="factorRecord"></param>
         internal void GenerateLitPush (LiteralRecord litRecord, ref VariableType factorRecord)
         {
-            Console.WriteLine("ldc.i4.s " + litRecord.lexeme);
+            Console.WriteLine("ldc.i4 " + litRecord.lexeme);
             factorRecord = litRecord.type;
         }
 
