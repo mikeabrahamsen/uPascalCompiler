@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using Compiler.SymbolTbl;
 using Compiler.Library;
+using System.ComponentModel;
+
 namespace Compiler.SemAnalyzer
 {
     class SemanticAnalyzer
@@ -221,8 +223,41 @@ namespace Compiler.SemAnalyzer
         {
             Console.WriteLine(".assembly extern mscorlib {}");
             Console.WriteLine(".assembly " + name + " {}\n");
-            Console.WriteLine(".method static void Main()");
+            Console.WriteLine(".method static void Main()\n{");
             Console.WriteLine(".entrypoint");
+        }
+
+        /// <summary>
+        /// Generates code for local variable
+        /// </summary>
+        internal void GenerateLocals()
+        {
+            SymbolTable table = symbolTableStack.Peek();
+            int recordSize = table.activationRecordSize;
+            
+            if (recordSize > 0)
+            {
+                int index = 0;
+                Console.WriteLine(".maxstack " + recordSize);
+                Console.Write(".locals init (");
+
+                foreach (Symbol symbol in table.symbolTable)
+                {
+                    switch (symbol.symbolType)
+                    {                           
+                        case SymbolType.VariableSymbol:
+                            //write the enum out as a string using the Get
+                            Console.Write("[" + index + "] " + Enumerations.GetDescription<VariableType>((symbol as VariableSymbol).variableType) + " " + symbol.name);
+                            if (index < table.symbolTable.Count -1)
+                            {
+                                Console.Write(",");
+                            }
+                            break;
+                    }
+                    index++;
+                }
+                Console.WriteLine(")");
+            }
         }
         /// <summary>
         /// Generates code for assignment statements

@@ -123,8 +123,7 @@ namespace Compiler.Parse
         {
             UsedRules.WriteLine("4");
             VariableDeclarationPart();
-
-            Console.WriteLine(analyzer.symbolTableStack.Peek());
+            analyzer.GenerateLocals();
             ProcedureAndFunctionDeclarationPart();
             StatementPart();
 
