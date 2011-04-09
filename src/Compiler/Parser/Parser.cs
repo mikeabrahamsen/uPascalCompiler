@@ -45,13 +45,13 @@ namespace Compiler.Parse
         }
         private void Error (string errorString)
         {
-            throw new SyntaxException("Error at line: " + scanner.Line + " Column: " + 
-                (scanner.Column - lookAheadToken.Lexeme.Length-1) + " " + errorString);
+            throw new SyntaxException("Error at line: " + lookAheadToken.line + " Column: " + 
+                (lookAheadToken.column) + " " + errorString);
         }
         private void Match (int tag)
         {
            
-            if((int)lookAheadToken.Tag == tag)
+            if((int)lookAheadToken.tag == tag)
             {
                 Move();
             }
@@ -64,9 +64,9 @@ namespace Compiler.Parse
 
         private void Match(int tag, ref string lexeme)
         {
-            if((int)lookAheadToken.Tag == tag)
+            if((int)lookAheadToken.tag == tag)
             {
-                lexeme = lookAheadToken.Lexeme;
+                lexeme = lookAheadToken.lexeme;
                 Move();
             }
             else
@@ -87,9 +87,9 @@ namespace Compiler.Parse
             UsedRules.Close();
 
             //If we find the EOF then the parser is done here, if not then there was an error
-            if(lookAheadToken.Tag != Tags.MP_EOF)
+            if(lookAheadToken.tag != Tags.MP_EOF)
             {
-                Error("Expecting EOF but found " + lookAheadToken.Lexeme);
+                Error("Expecting EOF but found " + lookAheadToken.lexeme);
             }
             
         }
@@ -105,7 +105,7 @@ namespace Compiler.Parse
         private void ProgramHeading () 
         {
             string programIdentifierRecord = null;
-            switch(lookAheadToken.Tag)
+            switch(lookAheadToken.tag)
             {
                 case Tags.MP_PROGRAM:
                     UsedRules.WriteLine("3");
@@ -115,7 +115,7 @@ namespace Compiler.Parse
                     analyzer.GenerateProgramInitialize(programIdentifierRecord);
                     break;
                 default:
-                    Error("Expecting Program found " + lookAheadToken.Lexeme);
+                    Error("Expecting Program found " + lookAheadToken.lexeme);
                 break;
             }
         }
@@ -132,7 +132,7 @@ namespace Compiler.Parse
         }
         private void VariableDeclarationPart () 
         {
-            switch(lookAheadToken.Tag)
+            switch(lookAheadToken.tag)
             {
                 case Tags.MP_VAR: //"var" Variable Declaration ";" VariableDeclationTail
                     UsedRules.WriteLine("5");
@@ -146,14 +146,14 @@ namespace Compiler.Parse
                     UsedRules.WriteLine("6");
                     break;
                 default:
-                    Error("Expecting VariableDeclarationPart but found " + lookAheadToken.Lexeme);
+                    Error("Expecting VariableDeclarationPart but found " + lookAheadToken.lexeme);
                     break;
                 
             }
         }
         private void ProcedureAndFunctionDeclarationPart () 
         {
-            switch(lookAheadToken.Tag)
+            switch(lookAheadToken.tag)
             {
                 case Tags.MP_PROCEDURE: // PeocedureDeclaration ProcedureAndFunctionDeclarationPart
                     UsedRules.WriteLine("12");
@@ -169,14 +169,14 @@ namespace Compiler.Parse
                     UsedRules.WriteLine("14");
                     break;
                 default:
-                    Error("Expecting ProcedureAndFunctionDeclarationPart but found " + lookAheadToken.Lexeme);
+                    Error("Expecting ProcedureAndFunctionDeclarationPart but found " + lookAheadToken.lexeme);
                     break;
             }
         }
 
         private void VariableDeclarationTail () 
         {
-            switch(lookAheadToken.Tag)
+            switch(lookAheadToken.tag)
             {
                 case Tags.MP_IDENTIFIER: // VariableDeclaration ";" VariableDeclarationTail
                     UsedRules.WriteLine("7");
@@ -190,7 +190,7 @@ namespace Compiler.Parse
                     UsedRules.WriteLine("8");
                     break;
                 default:
-                    Error("Expecting VariableDeclarationTail but found " + lookAheadToken.Lexeme);
+                    Error("Expecting VariableDeclarationTail but found " + lookAheadToken.lexeme);
                     break;
             }
             
@@ -199,7 +199,7 @@ namespace Compiler.Parse
         {
             List<string> identifierRecordList = new List<string>();
             TypeRecord typeRecord = new TypeRecord(SymbolType.VariableSymbol, VariableType.Null);
-            switch(lookAheadToken.Tag)
+            switch(lookAheadToken.tag)
             {
                 case Tags.MP_IDENTIFIER:
                     UsedRules.WriteLine("9");
@@ -209,14 +209,14 @@ namespace Compiler.Parse
                     analyzer.SymbolTableInsert(identifierRecordList, typeRecord);
                     break;
                 default:
-                    Error("Expecting VariableDeclaration but found " + lookAheadToken.Lexeme);
+                    Error("Expecting VariableDeclaration but found " + lookAheadToken.lexeme);
                     break;
             }
             
         }
         private void Type (ref TypeRecord typeRecord) 
         {
-            switch(lookAheadToken.Tag)
+            switch(lookAheadToken.tag)
             {
                 case Tags.MP_INTEGER: // Integer
                     UsedRules.WriteLine("10");
@@ -229,7 +229,7 @@ namespace Compiler.Parse
                     typeRecord.variableType = VariableType.Float;
                     break;
                 default:
-                    Error("Expecting Type but found " + lookAheadToken.Lexeme);
+                    Error("Expecting Type but found " + lookAheadToken.lexeme);
                     break;
             }
         }
@@ -254,7 +254,7 @@ namespace Compiler.Parse
             string procedureIdentifier = null;
             List<Parameter> parameterList = new List<Parameter>();
 
-            switch(lookAheadToken.Tag)
+            switch(lookAheadToken.tag)
             {
                 case Tags.MP_PROCEDURE:                    
                     UsedRules.WriteLine("17");
@@ -264,7 +264,7 @@ namespace Compiler.Parse
                     OptionalFormalParameterList();
                     break;
                 default:
-                    Error("Expecting ProcedureHeading but found " + lookAheadToken.Lexeme);
+                    Error("Expecting ProcedureHeading but found " + lookAheadToken.lexeme);
                     break;
             }
             
@@ -282,7 +282,7 @@ namespace Compiler.Parse
         }
         private void OptionalFormalParameterList () 
         {
-            switch(lookAheadToken.Tag)
+            switch(lookAheadToken.tag)
             {
                 case Tags.MP_LPAREN: // "(" FormalParameterSection FormalParameterSectionTail ")"
                     UsedRules.WriteLine("19");
@@ -297,13 +297,13 @@ namespace Compiler.Parse
                     UsedRules.WriteLine("20");
                     break;
                 default:
-                    Error("Expecting OptionalFormalParameterList but found " + lookAheadToken.Lexeme);
+                    Error("Expecting OptionalFormalParameterList but found " + lookAheadToken.lexeme);
                     break;
             }
         }
         private void FormalParameterSectionTail () 
         {
-            switch(lookAheadToken.Tag)
+            switch(lookAheadToken.tag)
             {
                 case Tags.MP_SCOLON: // ";" FormalParameterSection FormalParameterSectionTail
                     UsedRules.WriteLine("21");
@@ -315,13 +315,13 @@ namespace Compiler.Parse
                     UsedRules.WriteLine("22");
                     break;
                 default:
-                    Error("Expecting FormalParameterSectionTail but found " + lookAheadToken.Lexeme);
+                    Error("Expecting FormalParameterSectionTail but found " + lookAheadToken.lexeme);
                     break;
             }
         }
         private void FormalParameterSection () 
         {
-            switch(lookAheadToken.Tag)
+            switch(lookAheadToken.tag)
             {
                 case Tags.MP_IDENTIFIER: // ValueParameterSection
                     UsedRules.WriteLine("23");
@@ -332,7 +332,7 @@ namespace Compiler.Parse
                     VariableParameterSection();
                     break;
                 default:
-                    Error("Expecting FormalParameterSection but found " + lookAheadToken.Lexeme);
+                    Error("Expecting FormalParameterSection but found " + lookAheadToken.lexeme);
                     break;
             }
         }
@@ -375,7 +375,7 @@ namespace Compiler.Parse
         }
         private void StatementTail () 
         {
-            switch (lookAheadToken.Tag)
+            switch (lookAheadToken.tag)
             {
                 case Tags.MP_SCOLON:  //";" Statement StatementTail
                     UsedRules.WriteLine("30");
@@ -389,13 +389,13 @@ namespace Compiler.Parse
                     UsedRules.WriteLine("31");
                     break;
                 default:
-                    Error("Expecting StatementTail but found " + lookAheadToken.Lexeme);
+                    Error("Expecting StatementTail but found " + lookAheadToken.lexeme);
                     break;
             }
         }
         private void Statement () 
         {
-            switch (lookAheadToken.Tag)
+            switch (lookAheadToken.tag)
             {
                 case Tags.MP_SCOLON:
                 case Tags.MP_END:
@@ -417,7 +417,7 @@ namespace Compiler.Parse
                     WriteStatement();
                     break;
                 case Tags.MP_IDENTIFIER: //AssignmentStatement
-                    if(tokenQueue.Peek().Tag == Tags.MP_ASSIGN)
+                    if(tokenQueue.Peek().tag == Tags.MP_ASSIGN)
                     {
                         UsedRules.WriteLine("36");
                         AssignmentStatement();
@@ -445,14 +445,14 @@ namespace Compiler.Parse
                     ForStatement();
                     break;                    
                 default:
-                    Error("Expecting Statement but found " + lookAheadToken.Lexeme);
+                    Error("Expecting Statement but found " + lookAheadToken.lexeme);
                     break;
             }
         }
 
         private void EmptyStatement () 
         {
-            switch (lookAheadToken.Tag)
+            switch (lookAheadToken.tag)
             {
                 case Tags.MP_SCOLON:
                 case Tags.MP_END:
@@ -461,14 +461,14 @@ namespace Compiler.Parse
                     UsedRules.WriteLine("42");
                     break;
                 default:
-                    Error("Expecting EmptyStatement but found " + lookAheadToken.Lexeme);
+                    Error("Expecting EmptyStatement but found " + lookAheadToken.lexeme);
                     break;
             }
         }
         private void ReadStatement () 
         {
             IdentifierRecord idRecord = new IdentifierRecord();
-            switch(lookAheadToken.Tag)
+            switch(lookAheadToken.tag)
             {
                 case Tags.MP_READ:
                     UsedRules.WriteLine("43");
@@ -480,7 +480,7 @@ namespace Compiler.Parse
                     Match((int)Tags.MP_RPAREN);
                     break;
                 default:
-                    Error("Expecting Read but found " + lookAheadToken.Tag);
+                    Error("Expecting Read but found " + lookAheadToken.tag);
                     break;
             }
                     
@@ -488,7 +488,7 @@ namespace Compiler.Parse
         private void ReadParameterTail()
         {
             IdentifierRecord idRecord = new IdentifierRecord();
-            switch (lookAheadToken.Tag)
+            switch (lookAheadToken.tag)
             {
                 case Tags.MP_COMMA:  //"," ReadParameter ReadParameterTail
                     UsedRules.WriteLine("44");
@@ -502,13 +502,13 @@ namespace Compiler.Parse
                     UsedRules.WriteLine("45");
                     break;
                 default:
-                    Error("Expecting ReadParameterTail but found " + lookAheadToken.Lexeme);
+                    Error("Expecting ReadParameterTail but found " + lookAheadToken.lexeme);
                     break;
             }
         }
         private void ReadParameter (IdentifierRecord idRecord) 
         {
-            switch(lookAheadToken.Tag)
+            switch(lookAheadToken.tag)
             {
                 case Tags.MP_IDENTIFIER:
                     string idRecName = null;
@@ -518,13 +518,13 @@ namespace Compiler.Parse
                     analyzer.ProcessId(idRecord);
                     break;
                 default:
-                    Error("Expecting ID found " + lookAheadToken.Tag);
+                    Error("Expecting ID found " + lookAheadToken.tag);
                     break;
              }
         }
         private void WriteStatement () 
         {
-            switch(lookAheadToken.Tag)
+            switch(lookAheadToken.tag)
             {
                 case Tags.MP_WRITE:
                     UsedRules.WriteLine("47");
@@ -536,13 +536,13 @@ namespace Compiler.Parse
                     Match((int)Tags.MP_RPAREN);
                 break;
                 default:
-                    Error("Expecting Write, found " + lookAheadToken.Tag);
+                    Error("Expecting Write, found " + lookAheadToken.tag);
                 break;
             }
         }
         private void WriteParameterTail () 
         {
-            switch (lookAheadToken.Tag)
+            switch (lookAheadToken.tag)
             {
                 case Tags.MP_COMMA:  //"," WriteParameter WriteParameterTail
                     UsedRules.WriteLine("48");
@@ -555,7 +555,7 @@ namespace Compiler.Parse
                     UsedRules.WriteLine("49");
                     break;
                 default:
-                    Error("Expecting WriteParameterTail but found " + lookAheadToken.Lexeme);
+                    Error("Expecting WriteParameterTail but found " + lookAheadToken.lexeme);
                     break;
             }
         }
@@ -569,7 +569,7 @@ namespace Compiler.Parse
             IdentifierRecord idRecord = new IdentifierRecord();
             VariableType expressionRecord = VariableType.Null;
             string idRecName = null;
-            switch (lookAheadToken.Tag)
+            switch (lookAheadToken.tag)
             {
                 case Tags.MP_IDENTIFIER: // Identifier ":=" Expression
                     UsedRules.WriteLine("51");
@@ -581,7 +581,7 @@ namespace Compiler.Parse
                     analyzer.GenerateAssign(idRecord, expressionRecord);
                     break;
                 default:
-                    Error("Expecting AssignmentStatement but found " + lookAheadToken.Lexeme);
+                    Error("Expecting AssignmentStatement but found " + lookAheadToken.lexeme);
                     break;
             }
         }
@@ -596,7 +596,7 @@ namespace Compiler.Parse
         }
         private void OptionalElsePart() 
         {
-            switch (lookAheadToken.Tag)
+            switch (lookAheadToken.tag)
             {
                 case Tags.MP_ELSE: // "else" Statement  
                     UsedRules.WriteLine("53");
@@ -607,7 +607,7 @@ namespace Compiler.Parse
                     UsedRules.WriteLine("54");
                     break;
                 default:
-                    Error("Expecting OptionalElsePart but found " + lookAheadToken.Lexeme);
+                    Error("Expecting OptionalElsePart but found " + lookAheadToken.lexeme);
                     break;
             }
         }
@@ -653,7 +653,7 @@ namespace Compiler.Parse
         }
         private void StepValue() 
         {
-            switch (lookAheadToken.Tag)
+            switch (lookAheadToken.tag)
             {
                 case Tags.MP_TO: // "to"
                     UsedRules.WriteLine("60");
@@ -664,7 +664,7 @@ namespace Compiler.Parse
                     Match((int)Tags.MP_DOWNTO);
                     break;
                 default:
-                    Error("Expecting StepValue but found " + lookAheadToken.Lexeme);
+                    Error("Expecting StepValue but found " + lookAheadToken.lexeme);
                     break;
             }
         }
@@ -683,7 +683,7 @@ namespace Compiler.Parse
 
         private void OptionalActualParameterList() 
         {
-            switch (lookAheadToken.Tag)
+            switch (lookAheadToken.tag)
             {
                 case Tags.MP_LPAREN: // "(" ActualParameter ActualParameterTail ")" 
                     UsedRules.WriteLine("64");
@@ -718,7 +718,7 @@ namespace Compiler.Parse
                     UsedRules.WriteLine("65");
                     break;
                 default:
-                    Error("Expecting OptionalActualParameterList but found " + lookAheadToken.Lexeme);
+                    Error("Expecting OptionalActualParameterList but found " + lookAheadToken.lexeme);
                     break;
             }
         }
@@ -729,7 +729,7 @@ namespace Compiler.Parse
 
         private void ActualParameterTail()
         {
-            switch(lookAheadToken.Tag)
+            switch(lookAheadToken.tag)
             {
                 case Tags.MP_COMMA: //"," ActualParameter ActualParameterTail
                     UsedRules.WriteLine("66");
@@ -742,7 +742,7 @@ namespace Compiler.Parse
                     UsedRules.WriteLine("67");
                     break;
                 default:
-                    Error("Expecting ActualParameterTail but found " + lookAheadToken.Lexeme);
+                    Error("Expecting ActualParameterTail but found " + lookAheadToken.lexeme);
                     break;
             }
         }
@@ -755,7 +755,7 @@ namespace Compiler.Parse
 
         private void Expression(ref VariableType expressionRecord)
         {
-            switch(lookAheadToken.Tag)
+            switch(lookAheadToken.tag)
             {
                 case Tags.MP_LPAREN:
                 case Tags.MP_PLUS:
@@ -768,7 +768,7 @@ namespace Compiler.Parse
                     OptionalRelationalPart(ref expressionRecord);
                 break;
                 default:
-                    Error("Expecting Expression Args found " + lookAheadToken.Lexeme);
+                    Error("Expecting Expression Args found " + lookAheadToken.lexeme);
                 break;
             }
         }
@@ -779,7 +779,7 @@ namespace Compiler.Parse
             VariableType resultRecord = VariableType.Null;
             string relationalOpRecord = string.Empty;
 
-            switch (lookAheadToken.Tag)
+            switch (lookAheadToken.tag)
             {
                 case Tags.MP_EQUAL:
                 case Tags.MP_LTHAN:
@@ -807,7 +807,7 @@ namespace Compiler.Parse
                     UsedRules.WriteLine("71");
                     break;
                 default:
-                    Error("Expecting OptionalRelationalPart but found " + lookAheadToken.Lexeme);
+                    Error("Expecting OptionalRelationalPart but found " + lookAheadToken.lexeme);
                     break;
 
             }
@@ -815,8 +815,8 @@ namespace Compiler.Parse
         
         private void RelationalOperator(ref string relationalOpRecord)
         {
-            relationalOpRecord = lookAheadToken.Lexeme;
-            switch (lookAheadToken.Tag)
+            relationalOpRecord = lookAheadToken.lexeme;
+            switch (lookAheadToken.tag)
             {
                 case Tags.MP_EQUAL:
                     UsedRules.WriteLine("72");
@@ -846,7 +846,7 @@ namespace Compiler.Parse
                     Match((int)Tags.MP_NEQUAL);
                     break;
                 default:
-                    Error("Expecting RelationalOperator but found " + lookAheadToken.Lexeme);
+                    Error("Expecting RelationalOperator but found " + lookAheadToken.lexeme);
                     break;
 
             }
@@ -855,7 +855,7 @@ namespace Compiler.Parse
         private void SimpleExpression(ref VariableType simpleExpressionRecord)
         {
 
-            switch(lookAheadToken.Tag)
+            switch(lookAheadToken.tag)
             {
                 case Tags.MP_LPAREN:
                 case Tags.MP_PLUS:
@@ -869,7 +869,7 @@ namespace Compiler.Parse
                     TermTail(ref simpleExpressionRecord);
                 break;
                 default:
-                    Error("Expecting Simple Expression found " + lookAheadToken.Lexeme);
+                    Error("Expecting Simple Expression found " + lookAheadToken.lexeme);
                 break;
 
             }
@@ -881,7 +881,7 @@ namespace Compiler.Parse
             VariableType termRecord = VariableType.Null;
             VariableType resultRecord = VariableType.Null;
 
-            switch(lookAheadToken.Tag)
+            switch(lookAheadToken.tag)
             {
                 //AddingOperator Term TermTail
                 case Tags.MP_PLUS:
@@ -914,13 +914,13 @@ namespace Compiler.Parse
                     //lambda                    
                     break;
                 default:
-                    Error("Expecting TermTail but found " + lookAheadToken.Lexeme);
+                    Error("Expecting TermTail but found " + lookAheadToken.lexeme);
                     break;
             }
         }
         private void OptionalSign()
         {
-            switch(lookAheadToken.Tag)
+            switch(lookAheadToken.tag)
             {
                 case Tags.MP_PLUS:
                     UsedRules.WriteLine("81");
@@ -937,15 +937,15 @@ namespace Compiler.Parse
                     UsedRules.WriteLine("83");
                     break;
                 default:
-                    Error("Expecting OptionalSign but found " + lookAheadToken.Lexeme);
+                    Error("Expecting OptionalSign but found " + lookAheadToken.lexeme);
                     break;
             }
         }
 
         private void AddingOperator(ref string addOpRecord)
         {
-            addOpRecord = lookAheadToken.Lexeme;
-            switch (lookAheadToken.Tag)
+            addOpRecord = lookAheadToken.lexeme;
+            switch (lookAheadToken.tag)
             {
                 case Tags.MP_PLUS:
                     UsedRules.WriteLine("84");
@@ -960,14 +960,14 @@ namespace Compiler.Parse
                     Match((int)Tags.MP_OR);
                     break;
                 default:
-                    Error("Expecting AddingOperator but found " + lookAheadToken.Lexeme);
+                    Error("Expecting AddingOperator but found " + lookAheadToken.lexeme);
                     break;
             }
         }
 
         private void Term(ref VariableType termRecord)
         {
-            switch(lookAheadToken.Tag)
+            switch(lookAheadToken.tag)
             {
                 case Tags.MP_LPAREN:
                 case Tags.MP_IDENTIFIER:
@@ -978,7 +978,7 @@ namespace Compiler.Parse
                     FactorTail(ref termRecord);
                 break;
                 default:
-                    Error("Expecting Term found " + lookAheadToken.Tag);
+                    Error("Expecting Term found " + lookAheadToken.tag);
                 break;
             }
         }
@@ -986,8 +986,8 @@ namespace Compiler.Parse
         private void MultiplyingOperator(ref string mulOpRecord)
         {
 
-            mulOpRecord = lookAheadToken.Lexeme;
-            switch(lookAheadToken.Tag)
+            mulOpRecord = lookAheadToken.lexeme;
+            switch(lookAheadToken.tag)
             {
                 case Tags.MP_TIMES:
                     UsedRules.WriteLine("90");
@@ -1006,7 +1006,7 @@ namespace Compiler.Parse
                     Match((int)Tags.MP_AND);
                     break;                
                 default:
-                    Error("Expecting MultiplyingOperator but found " + lookAheadToken.Lexeme);
+                    Error("Expecting MultiplyingOperator but found " + lookAheadToken.lexeme);
                     break;
             }
         }
@@ -1015,7 +1015,7 @@ namespace Compiler.Parse
         {
             string mulOpRecord = null;
             VariableType factorRecord = VariableType.Null, resultRecord = VariableType.Null;
-            switch (lookAheadToken.Tag)
+            switch (lookAheadToken.tag)
             {
                 case Tags.MP_TIMES:
                 case Tags.MP_DIV:
@@ -1050,7 +1050,7 @@ namespace Compiler.Parse
                     UsedRules.WriteLine("89");
                     break;
                 default:
-                    Error("Expecting FactorTail but found " + lookAheadToken.Lexeme);
+                    Error("Expecting FactorTail but found " + lookAheadToken.lexeme);
                     break;
             }
         }
@@ -1060,11 +1060,11 @@ namespace Compiler.Parse
             IdentifierRecord idRecord = new IdentifierRecord();
             LiteralRecord litRecord = new LiteralRecord();
             string idRecName = null;
-            switch (lookAheadToken.Tag)
+            switch (lookAheadToken.tag)
             {
                 case Tags.MP_INTEGER_LIT:
                     UsedRules.WriteLine("94");
-                    litRecord.lexeme = lookAheadToken.Lexeme;
+                    litRecord.lexeme = lookAheadToken.lexeme;
                     litRecord.type = VariableType.Integer;
                     Match((int)Tags.MP_INTEGER_LIT);                    
                     analyzer.GenerateLitPush(litRecord, ref factorRecord);
@@ -1089,7 +1089,7 @@ namespace Compiler.Parse
                     OptionalActualParameterList();
                     break;
                 default:
-                    Error("Expecting Factor but found " + lookAheadToken.Lexeme);
+                    Error("Expecting Factor but found " + lookAheadToken.lexeme);
                     break;
             }
         }
@@ -1119,7 +1119,7 @@ namespace Compiler.Parse
         private void IdentifierTail(ref List<string>identifierRecordList)
         {
             string identifierRecord = null;
-            switch (lookAheadToken.Tag)
+            switch (lookAheadToken.tag)
             {
                 case Tags.MP_COMMA:
                     UsedRules.WriteLine("101");
@@ -1132,7 +1132,7 @@ namespace Compiler.Parse
                     UsedRules.WriteLine("102");
                     break;
                 default:
-                    Error("Expecting IdentifierTail but found " + lookAheadToken.Lexeme);
+                    Error("Expecting IdentifierTail but found " + lookAheadToken.lexeme);
                     break;
             }
         }
