@@ -585,12 +585,26 @@ namespace Compiler.Parse
         }
         private void IfStatement() 
         {
-            UsedRules.WriteLine("52");
-            Match((int)Tags.MP_IF);
-            BooleanExpression();
-            Match((int)Tags.MP_THEN);
-            Statement();
-            OptionalElsePart();
+            string ifLabelRecord = string.Empty, elseLabelRecord = string.Empty;
+
+            switch(lookAheadToken.tag)
+            {
+                case Tags.MP_IF:
+                    UsedRules.WriteLine("52");
+                    Match((int)Tags.MP_IF);
+                    BooleanExpression();
+                    analyzer.GenerateBranch(ref ifLabelRecord, BranchType.brfalse);
+                    Match((int)Tags.MP_THEN);
+                    Statement();
+                    analyzer.GenerateBranch(ref elseLabelRecord, BranchType.br);
+                    analyzer.GenerateLabel(ref ifLabelRecord);
+                    OptionalElsePart();
+                    analyzer.GenerateLabel(ref elseLabelRecord);
+                    break;
+                default:
+                    Error("Expecting IfStatement but foud " + lookAheadToken.lexeme);
+                    break;
+            }
         }
         private void OptionalElsePart() 
         {

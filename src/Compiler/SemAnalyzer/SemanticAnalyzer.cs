@@ -270,11 +270,43 @@ namespace Compiler.SemAnalyzer
         }
 
         /// <summary>
+        /// Generates code for a label
+        /// </summary>
+        /// <param name="labelRecord"></param>
+        internal void GenerateLabel(ref string labelRecord)
+        {
+            Console.WriteLine(labelRecord + ":"); 
+        }
+
+        /// <summary>
+        /// Generates code for branching
+        /// </summary>
+        /// <param name="branchLabelRecord"></param>
+        /// <param name="branchType"></param>
+        internal void GenerateBranch(ref string branchLabelRecord, BranchType branchType)
+        {
+            branchLabelRecord = nextLabel;
+
+            switch (branchType)
+            {
+                case BranchType.br:
+                    Console.Write("br.s ");
+                    break;
+                case BranchType.brfalse:
+                    Console.Write("brfalse ");
+                    break;
+                default:
+                    break;
+            }
+            Console.WriteLine(branchLabelRecord);
+        }
+        /// <summary>
         /// Generates code for return statements
         /// </summary>
         internal void GenerateReturn ()
         {
             Console.WriteLine("ret");
+            Console.WriteLine("}");
         }
     }
 }
