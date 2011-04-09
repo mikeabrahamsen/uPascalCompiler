@@ -38,7 +38,7 @@ namespace Compiler.SemAnalyzer
         /// <summary>
         /// Return the next label
         /// </summary>
-        public string NextLabel 
+        public string nextLabel 
         {
             get { return "L" + labelCount++; }
         }

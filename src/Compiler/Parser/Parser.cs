@@ -11,8 +11,7 @@ using Compiler.SymbolTbl;
 namespace Compiler.Parse
 {
     class Parser
-    {
-        
+    {        
         private TextWriter UsedRules = new StreamWriter("parse-tree.txt");
         
         public Parser (Queue<Token> TokenQueue,LexicalAnalyzer scanner, string fileName)
