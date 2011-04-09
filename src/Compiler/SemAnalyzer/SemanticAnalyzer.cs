@@ -120,7 +120,7 @@ namespace Compiler.SemAnalyzer
         {
             Console.WriteLine("call       string [mscorlib]System.Console::ReadLine()");
             Console.WriteLine("call       int32 [mscorlib]System.Int32::Parse(string)");
-            Console.WriteLine("stloc. " + idRecord.symbol.offset);
+            Console.WriteLine("stloc." + idRecord.symbol.offset);
         }
 
         /// <summary>
