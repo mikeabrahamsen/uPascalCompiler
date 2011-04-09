@@ -27,7 +27,7 @@ namespace Compiler.Library
     }
     public enum VariableType
     {
-        [Description("Int32")]
+        [Description("int32")]
         Integer = 1,
         Float,
         String,
