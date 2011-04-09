@@ -559,8 +559,23 @@ namespace Compiler.Parse
         }
         private void WriteParameter() 
         {
-            UsedRules.WriteLine("50");
-            OrdinalExpression();
+            VariableType ordinalExpressionRecord = VariableType.Null;
+            
+            switch(lookAheadToken.tag)
+            {
+                case Tags.MP_LPAREN:
+                case Tags.MP_PLUS:
+                case Tags.MP_MINUS:
+                case Tags.MP_INTEGER_LIT:
+                case Tags.MP_NOT:
+                case Tags.MP_IDENTIFIER:
+                    UsedRules.WriteLine("50");
+                    OrdinalExpression(ref ordinalExpressionRecord);
+                break;
+                default:
+                    Error("Expecting WriteParameter but found " + lookAheadToken.lexeme);
+                    break;
+            }
         }
         private void AssignmentStatement () 
         {
@@ -642,37 +657,88 @@ namespace Compiler.Parse
         }
         private void ForStatement () 
         {
-            UsedRules.WriteLine("57");
-            Match((int)Tags.MP_FOR);
-            ControlVariable();
-            Match((int)Tags.MP_ASSIGN);
-            InitialValue();
-            StepValue();
-            FinalValue();
-            Match((int)Tags.MP_DO);
-            Statement();
+            IdentifierRecord controlVariableRecord = new IdentifierRecord();
+            VariableType finalValueRecord = VariableType.Null;
+            VariableType controlStatementRecord = VariableType.Null;
+            string controlLabelRecord = string.Empty;
+            string loopLabel = string.Empty;
+            ControlRecord stepValueRecord = new ControlRecord();
+
+            switch(lookAheadToken.tag)
+            {
+                case Tags.MP_FOR:
+                    UsedRules.WriteLine("57");
+                    Match((int)Tags.MP_FOR);
+                    ControlVariable(ref controlVariableRecord);
+                    Match((int)Tags.MP_ASSIGN);
+                    InitialValue(ref controlVariableRecord);
+                    analyzer.GenerateLabel(ref controlLabelRecord);
+                    analyzer.GenerateIdPush(controlVariableRecord,ref controlStatementRecord);                      
+                    StepValue(ref stepValueRecord);
+                    FinalValue(ref finalValueRecord);
+                    analyzer.GenerateBranch(ref loopLabel, stepValueRecord.branchType);
+                    Match((int)Tags.MP_DO);
+                    Statement();
+                    analyzer.GenerateIncrement(ref controlVariableRecord, stepValueRecord.addingOperator);
+                    analyzer.GenerateBranch(ref controlLabelRecord, BranchType.br);
+                    analyzer.GenerateLabel(ref loopLabel);
+                    break;
+                default:
+                    Error("Expecting ForStatement found " + lookAheadToken.lexeme);
+                    break;
+            }
         }
-        private void ControlVariable () 
+        private void ControlVariable (ref IdentifierRecord controlVariableRecord) 
         {
-            string procedureIdentifier = null;
-            UsedRules.WriteLine("58");
-            Identifier(ref procedureIdentifier);
+            switch(lookAheadToken.tag)
+            {
+                case Tags.MP_IDENTIFIER:
+                    string procedureIdentifier = null;
+                    UsedRules.WriteLine("58");
+                    Identifier(ref procedureIdentifier);
+                    controlVariableRecord.lexeme = procedureIdentifier;
+                    analyzer.ProcessId(controlVariableRecord);
+                    break;
+                default:
+                    Error("Expecting ControlVariable but found " + lookAheadToken.lexeme);
+                    break;
+            }
         }
-        private void InitialValue () 
+        private void InitialValue (ref IdentifierRecord initialValueRecord) 
         {
-            UsedRules.WriteLine("59");
-            OrdinalExpression();
+            VariableType ordinalExpressionRecord = VariableType.Null;
+
+            switch (lookAheadToken.tag)
+            {
+                case Tags.MP_LPAREN:
+                case Tags.MP_PLUS:
+                case Tags.MP_MINUS:
+                case Tags.MP_INTEGER_LIT:
+                case Tags.MP_NOT:
+                case Tags.MP_IDENTIFIER:
+                    UsedRules.WriteLine("59");
+                    OrdinalExpression(ref ordinalExpressionRecord);
+                    analyzer.GenerateAssign(initialValueRecord, ordinalExpressionRecord);
+                    break;
+                default:
+                    Error("Expecting InitialValue but found " + lookAheadToken.lexeme);
+                    break;
+            }
         }
-        private void StepValue() 
+        private void StepValue(ref ControlRecord stepValueRecord) 
         {
             switch (lookAheadToken.tag)
             {
                 case Tags.MP_TO: // "to"
                     UsedRules.WriteLine("60");
+                    stepValueRecord.addingOperator = "add";
+                    stepValueRecord.branchType = BranchType.bgt;
                     Match((int)Tags.MP_TO);
                     break;
                 case Tags.MP_DOWNTO: //"downto"
                     UsedRules.WriteLine("61");
+                    stepValueRecord.addingOperator = "sub";
+                    stepValueRecord.branchType = BranchType.blt;
                     Match((int)Tags.MP_DOWNTO);
                     break;
                 default:
@@ -680,10 +746,23 @@ namespace Compiler.Parse
                     break;
             }
         }
-        private void FinalValue () 
+        private void FinalValue (ref VariableType ordinalExpressionRecord) 
         {
-            UsedRules.WriteLine("62");
-            OrdinalExpression();
+            switch(lookAheadToken.tag)
+            {
+                case Tags.MP_LPAREN:
+                case Tags.MP_PLUS:
+                case Tags.MP_MINUS:
+                case Tags.MP_INTEGER_LIT:
+                case Tags.MP_NOT:
+                case Tags.MP_IDENTIFIER:
+                    UsedRules.WriteLine("62");
+                    OrdinalExpression(ref ordinalExpressionRecord);
+                    break;
+                default:
+                Error("Expecting FinalValue but found " + lookAheadToken.lexeme);
+                break;
+            }
         }
         private void ProcedureStatement() 
         {
@@ -761,8 +840,23 @@ namespace Compiler.Parse
 
         private void ActualParameter()
         {
-            UsedRules.WriteLine("68");
-            OrdinalExpression();
+            VariableType ordinalExpressionRecord = VariableType.Null;
+
+            switch (lookAheadToken.tag)
+            {
+                case Tags.MP_LPAREN:
+                case Tags.MP_PLUS:
+                case Tags.MP_MINUS:
+                case Tags.MP_INTEGER_LIT:
+                case Tags.MP_NOT:
+                case Tags.MP_IDENTIFIER:
+                    UsedRules.WriteLine("68");
+                    OrdinalExpression(ref ordinalExpressionRecord);
+                    break;
+                default:
+                    Error("Expecting ActualParameter but found " + lookAheadToken.lexeme);
+                    break;
+            }
         }
 
         private void Expression(ref VariableType expressionRecord)
@@ -1112,11 +1206,24 @@ namespace Compiler.Parse
             UsedRules.WriteLine("98");
             Expression(ref expressionRecord);
         }
-        private void OrdinalExpression()
+        private void OrdinalExpression(ref VariableType expressionRecord)
         {
-            VariableType expressionRecord = VariableType.Null;
-            UsedRules.WriteLine("99");
-            Expression(ref expressionRecord);
+            switch (lookAheadToken.tag)
+            {
+                case Tags.MP_LPAREN:
+                case Tags.MP_PLUS:
+                case Tags.MP_MINUS:
+                case Tags.MP_IDENTIFIER:
+                case Tags.MP_NOT:
+                case Tags.MP_INTEGER_LIT:
+                    UsedRules.WriteLine("99");
+                    Expression(ref expressionRecord);
+                    break;
+                default:
+                    Error("Expecting OridinalExpression but found " + lookAheadToken.lexeme);
+                    break;
+            }
+            
         }
 
         private void IdentifierList (ref List<string> identifierRecordList)

@@ -66,6 +66,7 @@
     <Compile Include="Parser\SyntaxException.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SemAnalyzer\ControlRecord.cs" />
     <Compile Include="SemAnalyzer\IdentifierRecord.cs" />
     <Compile Include="SemAnalyzer\LiteralRecord.cs" />
     <Compile Include="SemAnalyzer\SemanticAnalyzer.cs" />

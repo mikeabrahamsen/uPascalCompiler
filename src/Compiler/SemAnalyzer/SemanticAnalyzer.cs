@@ -275,6 +275,10 @@ namespace Compiler.SemAnalyzer
         /// <param name="labelRecord"></param>
         internal void GenerateLabel(ref string labelRecord)
         {
+            if (labelRecord.Equals(string.Empty))
+            {
+                labelRecord = nextLabel;
+            }
             Console.WriteLine(labelRecord + ":"); 
         }
 
@@ -286,7 +290,10 @@ namespace Compiler.SemAnalyzer
         internal void GenerateBranch(ref string branchLabelRecord, BranchType branchType)
         {
             branchLabelRecord = nextLabel;
-
+            if (branchLabelRecord.Equals(string.Empty))
+            {
+                branchLabelRecord = nextLabel;
+            }
             switch (branchType)
             {
                 case BranchType.br:
@@ -294,6 +301,9 @@ namespace Compiler.SemAnalyzer
                     break;
                 case BranchType.brfalse:
                     Console.Write("brfalse ");
+                    break;
+                case BranchType.bgt:
+                    Console.Write("bgt ");
                     break;
                 default:
                     break;
@@ -307,6 +317,20 @@ namespace Compiler.SemAnalyzer
         {
             Console.WriteLine("ret");
             Console.WriteLine("}");
+        }
+
+        /// <summary>
+        /// Generates code for incrementing in a control structure
+        /// </summary>
+        /// <param name="controlLabelRecord"></param>
+        /// <param name="p"></param>
+        internal void GenerateIncrement(ref IdentifierRecord identifierRecord, string addingOperator)
+        {
+            int offset = identifierRecord.symbol.offset;
+            Console.WriteLine("ldloc." + offset);
+            Console.WriteLine("ldc.i4 1");
+            Console.WriteLine(addingOperator);
+            Console.WriteLine("stloc." + offset);
         }
     }
 }
