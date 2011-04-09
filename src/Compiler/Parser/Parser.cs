@@ -640,19 +640,18 @@ namespace Compiler.Parse
         }
         private void RepeatStatement() 
         {
-            string controlLabelRecord = string.Empty;
-            string loopLabel = string.Empty;
+            string startLoopLabel = string.Empty;
 
             switch(lookAheadToken.tag)
             {
                 case Tags.MP_REPEAT:
                     UsedRules.WriteLine("55");
                     Match((int)Tags.MP_REPEAT);
-                    analyzer.GenerateLabel(ref controlLabelRecord);
+                    analyzer.GenerateLabel(ref startLoopLabel);
                     StatementSequence();
                     Match((int)Tags.MP_UNTIL);                    
                     BooleanExpression();  
-                    analyzer.GenerateBranch(ref controlLabelRecord, BranchType.brfalse);
+                    analyzer.GenerateBranch(ref startLoopLabel, BranchType.brfalse);
                     break;
                 default:
                     Error("Expecting RepeatStatement but found " + lookAheadToken.lexeme);

@@ -7,24 +7,43 @@ using System.Reflection;
 
 namespace Compiler.Library
 {
+    /// <summary>
+    /// CIL Branch Type
+    /// </summary>
     public enum BranchType
     {
+        [Description("br ")]
         br,
+        [Description("beq ")]
         beq,
+        [Description("bge ")]
         bge,
+        [Description("bgt ")]
         bgt,
+        [Description("ble ")]
         ble,
+        [Description("blt ")]
         blt,
+        [Description("bne ")]
         bne,
+        [Description("brfalse ")]
         brfalse,
+        [Description("brtrue ")]
         brtrue
     }
     
+    /// <summary>
+    /// Input/Output
+    /// </summary>
     public enum IOMode
     {
         In = 1,
         InOut
     }
+
+    /// <summary>
+    /// Variable Type
+    /// </summary>
     public enum VariableType
     {
         [Description("int32")]
@@ -34,6 +53,10 @@ namespace Compiler.Library
         Fixed,
         Null
     }
+
+    /// <summary>
+    /// Symbol Types
+    /// </summary>
     public enum SymbolType
     {
         VariableSymbol = 1,

@@ -318,20 +318,8 @@ namespace Compiler.SemAnalyzer
             {
                 branchLabelRecord = nextLabel;
             }
-            switch (branchType)
-            {
-                case BranchType.br:
-                    Console.Write("br.s ");
-                    break;
-                case BranchType.brfalse:
-                    Console.Write("brfalse ");
-                    break;
-                case BranchType.bgt:
-                    Console.Write("bgt ");
-                    break;
-                default:
-                    break;
-            }
+
+            Console.Write(Enumerations.GetDescription<BranchType>(branchType));
             Console.WriteLine(branchLabelRecord);
         }
         /// <summary>
