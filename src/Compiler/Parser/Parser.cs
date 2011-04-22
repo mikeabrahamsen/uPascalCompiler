@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,7 +15,8 @@ namespace Compiler.Parse
     {        
         private TextWriter UsedRules = new StreamWriter("parse-tree.txt");
         
-        public Parser (Queue<Token> TokenQueue,LexicalAnalyzer scanner, string fileName)
+        public Parser (Queue<Token> TokenQueue,LexicalAnalyzer scanner, 
+                        string fileName)
         {
             this.tokenQueue = TokenQueue;
             this.scanner = scanner;
@@ -61,19 +63,6 @@ namespace Compiler.Parse
             
         }
 
-        private void Match(int tag, ref string lexeme)
-        {
-            if((int)lookAheadToken.tag == tag)
-            {
-                lexeme = lookAheadToken.lexeme;
-                Move();
-            }
-            else
-            {
-                Error("Syntax Error");
-            }
-        }
-
         private void Move ()
         {
             lookAheadToken = tokenQueue.Dequeue();
@@ -85,7 +74,8 @@ namespace Compiler.Parse
             Program();
             UsedRules.Close();
 
-            //If we find the EOF then the parser is done here, if not then there was an error
+            //If we find the EOF then the parser is done here, if not then there 
+            //was an error
             if(lookAheadToken.tag != Tags.MP_EOF)
             {
                 Error("Expecting EOF but found " + lookAheadToken.lexeme);
@@ -152,7 +142,8 @@ namespace Compiler.Parse
         {
             switch(lookAheadToken.tag)
             {
-                case Tags.MP_VAR: //"var" Variable Declaration ";" VariableDeclationTail
+                //"var" Variable Declaration ";" VariableDeclationTail
+                case Tags.MP_VAR: 
                     UsedRules.WriteLine("5");
                     Match((int)Tags.MP_VAR);
                     VariableDeclaration();
@@ -451,6 +442,7 @@ namespace Compiler.Parse
                 case Tags.MP_SCOLON:
                 case Tags.MP_BEGIN:
                 case Tags.MP_END:
+                case Tags.MP_READ:
                 case Tags.MP_WRITE:
                 case Tags.MP_IF:
                 case Tags.MP_ELSE:
@@ -464,7 +456,7 @@ namespace Compiler.Parse
                     StatementTail();
                     break;
                 default:
-                    Error("Expecting Statementequence but found " + lookAheadToken.lexeme);
+                    Error("Expecting Statementsequence but found " + lookAheadToken.lexeme);
                     break;
             }
         }
@@ -949,7 +941,8 @@ namespace Compiler.Parse
         }
         private void Identifier (ref string programIdenentifierRecord)
         {
-            Match((int)Tags.MP_IDENTIFIER, ref programIdenentifierRecord);
+            programIdenentifierRecord = lookAheadToken.lexeme;
+            Match((int)Tags.MP_IDENTIFIER);            
         }        
 
         private void ActualParameterTail()
@@ -1130,7 +1123,8 @@ namespace Compiler.Parse
                     UsedRules.WriteLine("79");
                     AddingOperator(ref addOpRecord);
                     Term(ref termRecord);
-                    analyzer.GenerateArithmetic(termTailRecord, addOpRecord, termRecord, ref resultRecord);
+                    analyzer.GenerateArithmetic(termTailRecord, addOpRecord, termRecord, 
+                                                    ref resultRecord);
                     TermTail(ref resultRecord);
                     break;
 
@@ -1264,7 +1258,8 @@ namespace Compiler.Parse
                     UsedRules.WriteLine("88");
                     MultiplyingOperator(ref mulOpRecord);
                     Factor(ref factorTailRecord);
-                    analyzer.GenerateArithmetic(factorTailRecord, mulOpRecord, factorRecord,ref resultRecord);
+                    analyzer.GenerateArithmetic(factorTailRecord, mulOpRecord, factorRecord,
+                                                    ref resultRecord);
                     FactorTail(ref factorTailRecord);
                     break;
 
