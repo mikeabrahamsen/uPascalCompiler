@@ -59,7 +59,7 @@ namespace Compiler.SemAnalyzer
             {
                 string previousCilScope = symbolTableStack.Peek().cilScope;
                 string previousName = symbolTableStack.Peek().name;
-                cilScope = previousCilScope + "/" + previousName;
+                cilScope = previousCilScope + "/c__" + previousName;
             }
             else
             {
@@ -127,6 +127,24 @@ namespace Compiler.SemAnalyzer
             }           
         }
         
+         /// <summary>
+        /// inserts symbols into the symboltable
+        /// </summary>
+        /// <param name="idRecordList"></param>
+        /// <param name="typeRecord"></param>
+        public void SymbolTableInsert(MethodRecord methodRecord)
+        {
+            Symbol symbol;
+            switch (methodRecord.symbolType)
+            {
+                case SymbolType.ProcedureSymbol:
+                    symbol = new ProcedureSymbol(methodRecord.name, SymbolType.ProcedureSymbol, nextLabel, methodRecord.parameterList);
+                    symbolTableStack.Peek().Insert(symbol);
+                    break;
+                case SymbolType.FunctionSymbol:
+                    break;
+            }
+        }
         /// <summary>
         /// Generates code for a read statement
         /// </summary>
@@ -302,12 +320,37 @@ namespace Compiler.SemAnalyzer
                             Console.Write(".field public " + Enumerations.GetDescription<VariableType>(
                                 (symbol as VariableSymbol).variableType) + " " + symbol.name);
                             break;
+                        case SymbolType.ProcedureSymbol:
+                            break;
+                        case SymbolType.FunctionSymbol:
+                            break;
                     }
                     index++;
                 }
                 Console.WriteLine();
             }
+
+            if (symbolTableStack.Count > 1)
+            {
+                GeneratePreviousScopeObjects();
+            }
         }
+
+        /// <summary>
+        /// Generates fields for all of the previous scopes that we may need to 
+        /// see from the current scope
+        /// </summary>
+        internal void GeneratePreviousScopeObjects()
+        {
+
+            foreach (SymbolTable symbolTable in symbolTableStack)
+            {
+                Console.WriteLine(".field public class " + symbolTable.cilScope + "/c__"
+                    + symbolTable.name + " c__" + symbolTable.name + "Obj");
+            }
+            
+        }
+        /*
         /// <summary>
         /// Generates code for local variable
         /// </summary>
@@ -340,7 +383,7 @@ namespace Compiler.SemAnalyzer
                 }
                 Console.WriteLine(")");
             }
-        }
+        }*/
         /// <summary>
         /// Generates code for assignment statements
         /// </summary>

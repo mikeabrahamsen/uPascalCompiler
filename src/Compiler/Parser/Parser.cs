@@ -92,7 +92,7 @@ namespace Compiler.Parse
                     UsedRules.WriteLine("2");
                     ProgramHeading(ref programIdentifierRecord);
                     Match(';');
-                    Block(ref programIdentifierRecord);
+                    Block(programIdentifierRecord);
                     analyzer.symbolTableStack.Pop();
                     Match('.');
                     analyzer.GenerateClosingBrace();
@@ -120,7 +120,7 @@ namespace Compiler.Parse
             }
         }
 
-        private void Block (ref string identifierRecord) 
+        private void Block (string identifierRecord) 
         {
             switch (lookAheadToken.tag)
             {
@@ -251,15 +251,15 @@ namespace Compiler.Parse
         }
         private void ProcedureDeclaration () 
         {
-            string procedureIdentifierRecord = null;
+            MethodRecord procedureIdentifierRecord = new MethodRecord(SymbolType.ProcedureSymbol);
 
             switch(lookAheadToken.tag)
             {
                 case Tags.MP_PROCEDURE:
                     UsedRules.WriteLine("15");
-                    ProcedureHeading(ref procedureIdentifierRecord);
+                    ProcedureHeading(procedureIdentifierRecord);
                     Match(';');
-                    Block(ref procedureIdentifierRecord);
+                    Block(procedureIdentifierRecord.name);
                     analyzer.symbolTableStack.Pop();
                     Match(';');
                     break;
@@ -271,14 +271,14 @@ namespace Compiler.Parse
         }
         private void FunctionDeclaration () 
         {
-            string functionIdentifierRecord = null;
+            MethodRecord functionIdentifierRecord = new MethodRecord(SymbolType.FunctionSymbol);
             switch (lookAheadToken.tag)
             {
                 case Tags.MP_FUNCTION:
                     UsedRules.WriteLine("16");
-                    FunctionHeading(ref functionIdentifierRecord);
+                    FunctionHeading(functionIdentifierRecord);
                     Match(';');
-                    Block(ref functionIdentifierRecord);
+                    Block(functionIdentifierRecord.name);
                     analyzer.symbolTableStack.Pop();
                     Match(';');
                     break;
@@ -287,18 +287,16 @@ namespace Compiler.Parse
                     break;
             }
         }
-        private void ProcedureHeading (ref string procedureIdentifier) 
+        private void ProcedureHeading (MethodRecord procedureRecord) 
         {
-            List<Parameter> parameterList = new List<Parameter>();
-
             switch(lookAheadToken.tag)
             {
                 case Tags.MP_PROCEDURE:                    
                     UsedRules.WriteLine("17");
                     Match((int)Tags.MP_PROCEDURE);
-                    Identifier(ref procedureIdentifier);
-                    analyzer.CreateSymbolTable(procedureIdentifier);
-                    OptionalFormalParameterList();
+                    Identifier(procedureRecord);
+                    analyzer.CreateSymbolTable(procedureRecord.name);
+                    OptionalFormalParameterList(procedureRecord.parameterList);
                     break;
                 default:
                     Error("Expecting ProcedureHeading but found " + lookAheadToken.lexeme);
@@ -307,16 +305,17 @@ namespace Compiler.Parse
             
 
         }
-        private void FunctionHeading (ref string functionIdentiferRecord) 
+        private void FunctionHeading (MethodRecord functionRecord) 
         {
             TypeRecord typeRecord = new TypeRecord(SymbolType.FunctionSymbol, VariableType.Null);
+
             switch (lookAheadToken.tag)
             {
                 case Tags.MP_FUNCTION:
                     UsedRules.WriteLine("18");
                     Match((int)Tags.MP_FUNCTION);
-                    Identifier(ref functionIdentiferRecord);
-                    OptionalFormalParameterList();
+                    Identifier(functionRecord);
+                    OptionalFormalParameterList(functionRecord.parameterList);
                     Type(ref typeRecord);
                     break;
                 default:
@@ -324,15 +323,15 @@ namespace Compiler.Parse
                     break;
             }
         }
-        private void OptionalFormalParameterList () 
+        private void OptionalFormalParameterList (List<Parameter> parameterList) 
         {
             switch(lookAheadToken.tag)
             {
                 case Tags.MP_LPAREN: // "(" FormalParameterSection FormalParameterSectionTail ")"
                     UsedRules.WriteLine("19");
                     Match('(');
-                    FormalParameterSection();
-                    FormalParameterSectionTail();
+                    FormalParameterSection(parameterList);
+                    FormalParameterSectionTail(parameterList);
                     Match(')');
                     break;
                 case Tags.MP_SCOLON:
@@ -345,15 +344,15 @@ namespace Compiler.Parse
                     break;
             }
         }
-        private void FormalParameterSectionTail () 
+        private void FormalParameterSectionTail (List<Parameter> parameters) 
         {
             switch(lookAheadToken.tag)
             {
                 case Tags.MP_SCOLON: // ";" FormalParameterSection FormalParameterSectionTail
                     UsedRules.WriteLine("21");
                     Match(';');
-                    FormalParameterSection();
-                    FormalParameterSectionTail();
+                    FormalParameterSection(parameters);
+                    FormalParameterSectionTail(parameters);
                     break;
                 case Tags.MP_RPAREN: // lamda
                     UsedRules.WriteLine("22");
@@ -363,24 +362,24 @@ namespace Compiler.Parse
                     break;
             }
         }
-        private void FormalParameterSection () 
+        private void FormalParameterSection (List<Parameter> parameters) 
         {
             switch(lookAheadToken.tag)
             {
                 case Tags.MP_IDENTIFIER: // ValueParameterSection
                     UsedRules.WriteLine("23");
-                    ValueParameterSection();
+                    ValueParameterSection(parameters);
                     break;
                 case Tags.MP_VAR: // VariableParameterSection
                     UsedRules.WriteLine("24");
-                    VariableParameterSection();
+                    VariableParameterSection(parameters);
                     break;
                 default:
                     Error("Expecting FormalParameterSection but found " + lookAheadToken.lexeme);
                     break;
             }
         }
-        private void ValueParameterSection () 
+        private void ValueParameterSection (List<Parameter> parameters) 
         {
             TypeRecord typeRecord = new TypeRecord(SymbolType.ParameterSymbol, VariableType.Null);
             List<string> identifierList = new List<string>();
@@ -392,13 +391,15 @@ namespace Compiler.Parse
                     IdentifierList(ref identifierList);
                     Match(':');
                     Type(ref typeRecord);
+
+                     //TODO: must make the list of parameters
                      break;
                  default:
                      Error("Expecting ValueParameterSection but found " + lookAheadToken.lexeme);
                      break;
             }
         }
-        private void VariableParameterSection () 
+        private void VariableParameterSection (List<Parameter> parameters) 
         {
             TypeRecord typeRecord = new TypeRecord(SymbolType.ParameterSymbol, VariableType.Null);
             List<string> identifierList = new List<string>();
@@ -411,6 +412,7 @@ namespace Compiler.Parse
                     IdentifierList(ref identifierList);
                     Match(':');
                     Type(ref typeRecord);
+                    //TODO: must make the list of parameters
                     break;
                 default:
                     Error("Expecting VariableParameterSection but found " + lookAheadToken.lexeme);
@@ -957,8 +959,12 @@ namespace Compiler.Parse
         {
             programIdenentifierRecord = lookAheadToken.lexeme;
             Match((int)Tags.MP_IDENTIFIER);            
-        }        
-
+        }
+        private void Identifier(MethodRecord programIdenentifierRecord)
+        {
+            programIdenentifierRecord.name = lookAheadToken.lexeme;
+            Match((int)Tags.MP_IDENTIFIER);
+        } 
         private void ActualParameterTail()
         {
             switch(lookAheadToken.tag)
