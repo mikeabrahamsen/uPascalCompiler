@@ -10,6 +10,8 @@ namespace Compiler.SemAnalyzer
 {
     class SemanticAnalyzer
     {
+        const int DELEGATE_EXTRA_SPACE = 2;
+
         /// <summary>
         /// Gets and sets the symbolTableStack
         /// </summary>
@@ -51,8 +53,21 @@ namespace Compiler.SemAnalyzer
         /// <param name="recordName"></param>
         public void CreateSymbolTable(string recordName)
         {
-            SymbolTable symbolTable = new SymbolTable(recordName, symbolTableStack.Count);
-            symbolTableStack.Push(symbolTable);            
+            string cilScope;
+
+            if (symbolTableStack.Count != 0)
+            {
+                string previousCilScope = symbolTableStack.Peek().cilScope;
+                string previousName = symbolTableStack.Peek().name;
+                cilScope = previousCilScope + "/" + previousName;
+            }
+            else
+            {
+                cilScope = "Program";
+            }
+
+            SymbolTable symbolTable = new SymbolTable(recordName,cilScope, symbolTableStack.Count);
+            symbolTableStack.Push(symbolTable);
         }
 
         /// <summary>
@@ -120,7 +135,8 @@ namespace Compiler.SemAnalyzer
         {
             Console.WriteLine("call       string [mscorlib]System.Console::ReadLine()");
             Console.WriteLine("call       int32 [mscorlib]System.Int32::Parse(string)");
-            Console.WriteLine("stloc." + idRecord.symbol.offset);
+            Console.Write("stfld\t");
+            GenerateFieldLocation(idRecord);
         }
 
         /// <summary>
@@ -149,10 +165,24 @@ namespace Compiler.SemAnalyzer
         /// <param name="factorRecord"></param>
         internal void GenerateIdPush (IdentifierRecord idRecord, ref VariableType factorRecord)
         {
-            Console.WriteLine("ldloc." + idRecord.symbol.offset);
+            Console.WriteLine("  ldloc.0");
+            Console.Write("  ldfld\t");
+            GenerateFieldLocation(idRecord);
+
             factorRecord = idRecord.symbol.variableType;
         }
 
+        /// <summary>
+        /// Writes the location and type for field
+        /// </summary>
+        /// <param name="idRecord"></param>
+        internal void GenerateFieldLocation(IdentifierRecord idRecord)
+        {
+            Console.WriteLine(Enumerations.GetDescription<VariableType>(
+                idRecord.symbol.variableType) + " " +
+                    idRecord.symbolTable.cilScope + "/c__" + idRecord.symbolTable.name
+                        + "::" + idRecord.lexeme + Environment.NewLine);
+        }
         /// <summary>
         /// Generates code for arithmetic operations
         /// </summary>
@@ -246,11 +276,38 @@ namespace Compiler.SemAnalyzer
         internal void GenerateProgramInitialize(string name)
         {
             Console.WriteLine(".assembly extern mscorlib {}");
-            Console.WriteLine(".assembly " + name + " {}\n");
-            Console.WriteLine(".method static void Main()\n{");
-            Console.WriteLine(".entrypoint");
+            Console.WriteLine(".assembly " + name + " {}" + Environment.NewLine);
+            Console.WriteLine(".class private auto ansi beforefieldinit Program");
+            Console.WriteLine("\textends [mscorlib]System.Object");
+            Console.WriteLine("{" + Environment.NewLine);
         }
+        /// <summary>
+        /// Generates code for fields
+        /// </summary>
+        internal void GenerateFields()
+        {
+            SymbolTable table = symbolTableStack.Peek();
+            int recordSize = table.activationRecordSize;
 
+            if (recordSize > 0)
+            {
+                int index = 0;
+
+                foreach (Symbol symbol in table.symbolTable)
+                {
+                    switch (symbol.symbolType)
+                    {
+                        case SymbolType.VariableSymbol:
+                            //write the enum out as a string using the Get
+                            Console.Write(".field public " + Enumerations.GetDescription<VariableType>(
+                                (symbol as VariableSymbol).variableType) + " " + symbol.name);
+                            break;
+                    }
+                    index++;
+                }
+                Console.WriteLine();
+            }
+        }
         /// <summary>
         /// Generates code for local variable
         /// </summary>
@@ -262,7 +319,7 @@ namespace Compiler.SemAnalyzer
             if (recordSize > 0)
             {
                 int index = 0;
-                Console.WriteLine(".maxstack " + recordSize);
+                Console.WriteLine(".maxstack " + (recordSize + 1));
                 Console.Write(".locals init (");
 
                 foreach (Symbol symbol in table.symbolTable)
@@ -271,7 +328,8 @@ namespace Compiler.SemAnalyzer
                     {                           
                         case SymbolType.VariableSymbol:
                             //write the enum out as a string using the Get
-                            Console.Write("[" + index + "] " + Enumerations.GetDescription<VariableType>((symbol as VariableSymbol).variableType) + " " + symbol.name);
+                            Console.Write("[" + index + "] " + Enumerations.GetDescription<VariableType>(
+                                (symbol as VariableSymbol).variableType) + " " + symbol.name);
                             if (index < table.symbolTable.Count -1)
                             {
                                 Console.Write(",");
@@ -290,7 +348,10 @@ namespace Compiler.SemAnalyzer
         /// <param name="expressionRecord"></param>
         internal void GenerateAssign (IdentifierRecord idRecord, VariableType expressionRecord)
         {
-            Console.WriteLine("stloc." + idRecord.symbol.offset);
+            Console.WriteLine("stfld\t" + 
+                Enumerations.GetDescription<VariableType>(idRecord.symbol.variableType) + " " + 
+                    idRecord.symbolTable.cilScope + "/c__" + idRecord.symbolTable.name
+                        + "::" + idRecord.lexeme + Environment.NewLine);
         }
 
         /// <summary>
@@ -338,11 +399,94 @@ namespace Compiler.SemAnalyzer
         /// <param name="p"></param>
         internal void GenerateIncrement(ref IdentifierRecord identifierRecord, string addingOperator)
         {
-            int offset = identifierRecord.symbol.offset;
-            Console.WriteLine("ldloc." + offset);
-            Console.WriteLine("ldc.i4 1");
-            Console.WriteLine(addingOperator);
-            Console.WriteLine("stloc." + offset);
+            Console.WriteLine("  ldloc.0");
+            Console.WriteLine("  ldloc.0");
+            Console.Write("  ldfld\t");
+            GenerateFieldLocation(identifierRecord);
+            Console.WriteLine("  ldc.i4 1");
+            Console.WriteLine("  " + addingOperator);
+            Console.Write("  stfld\t"); 
+            GenerateFieldLocation(identifierRecord);
+        }
+        
+        /// <summary>
+        /// Generates a closing brace
+        /// </summary>
+        internal void GenerateClosingBrace()
+        {
+            Console.WriteLine("}");
+        }
+
+        /// <summary>
+        /// Generates code for a class declaration
+        /// </summary>
+        /// <param name="identifierRecord"></param>
+        internal void GenerateClassDeclaration(string identifierRecord)
+        {
+            Console.WriteLine("/* c__" + identifierRecord + " Class definition */");
+            Console.WriteLine(".class auto ansi sealed nested private beforefieldinit c__" +
+                identifierRecord);
+            Console.WriteLine("\textends [mscorlib]System.Object");
+            Console.WriteLine("{" + Environment.NewLine);
+        }
+
+        /// <summary>
+        /// Generates code for a class constructor
+        /// </summary>
+        /// <param name="identifierRecord"></param>
+        internal void GenerateClassConstructor(string identifierRecord)
+        {
+            Console.WriteLine("/* c__" + identifierRecord + " constructor */");
+            Console.WriteLine(".method public hidebysig specialname rtspecialname ");
+            Console.WriteLine("\tinstance void  .ctor() cil managed ");
+            Console.WriteLine("{");
+            Console.WriteLine("  .maxstack  8");
+            Console.WriteLine("  .ldarg.0");
+            Console.WriteLine("  call\tinstance void [mscorlib]System.Object::.ctor()");
+            Console.WriteLine("  ret");
+            Console.WriteLine("} // end of method c__" + identifierRecord + "::.ctor");
+        }
+
+        /// <summary>
+        /// Generates code for a method declaration
+        /// </summary>
+        /// <param name="identifierRecord"></param>
+        internal void GenerateMethodDeclaration(string identifierRecord)
+        {
+            if (symbolTableStack.Count == 1)
+            {
+                Console.WriteLine(".method private hidebysig static void " + identifierRecord + 
+                        "() cil managed");
+                Console.WriteLine("{");
+                Console.WriteLine(" .entrypoint");
+            }
+            else
+            {
+                Console.WriteLine(".method public hidebysig instance void " + identifierRecord + 
+                        "() cil managed");
+                Console.WriteLine("{");
+            }
+
+            int delegateCount = 0;
+
+            Console.WriteLine("  .maxstack " + (delegateCount + DELEGATE_EXTRA_SPACE) + 
+                                    Environment.NewLine);
+
+            string cilScope = symbolTableStack.Peek().cilScope;
+
+            Console.WriteLine( "  .locals init ([0] class " + cilScope + "/c__" + identifierRecord +
+                " c__" + identifierRecord + "Obj" + ")" + Environment.NewLine);
+
+            Console.WriteLine("  newobj\tvoid " + cilScope + "/c__" + identifierRecord + "::.ctor()");
+            Console.WriteLine("  stloc.0" + Environment.NewLine);
+
+        }
+        /// <summary>
+        /// Generates code for loading an object onto the stack
+        /// </summary>
+        internal void GenerateLoadObject()
+        {
+            Console.WriteLine("  ldloc.0");
         }
     }
 }

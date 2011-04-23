@@ -7,23 +7,42 @@ namespace Compiler.SymbolTbl
 {
     class SymbolTable
     {
+        /// <summary>
+        /// Gets and sets the name
+        /// </summary>
         public string name
         {
             get;
             set;
         }
+        /// <summary>
+        /// Gets and sets the nesting level
+        /// </summary>
         public int nestingLevel
         {
             get;
             set;
         }
+        /// <summary>
+        /// gets and sets the activation record size
+        /// </summary>
         public int activationRecordSize
         {
             get;
             set;
         }
-
+        /// <summary>
+        /// Gets and sets the symbolTable
+        /// </summary>
         public List<Symbol> symbolTable
+        {
+            get;
+            set;
+        }
+        /// <summary>
+        /// Gets and sets the cilScope
+        /// </summary>
+        public string cilScope
         {
             get;
             set;
@@ -34,9 +53,10 @@ namespace Compiler.SymbolTbl
         /// <param name="name"></param>
         /// <param name="nestingLevel"></param>
         /// <param name="activationRecordSize"></param>
-        public SymbolTable (string name,int nestingLevel)
+        public SymbolTable (string name,string cilScope,int nestingLevel)
         {
             this.name = name;
+            this.cilScope = cilScope;
             this.nestingLevel = nestingLevel;
             symbolTable = new List<Symbol>();
         }

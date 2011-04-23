@@ -84,25 +84,26 @@ namespace Compiler.Parse
         }
         private void Program ()
         {
+            string programIdentifierRecord = string.Empty;
+
             switch (lookAheadToken.tag)
             {
                 case Tags.MP_PROGRAM:
                     UsedRules.WriteLine("2");
-                    ProgramHeading();
+                    ProgramHeading(ref programIdentifierRecord);
                     Match(';');
-                    Block();
+                    Block(ref programIdentifierRecord);
                     Match('.');
-                    analyzer.GenerateReturn();
+                    analyzer.GenerateClosingBrace();
                     break;
                 default:
                     Error("Expecting Program found " + lookAheadToken.lexeme);
                     break;
             }
-
         }
-        private void ProgramHeading () 
+
+        private void ProgramHeading(ref string programIdentifierRecord) 
         {
-            string programIdentifierRecord = null;
             switch(lookAheadToken.tag)
             {
                 case Tags.MP_PROGRAM:
@@ -118,7 +119,7 @@ namespace Compiler.Parse
             }
         }
 
-        private void Block () 
+        private void Block (ref string identifierRecord) 
         {
             switch (lookAheadToken.tag)
             {
@@ -127,10 +128,15 @@ namespace Compiler.Parse
                 case Tags.MP_FUNCTION:
                 case Tags.MP_BEGIN:
                     UsedRules.WriteLine("4");
+                    analyzer.GenerateClassDeclaration(identifierRecord);
                     VariableDeclarationPart();
-                    analyzer.GenerateLocals();
+                    analyzer.GenerateFields();
+                    analyzer.GenerateClassConstructor(identifierRecord);
                     ProcedureAndFunctionDeclarationPart();
+                    analyzer.GenerateClosingBrace();
+                    analyzer.GenerateMethodDeclaration(identifierRecord);
                     StatementPart();
+                    analyzer.GenerateReturn();
                     break;
                 default:
                     Error("Expecting ProgramBlock found " + lookAheadToken.lexeme);
@@ -244,13 +250,15 @@ namespace Compiler.Parse
         }
         private void ProcedureDeclaration () 
         {
+            string procedureIdentifierRecord = null;
+
             switch(lookAheadToken.tag)
             {
                 case Tags.MP_PROCEDURE:
                     UsedRules.WriteLine("15");
-                    ProcedureHeading();
+                    ProcedureHeading(ref procedureIdentifierRecord);
                     Match(';');
-                    Block();
+                    Block(ref procedureIdentifierRecord);
                     Match(';');
                     break;
                 default:
@@ -261,13 +269,14 @@ namespace Compiler.Parse
         }
         private void FunctionDeclaration () 
         {
+            string functionIdentifierRecord = null;
             switch (lookAheadToken.tag)
             {
                 case Tags.MP_FUNCTION:
                     UsedRules.WriteLine("16");
-                    FunctionHeading();
+                    FunctionHeading(ref functionIdentifierRecord);
                     Match(';');
-                    Block();
+                    Block(ref functionIdentifierRecord);
                     Match(';');
                     break;
                 default:
@@ -275,9 +284,8 @@ namespace Compiler.Parse
                     break;
             }
         }
-        private void ProcedureHeading () 
+        private void ProcedureHeading (ref string procedureIdentifier) 
         {
-            string procedureIdentifier = null;
             List<Parameter> parameterList = new List<Parameter>();
 
             switch(lookAheadToken.tag)
@@ -296,16 +304,15 @@ namespace Compiler.Parse
             
 
         }
-        private void FunctionHeading () 
+        private void FunctionHeading (ref string functionIdentiferRecord) 
         {
             TypeRecord typeRecord = new TypeRecord(SymbolType.FunctionSymbol, VariableType.Null);
-            string procedureIdentifier = null;
             switch (lookAheadToken.tag)
             {
                 case Tags.MP_FUNCTION:
                     UsedRules.WriteLine("18");
                     Match((int)Tags.MP_FUNCTION);
-                    Identifier(ref procedureIdentifier);
+                    Identifier(ref functionIdentiferRecord);
                     OptionalFormalParameterList();
                     Type(ref typeRecord);
                     break;
@@ -562,6 +569,7 @@ namespace Compiler.Parse
                     Match((int)Tags.MP_READ);
                     Match((int)Tags.MP_LPAREN);
                     ReadParameter(idRecord);
+                    analyzer.GenerateLoadObject();
                     analyzer.GenerateReadStatement(idRecord);
                     ReadParameterTail();
                     Match((int)Tags.MP_RPAREN);
@@ -581,6 +589,7 @@ namespace Compiler.Parse
                     UsedRules.WriteLine("44");
                     Match((int)Tags.MP_COMMA);
                     ReadParameter(idRecord);
+                    analyzer.GenerateLoadObject();
                     analyzer.GenerateReadStatement(idRecord);
                     ReadParameterTail();
                     break;
@@ -679,6 +688,7 @@ namespace Compiler.Parse
                     idRecord.lexeme = idRecName;
                     analyzer.ProcessId(idRecord);
                     Match((int)Tags.MP_ASSIGN);
+                    analyzer.GenerateLoadObject();
                     Expression(ref expressionRecord);
                     analyzer.GenerateAssign(idRecord, expressionRecord);
                     break;
@@ -835,6 +845,7 @@ namespace Compiler.Parse
                 case Tags.MP_NOT:
                 case Tags.MP_IDENTIFIER:
                     UsedRules.WriteLine("59");
+                    analyzer.GenerateLoadObject();
                     OrdinalExpression(ref ordinalExpressionRecord);
                     analyzer.GenerateAssign(initialValueRecord, ordinalExpressionRecord);
                     break;
