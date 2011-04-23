@@ -93,6 +93,7 @@ namespace Compiler.Parse
                     ProgramHeading(ref programIdentifierRecord);
                     Match(';');
                     Block(ref programIdentifierRecord);
+                    analyzer.symbolTableStack.Pop();
                     Match('.');
                     analyzer.GenerateClosingBrace();
                     break;
@@ -259,6 +260,7 @@ namespace Compiler.Parse
                     ProcedureHeading(ref procedureIdentifierRecord);
                     Match(';');
                     Block(ref procedureIdentifierRecord);
+                    analyzer.symbolTableStack.Pop();
                     Match(';');
                     break;
                 default:
@@ -277,6 +279,7 @@ namespace Compiler.Parse
                     FunctionHeading(ref functionIdentifierRecord);
                     Match(';');
                     Block(ref functionIdentifierRecord);
+                    analyzer.symbolTableStack.Pop();
                     Match(';');
                     break;
                 default:
