@@ -381,7 +381,7 @@ namespace Compiler.SemAnalyzer
                             break;
                         case SymbolType.ProcedureSymbol:
                             cilOutput.WriteLine(".field public class Program/" + symbol.name +
-                                "\tDelegate D__" + symbol.name);
+                                "Delegate d__" + symbol.name);
                             break;
                         case SymbolType.FunctionSymbol:
                             break;
