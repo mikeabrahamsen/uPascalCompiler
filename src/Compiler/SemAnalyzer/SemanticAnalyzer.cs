@@ -551,7 +551,7 @@ namespace Compiler.SemAnalyzer
             cilOutput.WriteLine( "  .locals init ([0] class " + cilScope + "/c__" + identifierRecord +
                 " c__" + identifierRecord + "Obj" + ")" + Environment.NewLine);
 
-            cilOutput.WriteLine("  newobj\tvoid " + cilScope + "/c__" + identifierRecord + "::.ctor()");
+            cilOutput.WriteLine("  newobj\tinstance void " + cilScope + "/c__" + identifierRecord + "::.ctor()");
             cilOutput.WriteLine("  stloc.0" + Environment.NewLine);
 
         }
