@@ -51,7 +51,7 @@ namespace Compiler.SemAnalyzer
         {
             symbolTableStack = new Stack<SymbolTable>();
             delegateList = new List<MethodRecord>();
-            cilOutput = new StreamWriter("CIL.txt");
+            cilOutput = new StreamWriter("CIL.il");
             labelCount = 0;
         }
 
@@ -515,7 +515,7 @@ namespace Compiler.SemAnalyzer
             cilOutput.WriteLine("\tinstance void  .ctor() cil managed ");
             cilOutput.WriteLine("{");
             cilOutput.WriteLine("  .maxstack  8");
-            cilOutput.WriteLine("  .ldarg.0");
+            cilOutput.WriteLine("  ldarg.0");
             cilOutput.WriteLine("  call\tinstance void [mscorlib]System.Object::.ctor()");
             cilOutput.WriteLine("  ret");
             cilOutput.WriteLine("} // end of method c__" + identifierRecord + "::.ctor" + Environment.NewLine);
@@ -529,15 +529,15 @@ namespace Compiler.SemAnalyzer
         {
             if (symbolTableStack.Count == 1)
             {
-                cilOutput.WriteLine(".method private hidebysig static void " + identifierRecord + 
-                        "() cil managed");
+                cilOutput.WriteLine(".method private hidebysig static void ");
+                cilOutput.WriteLine(identifierRecord + "() cil managed");
                 cilOutput.WriteLine("{");
                 cilOutput.WriteLine(" .entrypoint");
             }
             else
             {
-                cilOutput.WriteLine(".method public hidebysig instance void " + identifierRecord + 
-                        "() cil managed");
+                cilOutput.WriteLine(".method public hidebysig instance void ");
+                cilOutput.WriteLine("\tb__"+identifierRecord + "() cil managed");
                 cilOutput.WriteLine("{");
             }
 
