@@ -573,7 +573,35 @@ namespace Compiler.SemAnalyzer
                 identifierRecord + "::.ctor()");
             cilOutput.WriteLine("  stloc.0" + Environment.NewLine);
 
+            GenerateDelegateInitilization();
+
         }
+
+        /// <summary>
+        /// Generates code for initilizing a delegate
+        /// </summary>
+        internal void GenerateDelegateInitilization()
+        {
+            SymbolTable symbolTable = symbolTableStack.Peek();
+
+            foreach (Symbol symbol in symbolTable.symbolTable)
+            {
+                if (symbol.symbolType == SymbolType.ProcedureSymbol ||
+                    symbol.symbolType == SymbolType.FunctionSymbol)
+                {
+                    Console.WriteLine("  ldloc.0");
+                    Console.WriteLine("  ldloc.0");
+                    Console.WriteLine("  ldftn\tinstance void " + symbolTable.cilScope +
+                        "/c__" + symbolTable.name + "::b__" + symbol.name + "()");
+                    Console.WriteLine("  newobj\tinstance void Program" + "/" + symbol.name +
+                        "Delegate::.ctor(object,native int)");
+                    Console.WriteLine("  stfld\tclass Program" + "/" + symbol.name + "Delegate " +
+                        symbolTable.cilScope + "/c__" + symbolTable.name + "::d__" + symbol.name +
+                        Environment.NewLine);
+                }
+            }
+        }
+
         /// <summary>
         /// Generates code for loading an object onto the stack
         /// </summary>
