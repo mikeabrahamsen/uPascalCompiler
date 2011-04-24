@@ -257,7 +257,7 @@ namespace Compiler.SemAnalyzer
         /// <param name="factorRecord"></param>
         internal void GenerateIdPush (IdentifierRecord idRecord, ref VariableType factorRecord)
         {
-            cilOutput.WriteLine("  ldloc.0");
+            GenerateObjectScope(idRecord.symbolTable);
             cilOutput.Write("  ldfld\t");
             GenerateFieldLocation(idRecord);
 
@@ -575,6 +575,40 @@ namespace Compiler.SemAnalyzer
 
             GenerateDelegateInitilization();
 
+            if (symbolTableStack.Count > 1)
+            {
+                int scopeCount = 0;
+                string newScope = symbolTableStack.Peek().cilScope + "/c__" + 
+                    symbolTableStack.Peek().name;
+                int index = newScope.LastIndexOf("/");
+                string oldScope = newScope.Substring(0, index);
+                SymbolTable previousScope;
+                SymbolTable symbolTable = symbolTableStack.Peek();
+                int count = 0;                
+                
+                for(int i = 0;i <symbolTableStack.Count -1;i++)
+                {
+                    cilOutput.WriteLine("  ldloc.0");
+                    cilOutput.WriteLine("  ldarg.0");
+
+                    //symbolTable = symbolTableStack.ElementAt(count);
+                    count++;
+                    previousScope = symbolTableStack.ElementAt(count);
+                    
+                    if (scopeCount > 0)
+                    {
+                        cilOutput.WriteLine("  ldfld\tclass " + previousScope.cilScope +
+                            "/c__" + previousScope.name + " " + oldScope + "::c__" + previousScope.name +
+                            "Obj");
+                    }
+
+                    cilOutput.WriteLine("  stfld\tclass " + previousScope.cilScope +
+                        "/c__" + previousScope.name + " " + newScope + "::c__" + previousScope.name +
+                        "Obj" + Environment.NewLine);
+
+                    scopeCount++;
+                }
+            }
         }
 
         /// <summary>
@@ -589,26 +623,19 @@ namespace Compiler.SemAnalyzer
                 if (symbol.symbolType == SymbolType.ProcedureSymbol ||
                     symbol.symbolType == SymbolType.FunctionSymbol)
                 {
-                    Console.WriteLine("  ldloc.0");
-                    Console.WriteLine("  ldloc.0");
-                    Console.WriteLine("  ldftn\tinstance void " + symbolTable.cilScope +
+                    cilOutput.WriteLine("  ldloc.0");
+                    cilOutput.WriteLine("  ldloc.0");
+                    cilOutput.WriteLine("  ldftn\tinstance void " + symbolTable.cilScope +
                         "/c__" + symbolTable.name + "::b__" + symbol.name + "()");
-                    Console.WriteLine("  newobj\tinstance void Program" + "/" + symbol.name +
+                    cilOutput.WriteLine("  newobj\tinstance void Program" + "/" + symbol.name +
                         "Delegate::.ctor(object,native int)");
-                    Console.WriteLine("  stfld\tclass Program" + "/" + symbol.name + "Delegate " +
+                    cilOutput.WriteLine("  stfld\tclass Program" + "/" + symbol.name + "Delegate " +
                         symbolTable.cilScope + "/c__" + symbolTable.name + "::d__" + symbol.name +
                         Environment.NewLine);
                 }
             }
         }
 
-        /// <summary>
-        /// Generates code for loading an object onto the stack
-        /// </summary>
-        internal void GenerateLoadObject()
-        {
-            cilOutput.WriteLine("  ldloc.0");
-        }
 
         /// <summary>
         /// Generates code for calling a method
@@ -617,12 +644,45 @@ namespace Compiler.SemAnalyzer
         {
             SymbolTable symbolTable = symbolTableStack.Peek();
 
-            Console.WriteLine("  ldloc.0");
-            Console.WriteLine("  ldfld      class Program/");
-            Console.WriteLine(methodRecord.name + "Delegate " + symbolTable.cilScope +
+            cilOutput.WriteLine("  ldloc.0");
+            cilOutput.WriteLine("  ldfld      class Program/");
+            cilOutput.WriteLine(methodRecord.name + "Delegate " + symbolTable.cilScope +
                 "/c__" + symbolTable.name + "::d__" + methodRecord.name);
-            Console.WriteLine("  callvirt\tinstance void Program/" + methodRecord.name +
+            cilOutput.WriteLine("  callvirt\tinstance void Program/" + methodRecord.name +
                 "Delegate::Invoke()" + Environment.NewLine);
+        }
+
+        /// <summary>
+        /// Generates code for the object scope
+        /// </summary>
+        /// <param name="objectTable"></param>
+        internal void GenerateObjectScope(SymbolTable objectTable)
+        {
+            if (symbolTableStack.Count == 1)
+            {
+                cilOutput.WriteLine("  ldloc.0");
+            }
+            else
+            {
+                int nestingLevelDifference = symbolTableStack.Count - 1 - objectTable.nestingLevel;
+
+                if (nestingLevelDifference == 0)
+                {
+                    cilOutput.WriteLine("  ldloc.0");
+                }
+                else
+                {
+                    cilOutput.WriteLine("  ldarg.0");
+
+                    if (nestingLevelDifference > 1)
+                    {
+                        cilOutput.WriteLine("  ldfld\tclass " + objectTable.cilScope + "/c__" +
+                            objectTable.name + " " + symbolTableStack.Peek().cilScope + "::c__" +
+                            objectTable.name + "Obj");
+                    }
+                }
+
+            }
         }
     }
 }

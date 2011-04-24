@@ -732,7 +732,7 @@ namespace Compiler.Parse
                     Match((int)Tags.MP_READ);
                     Match((int)Tags.MP_LPAREN);
                     ReadParameter(idRecord);
-                    analyzer.GenerateLoadObject();
+                    analyzer.GenerateObjectScope(idRecord.symbolTable);
                     analyzer.GenerateReadStatement(idRecord);
                     ReadParameterTail();
                     Match((int)Tags.MP_RPAREN);
@@ -756,7 +756,7 @@ namespace Compiler.Parse
                     UsedRules.WriteLine("44");
                     Match((int)Tags.MP_COMMA);
                     ReadParameter(idRecord);
-                    analyzer.GenerateLoadObject();
+                    analyzer.GenerateObjectScope(idRecord.symbolTable);
                     analyzer.GenerateReadStatement(idRecord);
                     ReadParameterTail();
                     break;
@@ -876,7 +876,7 @@ namespace Compiler.Parse
                     idRecord.lexeme = idRecName;
                     analyzer.ProcessId(idRecord);
                     Match((int)Tags.MP_ASSIGN);
-                    analyzer.GenerateLoadObject();
+                    analyzer.GenerateObjectScope(idRecord.symbolTable);
                     Expression(ref expressionRecord);
                     analyzer.GenerateAssign(idRecord, expressionRecord);
                     break;
@@ -1062,7 +1062,7 @@ namespace Compiler.Parse
                 case Tags.MP_NOT:
                 case Tags.MP_IDENTIFIER:
                     UsedRules.WriteLine("59");
-                    analyzer.GenerateLoadObject();
+                    analyzer.GenerateObjectScope(initialValueRecord.symbolTable);
                     OrdinalExpression(ref ordinalExpressionRecord);
                     analyzer.GenerateAssign(initialValueRecord, ordinalExpressionRecord);
                     break;
