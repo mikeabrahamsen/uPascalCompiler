@@ -13,6 +13,14 @@ namespace Compiler.SemAnalyzer
         const int DELEGATE_EXTRA_SPACE = 2;
 
         /// <summary>
+        /// Gets and sets the list of delegates
+        /// </summary>
+        public List<MethodRecord> delegateList
+        {
+            get;
+            set;
+        }
+        /// <summary>
         /// Gets and sets the symbolTableStack
         /// </summary>
         public Stack<SymbolTable> symbolTableStack
@@ -36,6 +44,7 @@ namespace Compiler.SemAnalyzer
         public SemanticAnalyzer ()
         {
             symbolTableStack = new Stack<SymbolTable>();
+            delegateList = new List<MethodRecord>();
             labelCount = 0;
         }
 
@@ -125,7 +134,48 @@ namespace Compiler.SemAnalyzer
                 symbolTableStack.Peek().Insert(symbol);
             }           
         }
-        
+
+        /// <summary>
+        /// Generates code for a delegate declaration
+        /// </summary>
+        internal void GenerateDelegateDeclaration()
+        {
+            foreach(MethodRecord methodRecord in delegateList)
+            {
+                Console.WriteLine("/* " + methodRecord.name + "Delegate" +" delegate function declaration */");
+                Console.WriteLine(".class auto ansi sealed nested public " + methodRecord.name 
+                    + "Delegate");
+            
+                Console.WriteLine("extends [mscorlib]System.MulticastDelegate");
+                Console.WriteLine("{");
+                Console.WriteLine(".method public hidebysig specialname rtspecialname");
+                Console.WriteLine("instance void  .ctor(object 'object'," + Environment.NewLine +
+                                     "native int 'method') runtime managed");
+                Console.WriteLine("{");
+
+                Console.WriteLine("} // end of method " + methodRecord.name + "Delegate" + "::.ctor");
+               
+
+                Console.WriteLine(".method public hidebysig newslot virtual " + Environment.NewLine +
+                        "instance void  Invoke() runtime managed");
+                Console.WriteLine("{");
+                Console.WriteLine("} // end of method " + methodRecord.name + "Delegate" + "::Invoke");
+
+                Console.WriteLine(".method public hidebysig newslot virtual");
+                Console.WriteLine("\tinstance class [mscorlib]System.IAsyncResult");
+                Console.WriteLine("\tBeginInvoke(class [mscorlib]System.AsyncCallback callback,");
+                Console.WriteLine("\tobject 'object') runtime managed");
+                Console.WriteLine("{");
+                Console.WriteLine("} // end of method "+ methodRecord.name+ "Delegate" + "::BeginInvoke");
+
+                Console.WriteLine(".method public hidebysig newslot virtual");
+                Console.WriteLine("instance void  EndInvoke(class [mscorlib]System.IAsyncResult result) " 
+                    + "runtime managed");
+                Console.WriteLine("{");
+                Console.WriteLine("} // end of method " +methodRecord.name+ "Delegate"+ "::EndInvoke");
+                Console.WriteLine("} // end of class " + methodRecord.name+ "Delegate");             
+            }
+        }
          /// <summary>
         /// inserts symbols into the symboltable
         /// </summary>
@@ -133,6 +183,8 @@ namespace Compiler.SemAnalyzer
         /// <param name="typeRecord"></param>
         public void SymbolTableInsert(MethodRecord methodRecord)
         {
+            delegateList.Add(methodRecord);
+
             Symbol symbol;
             switch (methodRecord.symbolType)
             {

@@ -95,6 +95,7 @@ namespace Compiler.Parse
                     Block(programIdentifierRecord);
                     analyzer.symbolTableStack.Pop();
                     Match('.');
+                    analyzer.GenerateDelegateDeclaration();
                     analyzer.GenerateClosingBrace();
                     break;
                 default:
