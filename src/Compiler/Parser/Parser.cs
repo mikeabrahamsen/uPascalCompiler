@@ -12,37 +12,71 @@ using Compiler.SymbolTbl;
 namespace Compiler.Parse
 {
     class Parser
-    {        
-        private TextWriter UsedRules = new StreamWriter("parse-tree.txt");
-        
-        public Parser (Queue<Token> TokenQueue,LexicalAnalyzer scanner, 
-                        string fileName)
+    {
+        /// <summary>
+        /// Gets and sets the filename
+        /// </summary>
+        private string fileName
         {
-            this.tokenQueue = TokenQueue;
-            this.scanner = scanner;
-            analyzer = new SemanticAnalyzer();
-            UsedRules.WriteLine(fileName);
-            Move();
+            get;
+            set;
         }
+        /// <summary>
+        /// Gets and sets the used rules textwriter
+        /// </summary>
+        private TextWriter UsedRules
+        {
+            get;
+            set;
+        }
+        /// <summary>
+        /// gets and sets the semantic analyzer
+        /// </summary>
         private SemanticAnalyzer analyzer
         {
             get;
             set;
         }
+        /// <summary>
+        /// gets and sets the token queue
+        /// </summary>
         private Queue<Token> tokenQueue
         {
             get;
             set;
         }
+        /// <summary>
+        /// gets and sets the scanner
+        /// </summary>
         private LexicalAnalyzer scanner
         {
             get;
             set;
         }
+        /// <summary>
+        /// gets and sets the lookahead token
+        /// </summary>
         private Token lookAheadToken
         {
             get;
             set;
+        }
+        /// <summary>
+        /// Initializes properties and files
+        /// </summary>
+        /// <param name="TokenQueue"></param>
+        /// <param name="scanner"></param>
+        /// <param name="fileName"></param>
+        public Parser(Queue<Token> TokenQueue, LexicalAnalyzer scanner,
+                        string fileName)
+        {
+            this.tokenQueue = TokenQueue;
+            this.scanner = scanner;
+            this.fileName = fileName;
+            analyzer = new SemanticAnalyzer(fileName);
+            UsedRules = new StreamWriter("parse-tree.txt");
+            UsedRules.WriteLine(fileName);
+            Move();
         }
         private void Error (string errorString)
         {

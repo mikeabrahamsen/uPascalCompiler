@@ -6,7 +6,8 @@ using Compiler.SymbolTbl;
 using Compiler.Library;
 using System.ComponentModel;
 using System.IO;
-
+using Compiler.Parse;
+using System.Text.RegularExpressions;
 namespace Compiler.SemAnalyzer
 {
     class SemanticAnalyzer
@@ -47,14 +48,19 @@ namespace Compiler.SemAnalyzer
         /// <summary>
         /// Semantic Analyzer Constructor
         /// </summary>
-        public SemanticAnalyzer ()
+        public SemanticAnalyzer (string fileName)
         {
             symbolTableStack = new Stack<SymbolTable>();
             delegateList = new List<MethodRecord>();
-            cilOutput = new StreamWriter("CIL.il");
+            SetFileName(fileName);
             labelCount = 0;
         }
-
+        private void SetFileName(string fileName)
+        {
+            Match match = Regex.Match(fileName, @"[a-zA-Z0-9-]+.");
+            //remove the extention and replace with .il
+            cilOutput = new StreamWriter( match.ToString() + "il");
+        }
         /// <summary>
         /// Return the next label
         /// </summary>
