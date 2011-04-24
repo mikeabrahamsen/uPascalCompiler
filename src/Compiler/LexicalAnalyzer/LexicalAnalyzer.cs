@@ -71,6 +71,10 @@ namespace Compiler.Lexer
             LoadTokens("mpTokens.txt");
         }
        
+        /// <summary>
+        /// Opens a file and reads the first character
+        /// </summary>
+        /// <param name="mpFile"></param>
         public void OpenFile(string mpFile)
         {
             file = new StreamReader(mpFile);

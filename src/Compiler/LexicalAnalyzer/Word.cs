@@ -11,12 +11,22 @@ namespace Compiler.Lexer
     /// </summary>
     class Word : Token
     {
-        
+        /// <summary>
+        /// Constructor for Word
+        /// </summary>
+        /// <param name="s"></param>
+        /// <param name="tag"></param>
+        /// <param name="line"></param>
+        /// <param name="column"></param>
         public Word(string s, int tag,int line,int column) : base(tag,line,column)
         {
             lexeme = s;
         }
         
+        /// <summary>
+        /// Overrides the tostring to output the lexeme of a token
+        /// </summary>
+        /// <returns></returns>
         public override string ToString()
         {
             return lexeme;

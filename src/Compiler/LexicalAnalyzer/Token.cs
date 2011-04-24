@@ -11,6 +11,9 @@ namespace Compiler.Lexer
     /// </summary>
     class Token
     {
+        /// <summary>
+        /// Constructor for Token
+        /// </summary>
         public Token ()
         {
             tag = null;

@@ -55,6 +55,11 @@ namespace Compiler.SemAnalyzer
             SetFileName(fileName);
             labelCount = 0;
         }
+
+        /// <summary>
+        /// Sets the filename to a 'filename'.il format
+        /// </summary>
+        /// <param name="fileName"></param>
         private void SetFileName(string fileName)
         {
             Match match = Regex.Match(fileName, @"[a-zA-Z0-9-]+.");
