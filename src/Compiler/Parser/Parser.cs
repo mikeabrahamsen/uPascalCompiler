@@ -255,7 +255,8 @@ namespace Compiler.Parse
                     UsedRules.WriteLine("14");
                     break;
                 default:
-                    Error("Expecting ProcedureAndFunctionDeclarationPart but found " + lookAheadToken.lexeme);
+                    Error("Expecting ProcedureAndFunctionDeclarationPart but found " + 
+                        lookAheadToken.lexeme);
                     break;
             }
         }

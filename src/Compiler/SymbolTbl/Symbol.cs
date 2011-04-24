@@ -24,8 +24,7 @@ namespace Compiler.SymbolTbl
             get;
             private set;
         }
-        public Symbol ()
-        { }
+
         /// <summary>
         /// Creates a symbol
         /// </summary>

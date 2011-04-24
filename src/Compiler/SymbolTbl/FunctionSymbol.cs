@@ -25,7 +25,8 @@ namespace Compiler.SymbolTbl
         /// <param name="label"></param>
         /// <param name="paramList"></param>
         /// <param name="returnVar"></param>
-        public FunctionSymbol (string name,SymbolType symbolType,string label,List<Parameter> paramList,VariableType returnVar) 
+        public FunctionSymbol (string name,SymbolType symbolType,string label,
+            List<Parameter> paramList,VariableType returnVar) 
             :base(name,symbolType,label,paramList)
         {
             this.returnVar = returnVar;

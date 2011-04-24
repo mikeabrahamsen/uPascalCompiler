@@ -93,7 +93,8 @@ namespace Compiler.SymbolTbl
         public override string ToString ()
         {
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine(String.Format("{0,-10}{1,-20}{2,-10}{3,-10}{4,-10}{5,-10}","Name","Kind","Type","Size","Offset","Label"));
+            sb.AppendLine(String.Format("{0,-10}{1,-20}{2,-10}{3,-10}{4,-10}{5,-10}","Name",
+                "Kind","Type","Size","Offset","Label"));
             sb.AppendLine("------------------------------------------------------------------");
             foreach(Symbol s in symbolTable)
             {

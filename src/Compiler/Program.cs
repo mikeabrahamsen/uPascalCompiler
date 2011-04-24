@@ -37,7 +37,8 @@ namespace Compiler
                     if (token.tag != null)
                     {
                         output = string.Format("{0,-20} {1,-5} {2,-5} {3}",
-                            token.tag, scanner.line, (scanner.column - token.lexeme.Length - 1), token.lexeme);
+                            token.tag, scanner.line, (scanner.column - token.lexeme.Length - 1),
+                            token.lexeme);
                         TokenQueue.Enqueue(token);
                     }
                     if(token.tag.Equals(Tags.MP_EOF))

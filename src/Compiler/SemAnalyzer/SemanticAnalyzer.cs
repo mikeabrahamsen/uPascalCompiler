@@ -148,7 +148,7 @@ namespace Compiler.SemAnalyzer
                     default:
                         break;
                 }
-                symbolTableStack.Peek().activationRecordSize += size; //increment activation record size
+                symbolTableStack.Peek().activationRecordSize += size;
                 symbolTableStack.Peek().Insert(symbol);
             }           
         }
@@ -161,7 +161,8 @@ namespace Compiler.SemAnalyzer
             foreach(MethodRecord methodRecord in delegateList)
             {
                 
-                cilOutput.WriteLine("/* " + methodRecord.name + "Delegate" +" delegate function declaration */");
+                cilOutput.WriteLine("/* " + methodRecord.name + "Delegate" +
+                    " delegate function declaration */");
                 cilOutput.WriteLine(".class auto ansi sealed nested public " + methodRecord.name 
                     + "Delegate");
             
@@ -185,14 +186,16 @@ namespace Compiler.SemAnalyzer
                 cilOutput.WriteLine("\tBeginInvoke(class [mscorlib]System.AsyncCallback callback,");
                 cilOutput.WriteLine("\tobject 'object') runtime managed");
                 cilOutput.WriteLine("{");
-                cilOutput.WriteLine("} // end of method "+ methodRecord.name+ "Delegate" + "::BeginInvoke");
+                cilOutput.WriteLine("} // end of method "+ methodRecord.name+ "Delegate" 
+                    + "::BeginInvoke");
 
                 cilOutput.WriteLine(".method public hidebysig newslot virtual");
                 cilOutput.WriteLine("instance void  EndInvoke(class [mscorlib]System.IAsyncResult result) " 
                     + "runtime managed");
                 cilOutput.WriteLine("{");
                 cilOutput.WriteLine("} // end of method " +methodRecord.name+ "Delegate"+ "::EndInvoke");
-                cilOutput.WriteLine("} // end of class " + methodRecord.name+ "Delegate" + Environment.NewLine);             
+                cilOutput.WriteLine("} // end of class " + methodRecord.name+ "Delegate" + 
+                    Environment.NewLine);             
             }
         }
          /// <summary>
@@ -208,7 +211,8 @@ namespace Compiler.SemAnalyzer
             switch (methodRecord.symbolType)
             {
                 case SymbolType.ProcedureSymbol:
-                    symbol = new ProcedureSymbol(methodRecord.name, SymbolType.ProcedureSymbol, nextLabel, methodRecord.parameterList);
+                    symbol = new ProcedureSymbol(methodRecord.name, SymbolType.ProcedureSymbol, 
+                        nextLabel, methodRecord.parameterList);
                     symbolTableStack.Peek().Insert(symbol);
                     break;
                 case SymbolType.FunctionSymbol:
@@ -278,7 +282,8 @@ namespace Compiler.SemAnalyzer
         /// <param name="addOpRecord"></param>
         /// <param name="termRecord"></param>
         /// <param name="resultRecord"></param>
-        internal void GenerateArithmetic (VariableType termTailRecord, string addOpRecord, VariableType termRecord, ref VariableType resultRecord)
+        internal void GenerateArithmetic (VariableType termTailRecord, string addOpRecord,
+            VariableType termRecord, ref VariableType resultRecord)
         {
             switch(termTailRecord)
             {
@@ -387,7 +392,8 @@ namespace Compiler.SemAnalyzer
                     {
                         case SymbolType.VariableSymbol:
                             //write the enum out as a string using the Get
-                            cilOutput.WriteLine(".field public " + Enumerations.GetDescription<VariableType>(
+                            cilOutput.WriteLine(".field public " + 
+                                Enumerations.GetDescription<VariableType>(
                                 (symbol as VariableSymbol).variableType) + " " + symbol.name);
                             break;
                         case SymbolType.ProcedureSymbol:
@@ -529,7 +535,8 @@ namespace Compiler.SemAnalyzer
             cilOutput.WriteLine("  ldarg.0");
             cilOutput.WriteLine("  call\tinstance void [mscorlib]System.Object::.ctor()");
             cilOutput.WriteLine("  ret");
-            cilOutput.WriteLine("} // end of method c__" + identifierRecord + "::.ctor" + Environment.NewLine);
+            cilOutput.WriteLine("} // end of method c__" + identifierRecord + "::.ctor" + 
+                Environment.NewLine);
         }
 
         /// <summary>
@@ -562,7 +569,8 @@ namespace Compiler.SemAnalyzer
             cilOutput.WriteLine( "  .locals init ([0] class " + cilScope + "/c__" + identifierRecord +
                 " c__" + identifierRecord + "Obj" + ")" + Environment.NewLine);
 
-            cilOutput.WriteLine("  newobj\tinstance void " + cilScope + "/c__" + identifierRecord + "::.ctor()");
+            cilOutput.WriteLine("  newobj\tinstance void " + cilScope + "/c__" + 
+                identifierRecord + "::.ctor()");
             cilOutput.WriteLine("  stloc.0" + Environment.NewLine);
 
         }

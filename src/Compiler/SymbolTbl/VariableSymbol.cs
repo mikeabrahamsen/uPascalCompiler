@@ -40,7 +40,8 @@ namespace Compiler.SymbolTbl
         /// <param name="name"></param>
         /// <param name="size"></param>
         /// <param name="offset"></param>
-        public VariableSymbol ( string name, SymbolType symbolType, VariableType var,int size, int offset) :base(name,symbolType)
+        public VariableSymbol ( string name, SymbolType symbolType, VariableType var,int size, 
+            int offset) :base(name,symbolType)
         {
             this.size = size;
             this.offset = offset;
@@ -53,7 +54,8 @@ namespace Compiler.SymbolTbl
         /// <returns></returns>
         public override string ToString ()
         {
-            return String.Format("{0,-10}{1,-20}{2,-10}{3,-10}{4,-10}",name,symbolType,variableType,size,offset);
+            return String.Format("{0,-10}{1,-20}{2,-10}{3,-10}{4,-10}",name,symbolType,
+                variableType,size,offset);
         }
     }
 }

@@ -90,7 +90,8 @@ namespace Compiler.Lexer
             Assembly assembly = Assembly.GetExecutingAssembly();
             try
             {
-              StreamReader tokens = new StreamReader(assembly.GetManifestResourceStream("Compiler.LexicalAnalyzer.mpTokens.txt"));
+              StreamReader tokens = new StreamReader(assembly.GetManifestResourceStream(
+                  "Compiler.LexicalAnalyzer.mpTokens.txt"));
 
               //StreamReader tokens = new StreamReader(stream);
               string s, name, lexeme;
@@ -99,14 +100,16 @@ namespace Compiler.Lexer
               {
                   s = tokens.ReadLine();
 
-                  MatchCollection matchTokenName = Regex.Matches(s, "(?<name>[a-zA-Z_]+).+\"(?<lexeme>.+)\"");
+                  MatchCollection matchTokenName = Regex.Matches(s, 
+                      "(?<name>[a-zA-Z_]+).+\"(?<lexeme>.+)\"");
 
                   Match token = matchTokenName[0];
                   name = token.Groups["name"].ToString();
                   lexeme = token.Groups["lexeme"].ToString();
 
                   // Add all of the tokens to the word list
-                  ReservedWords.Add(new Word(lexeme, (int)(Tags)Enum.Parse(typeof(Tags), name, false), line, column));
+                  ReservedWords.Add(new Word(lexeme, (int)(Tags)Enum.Parse(typeof(Tags), name, false), 
+                      line, column));
               }
             }
             catch(Exception e)
@@ -207,7 +210,8 @@ namespace Compiler.Lexer
                 return ScanNumericLiteral();
             }
 
-            throw new SyntaxException("invalid character found on line: " + line + "starting position: " + (column - 1));
+            throw new SyntaxException("invalid character found on line: " + line + 
+                "starting position: " + (column - 1));
         }
         /// <summary>
         /// Create token for '*'
@@ -277,7 +281,8 @@ namespace Compiler.Lexer
 
             if(currentChar == (char)3)
             {
-                throw new SyntaxException("run comment found on line: " + line + " at position " + (column - count));                                
+                throw new SyntaxException("run comment found on line: " + line + " at position " +
+                    (column - count));                                
             }
             return new Token();
                               
@@ -344,7 +349,8 @@ namespace Compiler.Lexer
                     case States.S3:
                         //return error token
                         finishState = true;
-                        throw new SyntaxException("run comment string on line: " + line + " starting position: " +tokenStartColumn);                                                                    
+                        throw new SyntaxException("run comment string on line: " + line +
+                            " starting position: " +tokenStartColumn);                                                                    
                 }
             }
             s = sb.ToString();
