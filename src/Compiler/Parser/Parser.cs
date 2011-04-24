@@ -78,11 +78,21 @@ namespace Compiler.Parse
             UsedRules.WriteLine(fileName);
             Move();
         }
+
+        /// <summary>
+        /// Throws a syntax exception with a given error string
+        /// </summary>
+        /// <param name="errorString"></param>
         private void Error (string errorString)
         {
             throw new SyntaxException("Error at line: " + lookAheadToken.line + " Column: " + 
                 (lookAheadToken.column) + " " + errorString);
         }
+
+        /// <summary>
+        /// Matches a lookahead token with a tag
+        /// </summary>
+        /// <param name="tag"></param>
         private void Match (int tag)
         {
            
@@ -97,11 +107,17 @@ namespace Compiler.Parse
             
         }
 
+        /// <summary>
+        /// Remove a token from the queue
+        /// </summary>
         private void Move ()
         {
             lookAheadToken = tokenQueue.Dequeue();
         }
 
+        /// <summary>
+        /// SystemGoal - This is where parser starts
+        /// </summary>
         public void SystemGoal ()
         {
             UsedRules.WriteLine("1");
@@ -116,6 +132,9 @@ namespace Compiler.Parse
             }
             
         }
+        /// <summary>
+        /// Parse Program
+        /// </summary>
         private void Program ()
         {
             string programIdentifierRecord = string.Empty;
@@ -138,6 +157,10 @@ namespace Compiler.Parse
             }
         }
 
+        /// <summary>
+        /// Parse ProgramHeading
+        /// </summary>
+        /// <param name="programIdentifierRecord"></param>
         private void ProgramHeading(ref string programIdentifierRecord) 
         {
             switch(lookAheadToken.tag)
@@ -154,7 +177,11 @@ namespace Compiler.Parse
                 break;
             }
         }
-
+        
+        /// <summary>
+        /// Parse Block
+        /// </summary>
+        /// <param name="identifierRecord"></param>
         private void Block (string identifierRecord) 
         {
             switch (lookAheadToken.tag)
@@ -180,6 +207,10 @@ namespace Compiler.Parse
             }
 
         }
+
+        /// <summary>
+        /// Parse VariableDeclarationPart
+        /// </summary>
         private void VariableDeclarationPart () 
         {
             switch(lookAheadToken.tag)
@@ -202,6 +233,10 @@ namespace Compiler.Parse
                 
             }
         }
+
+        /// <summary>
+        /// Parse ProcedureAndFunctionDeclarationPart
+        /// </summary>
         private void ProcedureAndFunctionDeclarationPart () 
         {
             switch(lookAheadToken.tag)
@@ -225,6 +260,9 @@ namespace Compiler.Parse
             }
         }
 
+        /// <summary>
+        /// Parse VariableDeclarationTail
+        /// </summary>
         private void VariableDeclarationTail () 
         {
             switch(lookAheadToken.tag)
@@ -246,6 +284,10 @@ namespace Compiler.Parse
             }
             
         }
+
+        /// <summary>
+        /// Parse VariableDeclaration
+        /// </summary>
         private void VariableDeclaration () 
         {
             List<string> identifierRecordList = new List<string>();
@@ -265,6 +307,11 @@ namespace Compiler.Parse
             }
             
         }
+
+        /// <summary>
+        /// Parse Type
+        /// </summary>
+        /// <param name="typeRecord"></param>
         private void Type (ref TypeRecord typeRecord) 
         {
             switch(lookAheadToken.tag)
@@ -284,6 +331,10 @@ namespace Compiler.Parse
                     break;
             }
         }
+
+        /// <summary>
+        /// Parse ProcedureDeclaration
+        /// </summary>
         private void ProcedureDeclaration () 
         {
             MethodRecord procedureIdentifierRecord = new MethodRecord(SymbolType.ProcedureSymbol);
@@ -302,8 +353,12 @@ namespace Compiler.Parse
                     Error("Expecting ProcedureDeclaration but found " + lookAheadToken.lexeme);
                     break;
 
+            }
         }
-        }
+
+        /// <summary>
+        /// Parse FunctionDeclaration
+        /// </summary>
         private void FunctionDeclaration () 
         {
             MethodRecord functionIdentifierRecord = new MethodRecord(SymbolType.FunctionSymbol);
@@ -322,6 +377,11 @@ namespace Compiler.Parse
                     break;
             }
         }
+
+        /// <summary>
+        /// Parse ProcedureHeading
+        /// </summary>
+        /// <param name="procedureRecord"></param>
         private void ProcedureHeading (MethodRecord procedureRecord) 
         {
             switch(lookAheadToken.tag)
@@ -341,6 +401,11 @@ namespace Compiler.Parse
             
 
         }
+
+        /// <summary>
+        /// Parse FunctionHeading
+        /// </summary>
+        /// <param name="functionRecord"></param>
         private void FunctionHeading (MethodRecord functionRecord) 
         {
             TypeRecord typeRecord = new TypeRecord(SymbolType.FunctionSymbol, VariableType.Null);
@@ -363,6 +428,11 @@ namespace Compiler.Parse
                     break;
             }
         }
+
+        /// <summary>
+        /// Parse OptionalFormalParameterList
+        /// </summary>
+        /// <param name="parameterList"></param>
         private void OptionalFormalParameterList (List<Parameter> parameterList) 
         {
             switch(lookAheadToken.tag)
@@ -384,6 +454,11 @@ namespace Compiler.Parse
                     break;
             }
         }
+
+        /// <summary>
+        /// Parse FormalParameterSectionTail
+        /// </summary>
+        /// <param name="parameters"></param>
         private void FormalParameterSectionTail (List<Parameter> parameters) 
         {
             switch(lookAheadToken.tag)
@@ -402,6 +477,11 @@ namespace Compiler.Parse
                     break;
             }
         }
+
+        /// <summary>
+        /// Parse FormalParameterSection
+        /// </summary>
+        /// <param name="parameters"></param>
         private void FormalParameterSection (List<Parameter> parameters) 
         {
             switch(lookAheadToken.tag)
@@ -419,6 +499,11 @@ namespace Compiler.Parse
                     break;
             }
         }
+
+        /// <summary>
+        /// Parse ValueParameterSection
+        /// </summary>
+        /// <param name="parameters"></param>
         private void ValueParameterSection (List<Parameter> parameters) 
         {
             TypeRecord typeRecord = new TypeRecord(SymbolType.ParameterSymbol, VariableType.Null);
@@ -439,6 +524,11 @@ namespace Compiler.Parse
                      break;
             }
         }
+
+        /// <summary>
+        /// Parse VariableParameterSection
+        /// </summary>
+        /// <param name="parameters"></param>
         private void VariableParameterSection (List<Parameter> parameters) 
         {
             TypeRecord typeRecord = new TypeRecord(SymbolType.ParameterSymbol, VariableType.Null);
@@ -459,6 +549,10 @@ namespace Compiler.Parse
                     break;
             }
         }
+
+        /// <summary>
+        /// Parse StatementPart
+        /// </summary>
         private void StatementPart ()
         {
             switch (lookAheadToken.tag)
@@ -472,6 +566,10 @@ namespace Compiler.Parse
                     break;
             }
         }
+
+        /// <summary>
+        /// Parse CompoundStatement
+        /// </summary>
         private void CompoundStatement () 
         {
             switch (lookAheadToken.tag)
@@ -487,6 +585,10 @@ namespace Compiler.Parse
                     break;
             }
         }
+
+        /// <summary>
+        /// Parse Statement Sequence
+        /// </summary>
         private void StatementSequence () 
         {
             switch (lookAheadToken.tag)
@@ -512,6 +614,10 @@ namespace Compiler.Parse
                     break;
             }
         }
+
+        /// <summary>
+        /// Parse StatementTail
+        /// </summary>
         private void StatementTail () 
         {
             switch (lookAheadToken.tag)
@@ -532,6 +638,10 @@ namespace Compiler.Parse
                     break;
             }
         }
+
+        /// <summary>
+        /// Parse Statement
+        /// </summary>
         private void Statement () 
         {
             switch (lookAheadToken.tag)
@@ -589,6 +699,9 @@ namespace Compiler.Parse
             }
         }
 
+        /// <summary>
+        /// Parse Empty Statement
+        /// </summary>
         private void EmptyStatement () 
         {
             switch (lookAheadToken.tag)
@@ -604,6 +717,10 @@ namespace Compiler.Parse
                     break;
             }
         }
+
+        /// <summary>
+        /// Parse ReadStatement
+        /// </summary>
         private void ReadStatement () 
         {
             IdentifierRecord idRecord = new IdentifierRecord();
@@ -625,6 +742,10 @@ namespace Compiler.Parse
             }
                     
         }
+
+        /// <summary>
+        /// Parse ReadParameterTail
+        /// </summary>
         private void ReadParameterTail()
         {
             IdentifierRecord idRecord = new IdentifierRecord();
@@ -647,6 +768,11 @@ namespace Compiler.Parse
                     break;
             }
         }
+
+        /// <summary>
+        /// Parse ReadParameter
+        /// </summary>
+        /// <param name="idRecord"></param>
         private void ReadParameter (IdentifierRecord idRecord) 
         {
             switch(lookAheadToken.tag)
@@ -663,6 +789,10 @@ namespace Compiler.Parse
                     break;
              }
         }
+
+        /// <summary>
+        /// Parse WriteStatement
+        /// </summary>
         private void WriteStatement () 
         {
             switch(lookAheadToken.tag)
@@ -681,6 +811,10 @@ namespace Compiler.Parse
                 break;
             }
         }
+
+        /// <summary>
+        /// Parse WriteParameterTail
+        /// </summary>
         private void WriteParameterTail () 
         {
             switch (lookAheadToken.tag)
@@ -700,6 +834,10 @@ namespace Compiler.Parse
                     break;
             }
         }
+
+        /// <summary>
+        /// Parse WriteParameter
+        /// </summary>
         private void WriteParameter() 
         {
             VariableType ordinalExpressionRecord = VariableType.Null;
@@ -720,6 +858,10 @@ namespace Compiler.Parse
                     break;
             }
         }
+
+        /// <summary>
+        /// Parse AssignmentStatement
+        /// </summary>
         private void AssignmentStatement () 
         {
             IdentifierRecord idRecord = new IdentifierRecord();
@@ -742,6 +884,10 @@ namespace Compiler.Parse
                     break;
             }
         }
+
+        /// <summary>
+        /// Parse IfStatement
+        /// </summary>
         private void IfStatement() 
         {
             string ifLabelRecord = string.Empty, elseLabelRecord = string.Empty;
@@ -765,6 +911,10 @@ namespace Compiler.Parse
                     break;
             }
         }
+
+        /// <summary>
+        /// Parse OptionalElsePart
+        /// </summary>
         private void OptionalElsePart() 
         {
             switch (lookAheadToken.tag)
@@ -782,6 +932,10 @@ namespace Compiler.Parse
                     break;
             }
         }
+
+        /// <summary>
+        /// Parse RepeatStatement
+        /// </summary>
         private void RepeatStatement() 
         {
             string startLoopLabel = string.Empty;
@@ -803,6 +957,10 @@ namespace Compiler.Parse
             }
             
         }
+
+        /// <summary>
+        /// Parse WhileStatement
+        /// </summary>
         private void WhileStatement () 
         {
             string controlLabelRecord = string.Empty;
@@ -825,9 +983,12 @@ namespace Compiler.Parse
                     Error("Expecting WhileStatement but found " + lookAheadToken.lexeme);
                     break;
 
+            }
         }
 
-        }
+        /// <summary>
+        /// Parse ForStatement
+        /// </summary>
         private void ForStatement () 
         {
             IdentifierRecord controlVariableRecord = new IdentifierRecord();
@@ -861,6 +1022,11 @@ namespace Compiler.Parse
                     break;
             }
         }
+
+        /// <summary>
+        /// Parse Control Variable
+        /// </summary>
+        /// <param name="controlVariableRecord"></param>
         private void ControlVariable (ref IdentifierRecord controlVariableRecord) 
         {
             switch(lookAheadToken.tag)
@@ -877,6 +1043,11 @@ namespace Compiler.Parse
                     break;
             }
         }
+
+        /// <summary>
+        /// Parse InitialValue
+        /// </summary>
+        /// <param name="initialValueRecord"></param>
         private void InitialValue (ref IdentifierRecord initialValueRecord) 
         {
             VariableType ordinalExpressionRecord = VariableType.Null;
@@ -899,6 +1070,11 @@ namespace Compiler.Parse
                     break;
             }
         }
+
+        /// <summary>
+        /// Parse StepValue
+        /// </summary>
+        /// <param name="stepValueRecord"></param>
         private void StepValue(ref ControlRecord stepValueRecord) 
         {
             switch (lookAheadToken.tag)
@@ -920,6 +1096,11 @@ namespace Compiler.Parse
                     break;
             }
         }
+
+        /// <summary>
+        /// Parse FinalValue
+        /// </summary>
+        /// <param name="ordinalExpressionRecord"></param>
         private void FinalValue (ref VariableType ordinalExpressionRecord) 
         {
             switch(lookAheadToken.tag)
@@ -938,6 +1119,10 @@ namespace Compiler.Parse
                 break;
             }
         }
+
+        /// <summary>
+        /// Parse ProcedureStatement
+        /// </summary>
         private void ProcedureStatement() 
         {
             string procedureIdentifier = null;
@@ -954,6 +1139,9 @@ namespace Compiler.Parse
             }
         }
 
+        /// <summary>
+        /// Parse OptionalActualParameterList
+        /// </summary>
         private void OptionalActualParameterList() 
         {
             switch (lookAheadToken.tag)
@@ -995,16 +1183,30 @@ namespace Compiler.Parse
                     break;
             }
         }
+
+        /// <summary>
+        /// Parse Identifier
+        /// </summary>
+        /// <param name="programIdenentifierRecord"></param>
         private void Identifier (ref string programIdenentifierRecord)
         {
             programIdenentifierRecord = lookAheadToken.lexeme;
             Match((int)Tags.MP_IDENTIFIER);            
         }
+
+        /// <summary>
+        /// Parse Identifier
+        /// </summary>
+        /// <param name="programIdenentifierRecord"></param>
         private void Identifier(MethodRecord programIdenentifierRecord)
         {
             programIdenentifierRecord.name = lookAheadToken.lexeme;
             Match((int)Tags.MP_IDENTIFIER);
         } 
+
+        /// <summary>
+        /// Parse ActualParameterTail
+        /// </summary>
         private void ActualParameterTail()
         {
             switch(lookAheadToken.tag)
@@ -1025,6 +1227,9 @@ namespace Compiler.Parse
             }
         }
 
+        /// <summary>
+        /// Parse ActualParameter
+        /// </summary>
         private void ActualParameter()
         {
             VariableType ordinalExpressionRecord = VariableType.Null;
@@ -1046,6 +1251,10 @@ namespace Compiler.Parse
             }
         }
 
+        /// <summary>
+        /// Parse Expression
+        /// </summary>
+        /// <param name="expressionRecord"></param>
         private void Expression(ref VariableType expressionRecord)
         {
             switch(lookAheadToken.tag)
@@ -1066,6 +1275,10 @@ namespace Compiler.Parse
             }
         }
 
+        /// <summary>
+        /// Parse OptionalRelationalPart
+        /// </summary>
+        /// <param name="expressionRecord"></param>
         private void OptionalRelationalPart(ref VariableType expressionRecord)
         {
             VariableType simpleExpressionRecord = VariableType.Null;
@@ -1105,7 +1318,11 @@ namespace Compiler.Parse
 
             }
         }
-        
+
+        /// <summary>
+        /// Parse RelationalOperator
+        /// </summary>
+        /// <param name="relationalOpRecord"></param>
         private void RelationalOperator(ref string relationalOpRecord)
         {
             relationalOpRecord = lookAheadToken.lexeme;
@@ -1145,9 +1362,12 @@ namespace Compiler.Parse
             }
         }
 
+        /// <summary>
+        /// Parse SimpleExpression
+        /// </summary>
+        /// <param name="simpleExpressionRecord"></param>
         private void SimpleExpression(ref VariableType simpleExpressionRecord)
         {
-
             switch(lookAheadToken.tag)
             {
                 case Tags.MP_LPAREN:
@@ -1164,10 +1384,13 @@ namespace Compiler.Parse
                 default:
                     Error("Expecting Simple Expression found " + lookAheadToken.lexeme);
                 break;
-
             }
         }
 
+        /// <summary>
+        /// Parse TermTail
+        /// </summary>
+        /// <param name="termTailRecord"></param>
         private void TermTail(ref VariableType termTailRecord)
         {
             string addOpRecord = null;
@@ -1212,6 +1435,10 @@ namespace Compiler.Parse
                     break;
             }
         }
+
+        /// <summary>
+        /// Parse OptionalSign
+        /// </summary>
         private void OptionalSign()
         {
             switch(lookAheadToken.tag)
@@ -1236,6 +1463,10 @@ namespace Compiler.Parse
             }
         }
 
+        /// <summary>
+        /// Parse AddingOperator
+        /// </summary>
+        /// <param name="addOpRecord"></param>
         private void AddingOperator(ref string addOpRecord)
         {
             addOpRecord = lookAheadToken.lexeme;
@@ -1259,6 +1490,10 @@ namespace Compiler.Parse
             }
         }
 
+        /// <summary>
+        /// Parse Term
+        /// </summary>
+        /// <param name="termRecord"></param>
         private void Term(ref VariableType termRecord)
         {
             switch(lookAheadToken.tag)
@@ -1277,6 +1512,10 @@ namespace Compiler.Parse
             }
         }
 
+        /// <summary>
+        /// Parse MultiplyingOperator
+        /// </summary>
+        /// <param name="mulOpRecord"></param>
         private void MultiplyingOperator(ref string mulOpRecord)
         {
 
@@ -1305,6 +1544,10 @@ namespace Compiler.Parse
             }
         }
 
+        /// <summary>
+        /// Parse FactorTail
+        /// </summary>
+        /// <param name="factorTailRecord"></param>
         private void FactorTail(ref VariableType factorTailRecord)
         {
             string mulOpRecord = null;
@@ -1350,6 +1593,10 @@ namespace Compiler.Parse
             }
         }
 
+        /// <summary>
+        /// Parse Factor
+        /// </summary>
+        /// <param name="factorRecord"></param>
         private void Factor(ref VariableType factorRecord)
         {
             IdentifierRecord idRecord = new IdentifierRecord();
@@ -1389,6 +1636,9 @@ namespace Compiler.Parse
             }
         }
 
+        /// <summary>
+        /// Parse BooleanExpression
+        /// </summary>
         private void BooleanExpression()
         {
             switch (lookAheadToken.tag)
@@ -1408,6 +1658,11 @@ namespace Compiler.Parse
                 break;
             }
         }
+
+        /// <summary>
+        /// Parse OrdinalExpression
+        /// </summary>
+        /// <param name="expressionRecord"></param>
         private void OrdinalExpression(ref VariableType expressionRecord)
         {
             switch (lookAheadToken.tag)
@@ -1428,6 +1683,10 @@ namespace Compiler.Parse
             
         }
 
+        /// <summary>
+        /// Parse IdentifierList
+        /// </summary>
+        /// <param name="identifierRecordList"></param>
         private void IdentifierList (ref List<string> identifierRecordList)
         {            
             string identifierRecord = null;
@@ -1446,6 +1705,10 @@ namespace Compiler.Parse
             }
         }
 
+        /// <summary>
+        /// Parse IdentifierTail
+        /// </summary>
+        /// <param name="identifierRecordList"></param>
         private void IdentifierTail(ref List<string>identifierRecordList)
         {
             string identifierRecord = null;

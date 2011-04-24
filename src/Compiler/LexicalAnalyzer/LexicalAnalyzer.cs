@@ -33,6 +33,9 @@ namespace Compiler.Lexer
             get;
             private set;
         }
+        /// <summary>
+        /// gets and sets the start column of a token
+        /// </summary>
         public int tokenStartColumn
         {
             get;
@@ -57,6 +60,10 @@ namespace Compiler.Lexer
         private StreamReader file;
         private List<Word> ReservedWords = new List<Word>();
         
+        /// <summary>
+        /// Constructor for LexicalAnalyzer
+        /// Sets line and column and Loads tokens from file
+        /// </summary>
         public LexicalAnalyzer ()
         {
             column = 1;
@@ -68,7 +75,6 @@ namespace Compiler.Lexer
         {
             file = new StreamReader(mpFile);
             ReadChar();
-            //Scan();
         }
        
         /// <summary>
