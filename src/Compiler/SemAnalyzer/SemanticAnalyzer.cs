@@ -5,6 +5,7 @@ using System.Text;
 using Compiler.SymbolTbl;
 using Compiler.Library;
 using System.ComponentModel;
+using System.IO;
 
 namespace Compiler.SemAnalyzer
 {
@@ -12,6 +13,11 @@ namespace Compiler.SemAnalyzer
     {
         const int DELEGATE_EXTRA_SPACE = 2;
 
+        public TextWriter cilOutput
+        {
+            get;
+            set;
+        }
         /// <summary>
         /// Gets and sets the list of delegates
         /// </summary>
@@ -45,6 +51,7 @@ namespace Compiler.SemAnalyzer
         {
             symbolTableStack = new Stack<SymbolTable>();
             delegateList = new List<MethodRecord>();
+            cilOutput = new StreamWriter("CIL.txt");
             labelCount = 0;
         }
 
@@ -142,38 +149,39 @@ namespace Compiler.SemAnalyzer
         {
             foreach(MethodRecord methodRecord in delegateList)
             {
-                Console.WriteLine("/* " + methodRecord.name + "Delegate" +" delegate function declaration */");
-                Console.WriteLine(".class auto ansi sealed nested public " + methodRecord.name 
+                
+                cilOutput.WriteLine("/* " + methodRecord.name + "Delegate" +" delegate function declaration */");
+                cilOutput.WriteLine(".class auto ansi sealed nested public " + methodRecord.name 
                     + "Delegate");
             
-                Console.WriteLine("extends [mscorlib]System.MulticastDelegate");
-                Console.WriteLine("{");
-                Console.WriteLine(".method public hidebysig specialname rtspecialname");
-                Console.WriteLine("instance void  .ctor(object 'object'," + Environment.NewLine +
+                cilOutput.WriteLine("extends [mscorlib]System.MulticastDelegate");
+                cilOutput.WriteLine("{");
+                cilOutput.WriteLine(".method public hidebysig specialname rtspecialname");
+                cilOutput.WriteLine("instance void  .ctor(object 'object'," + Environment.NewLine +
                                      "native int 'method') runtime managed");
-                Console.WriteLine("{");
+                cilOutput.WriteLine("{");
 
-                Console.WriteLine("} // end of method " + methodRecord.name + "Delegate" + "::.ctor");
+                cilOutput.WriteLine("} // end of method " + methodRecord.name + "Delegate" + "::.ctor");
                
 
-                Console.WriteLine(".method public hidebysig newslot virtual " + Environment.NewLine +
+                cilOutput.WriteLine(".method public hidebysig newslot virtual " + Environment.NewLine +
                         "instance void  Invoke() runtime managed");
-                Console.WriteLine("{");
-                Console.WriteLine("} // end of method " + methodRecord.name + "Delegate" + "::Invoke");
+                cilOutput.WriteLine("{");
+                cilOutput.WriteLine("} // end of method " + methodRecord.name + "Delegate" + "::Invoke");
 
-                Console.WriteLine(".method public hidebysig newslot virtual");
-                Console.WriteLine("\tinstance class [mscorlib]System.IAsyncResult");
-                Console.WriteLine("\tBeginInvoke(class [mscorlib]System.AsyncCallback callback,");
-                Console.WriteLine("\tobject 'object') runtime managed");
-                Console.WriteLine("{");
-                Console.WriteLine("} // end of method "+ methodRecord.name+ "Delegate" + "::BeginInvoke");
+                cilOutput.WriteLine(".method public hidebysig newslot virtual");
+                cilOutput.WriteLine("\tinstance class [mscorlib]System.IAsyncResult");
+                cilOutput.WriteLine("\tBeginInvoke(class [mscorlib]System.AsyncCallback callback,");
+                cilOutput.WriteLine("\tobject 'object') runtime managed");
+                cilOutput.WriteLine("{");
+                cilOutput.WriteLine("} // end of method "+ methodRecord.name+ "Delegate" + "::BeginInvoke");
 
-                Console.WriteLine(".method public hidebysig newslot virtual");
-                Console.WriteLine("instance void  EndInvoke(class [mscorlib]System.IAsyncResult result) " 
+                cilOutput.WriteLine(".method public hidebysig newslot virtual");
+                cilOutput.WriteLine("instance void  EndInvoke(class [mscorlib]System.IAsyncResult result) " 
                     + "runtime managed");
-                Console.WriteLine("{");
-                Console.WriteLine("} // end of method " +methodRecord.name+ "Delegate"+ "::EndInvoke");
-                Console.WriteLine("} // end of class " + methodRecord.name+ "Delegate");             
+                cilOutput.WriteLine("{");
+                cilOutput.WriteLine("} // end of method " +methodRecord.name+ "Delegate"+ "::EndInvoke");
+                cilOutput.WriteLine("} // end of class " + methodRecord.name+ "Delegate" + Environment.NewLine);             
             }
         }
          /// <summary>
@@ -202,9 +210,9 @@ namespace Compiler.SemAnalyzer
         /// <param name="idRecord"></param>
         internal void GenerateReadStatement (IdentifierRecord idRecord)
         {
-            Console.WriteLine("call       string [mscorlib]System.Console::ReadLine()");
-            Console.WriteLine("call       int32 [mscorlib]System.Int32::Parse(string)");
-            Console.Write("stfld\t");
+            cilOutput.WriteLine("  call       string [mscorlib]System.Console::ReadLine()");
+            cilOutput.WriteLine("  call       int32 [mscorlib]System.Int32::Parse(string)");
+            cilOutput.Write("  stfld\t");
             GenerateFieldLocation(idRecord);
         }
 
@@ -213,7 +221,7 @@ namespace Compiler.SemAnalyzer
         /// </summary>
         internal void GenerateWriteStatement ()
         {
-            Console.WriteLine("call void [mscorlib]System.Console::WriteLine(int32)");
+            cilOutput.WriteLine("  call void [mscorlib]System.Console::WriteLine(int32)");
         }
 
         /// <summary>
@@ -223,7 +231,7 @@ namespace Compiler.SemAnalyzer
         /// <param name="factorRecord"></param>
         internal void GenerateLitPush (LiteralRecord litRecord, ref VariableType factorRecord)
         {
-            Console.WriteLine("ldc.i4 " + litRecord.lexeme);
+            cilOutput.WriteLine("  ldc.i4 " + litRecord.lexeme);
             factorRecord = litRecord.type;
         }
 
@@ -234,8 +242,8 @@ namespace Compiler.SemAnalyzer
         /// <param name="factorRecord"></param>
         internal void GenerateIdPush (IdentifierRecord idRecord, ref VariableType factorRecord)
         {
-            Console.WriteLine("  ldloc.0");
-            Console.Write("  ldfld\t");
+            cilOutput.WriteLine("  ldloc.0");
+            cilOutput.Write("  ldfld\t");
             GenerateFieldLocation(idRecord);
 
             factorRecord = idRecord.symbol.variableType;
@@ -247,7 +255,7 @@ namespace Compiler.SemAnalyzer
         /// <param name="idRecord"></param>
         internal void GenerateFieldLocation(IdentifierRecord idRecord)
         {
-            Console.WriteLine(Enumerations.GetDescription<VariableType>(
+            cilOutput.WriteLine(Enumerations.GetDescription<VariableType>(
                 idRecord.symbol.variableType) + " " +
                     idRecord.symbolTable.cilScope + "/c__" + idRecord.symbolTable.name
                         + "::" + idRecord.lexeme + Environment.NewLine);
@@ -266,74 +274,74 @@ namespace Compiler.SemAnalyzer
                 case VariableType.Integer:
                     if (addOpRecord.Equals("+"))
                     {
-                        Console.WriteLine("add");
+                        cilOutput.WriteLine("  add");
                     }
                     else if (addOpRecord.Equals("-"))
                     {
-                        Console.WriteLine("sub");
+                        cilOutput.WriteLine("  sub");
                     }
                     else if (addOpRecord.Equals("*"))
                     {
-                        Console.WriteLine("mul");
+                        cilOutput.WriteLine("  mul");
                     }
                     else if(addOpRecord.Equals("div"))
                     {
-                        Console.WriteLine("div");
+                        cilOutput.WriteLine("  div");
                     }
                     else if (addOpRecord.Equals("<"))
                     {
-                        Console.WriteLine("clt");
+                        cilOutput.WriteLine("  clt");
                     }
                     else if (addOpRecord.Equals(">"))
                     {
-                        Console.WriteLine("cgt");
+                        cilOutput.WriteLine("  cgt");
                     }
                     else if (addOpRecord.Equals("<="))
                     {
-                        Console.WriteLine("cgt");
-                        Console.WriteLine("ldc.i4 0");
-                        Console.WriteLine("ceq");
+                        cilOutput.WriteLine("  cgt");
+                        cilOutput.WriteLine("  ldc.i4 0");
+                        cilOutput.WriteLine("  ceq");
                     }
                     else if (addOpRecord.Equals(">="))
                     {
-                        Console.WriteLine("clt");
-                        Console.WriteLine("ldc.i4 0");
-                        Console.WriteLine("ceq");
+                        cilOutput.WriteLine("  clt");
+                        cilOutput.WriteLine("  ldc.i4 0");
+                        cilOutput.WriteLine("  ceq");
                     }
                     else if (addOpRecord.Equals("<>"))
                     {
-                        Console.WriteLine("ceq");
-                        Console.WriteLine("ldc.i4 0");
-                        Console.WriteLine("ceq");
+                        cilOutput.WriteLine("  ceq");
+                        cilOutput.WriteLine("  ldc.i4 0");
+                        cilOutput.WriteLine("  ceq");
                     }
                     else if (addOpRecord.Equals("="))
                     {
-                        Console.WriteLine("ceq");
+                        cilOutput.WriteLine("  ceq");
                     }
                     else if (addOpRecord.Equals("or"))
                     {
-                        Console.WriteLine("or");
+                        cilOutput.WriteLine("  or");
                     }
                     else if (addOpRecord.Equals("and"))
                     {
-                        Console.WriteLine("and");
+                        cilOutput.WriteLine("  and");
                     }
                     else if (addOpRecord.Equals(""))
                     {
-                        Console.WriteLine("and");
+                        cilOutput.WriteLine("  and");
                     }
                     else if (addOpRecord.Equals("mod"))
                     {
-                        Console.WriteLine("rem");
+                        cilOutput.WriteLine("  rem");
                     }
                     else if (addOpRecord.Equals("not"))
                     {
-                        Console.WriteLine("not");
+                        cilOutput.WriteLine("  not");
                     }
                     resultRecord = VariableType.Integer;
                 break;
                 default:
-                Console.WriteLine("Not Assigned");
+                cilOutput.WriteLine("Not Assigned");
                     break;
 
             }
@@ -344,11 +352,11 @@ namespace Compiler.SemAnalyzer
         /// <param name="name"></param>
         internal void GenerateProgramInitialize(string name)
         {
-            Console.WriteLine(".assembly extern mscorlib {}");
-            Console.WriteLine(".assembly " + name + " {}" + Environment.NewLine);
-            Console.WriteLine(".class private auto ansi beforefieldinit Program");
-            Console.WriteLine("\textends [mscorlib]System.Object");
-            Console.WriteLine("{" + Environment.NewLine);
+            cilOutput.WriteLine(".assembly extern mscorlib {}");
+            cilOutput.WriteLine(".assembly " + name + " {}" + Environment.NewLine);
+            cilOutput.WriteLine(".class private auto ansi beforefieldinit Program");
+            cilOutput.WriteLine("\textends [mscorlib]System.Object");
+            cilOutput.WriteLine("{" + Environment.NewLine);
         }
         /// <summary>
         /// Generates code for fields
@@ -368,11 +376,11 @@ namespace Compiler.SemAnalyzer
                     {
                         case SymbolType.VariableSymbol:
                             //write the enum out as a string using the Get
-                            Console.WriteLine(".field public " + Enumerations.GetDescription<VariableType>(
+                            cilOutput.WriteLine(".field public " + Enumerations.GetDescription<VariableType>(
                                 (symbol as VariableSymbol).variableType) + " " + symbol.name);
                             break;
                         case SymbolType.ProcedureSymbol:
-                            Console.WriteLine(".field public class Program/" + symbol.name +
+                            cilOutput.WriteLine(".field public class Program/" + symbol.name +
                                 "\tDelegate D__" + symbol.name);
                             break;
                         case SymbolType.FunctionSymbol:
@@ -380,7 +388,7 @@ namespace Compiler.SemAnalyzer
                     }
                     index++;
                 }
-                Console.WriteLine();
+                cilOutput.WriteLine();
             }
 
             if (symbolTableStack.Count > 1)
@@ -400,47 +408,13 @@ namespace Compiler.SemAnalyzer
             {
                 if (count > 0)
                 {
-                    Console.WriteLine(".field public class " + symbolTable.cilScope + "/c__"
+                    cilOutput.WriteLine(".field public class " + symbolTable.cilScope + "/c__"
                         + symbolTable.name + " c__" + symbolTable.name + "Obj");
                 }
                 count++;
             }
             
         }
-        /*
-        /// <summary>
-        /// Generates code for local variable
-        /// </summary>
-        internal void GenerateLocals()
-        {
-            SymbolTable table = symbolTableStack.Peek();
-            int recordSize = table.activationRecordSize;
-            
-            if (recordSize > 0)
-            {
-                int index = 0;
-                Console.WriteLine(".maxstack " + (recordSize + 1));
-                Console.Write(".locals init (");
-
-                foreach (Symbol symbol in table.symbolTable)
-                {
-                    switch (symbol.symbolType)
-                    {                           
-                        case SymbolType.VariableSymbol:
-                            //write the enum out as a string using the Get
-                            Console.Write("[" + index + "] " + Enumerations.GetDescription<VariableType>(
-                                (symbol as VariableSymbol).variableType) + " " + symbol.name);
-                            if (index < table.symbolTable.Count -1)
-                            {
-                                Console.Write(",");
-                            }
-                            break;
-                    }
-                    index++;
-                }
-                Console.WriteLine(")");
-            }
-        }*/
         /// <summary>
         /// Generates code for assignment statements
         /// </summary>
@@ -448,7 +422,7 @@ namespace Compiler.SemAnalyzer
         /// <param name="expressionRecord"></param>
         internal void GenerateAssign (IdentifierRecord idRecord, VariableType expressionRecord)
         {
-            Console.WriteLine("stfld\t" + 
+            cilOutput.WriteLine("  stfld\t" + 
                 Enumerations.GetDescription<VariableType>(idRecord.symbol.variableType) + " " + 
                     idRecord.symbolTable.cilScope + "/c__" + idRecord.symbolTable.name
                         + "::" + idRecord.lexeme + Environment.NewLine);
@@ -464,7 +438,7 @@ namespace Compiler.SemAnalyzer
             {
                 labelRecord = nextLabel;
             }
-            Console.WriteLine(labelRecord + ":"); 
+            cilOutput.WriteLine(labelRecord + ":"); 
         }
 
         /// <summary>
@@ -480,16 +454,16 @@ namespace Compiler.SemAnalyzer
                 branchLabelRecord = nextLabel;
             }
 
-            Console.Write(Enumerations.GetDescription<BranchType>(branchType));
-            Console.WriteLine(branchLabelRecord);
+            cilOutput.Write(Enumerations.GetDescription<BranchType>(branchType));
+            cilOutput.WriteLine(branchLabelRecord);
         }
         /// <summary>
         /// Generates code for return statements
         /// </summary>
         internal void GenerateReturn ()
         {
-            Console.WriteLine("ret");
-            Console.WriteLine("}");
+            cilOutput.WriteLine("  ret");
+            cilOutput.WriteLine("}");
         }
 
         /// <summary>
@@ -499,13 +473,13 @@ namespace Compiler.SemAnalyzer
         /// <param name="p"></param>
         internal void GenerateIncrement(ref IdentifierRecord identifierRecord, string addingOperator)
         {
-            Console.WriteLine("  ldloc.0");
-            Console.WriteLine("  ldloc.0");
-            Console.Write("  ldfld\t");
+            cilOutput.WriteLine("  ldloc.0");
+            cilOutput.WriteLine("  ldloc.0");
+            cilOutput.Write("  ldfld\t");
             GenerateFieldLocation(identifierRecord);
-            Console.WriteLine("  ldc.i4 1");
-            Console.WriteLine("  " + addingOperator);
-            Console.Write("  stfld\t"); 
+            cilOutput.WriteLine("  ldc.i4 1");
+            cilOutput.WriteLine("  " + addingOperator);
+            cilOutput.Write("  stfld\t"); 
             GenerateFieldLocation(identifierRecord);
         }
         
@@ -514,7 +488,7 @@ namespace Compiler.SemAnalyzer
         /// </summary>
         internal void GenerateClosingBrace()
         {
-            Console.WriteLine("}");
+            cilOutput.WriteLine("}");
         }
 
         /// <summary>
@@ -523,11 +497,11 @@ namespace Compiler.SemAnalyzer
         /// <param name="identifierRecord"></param>
         internal void GenerateClassDeclaration(string identifierRecord)
         {
-            Console.WriteLine("/* c__" + identifierRecord + " Class definition */");
-            Console.WriteLine(".class auto ansi sealed nested private beforefieldinit c__" +
+            cilOutput.WriteLine("/* c__" + identifierRecord + " Class definition */");
+            cilOutput.WriteLine(".class auto ansi sealed nested private beforefieldinit c__" +
                 identifierRecord);
-            Console.WriteLine("\textends [mscorlib]System.Object");
-            Console.WriteLine("{" + Environment.NewLine);
+            cilOutput.WriteLine("\textends [mscorlib]System.Object");
+            cilOutput.WriteLine("{" + Environment.NewLine);
         }
 
         /// <summary>
@@ -536,15 +510,15 @@ namespace Compiler.SemAnalyzer
         /// <param name="identifierRecord"></param>
         internal void GenerateClassConstructor(string identifierRecord)
         {
-            Console.WriteLine("/* c__" + identifierRecord + " constructor */");
-            Console.WriteLine(".method public hidebysig specialname rtspecialname ");
-            Console.WriteLine("\tinstance void  .ctor() cil managed ");
-            Console.WriteLine("{");
-            Console.WriteLine("  .maxstack  8");
-            Console.WriteLine("  .ldarg.0");
-            Console.WriteLine("  call\tinstance void [mscorlib]System.Object::.ctor()");
-            Console.WriteLine("  ret");
-            Console.WriteLine("} // end of method c__" + identifierRecord + "::.ctor");
+            cilOutput.WriteLine("/* c__" + identifierRecord + " constructor */");
+            cilOutput.WriteLine(".method public hidebysig specialname rtspecialname ");
+            cilOutput.WriteLine("\tinstance void  .ctor() cil managed ");
+            cilOutput.WriteLine("{");
+            cilOutput.WriteLine("  .maxstack  8");
+            cilOutput.WriteLine("  .ldarg.0");
+            cilOutput.WriteLine("  call\tinstance void [mscorlib]System.Object::.ctor()");
+            cilOutput.WriteLine("  ret");
+            cilOutput.WriteLine("} // end of method c__" + identifierRecord + "::.ctor" + Environment.NewLine);
         }
 
         /// <summary>
@@ -555,30 +529,30 @@ namespace Compiler.SemAnalyzer
         {
             if (symbolTableStack.Count == 1)
             {
-                Console.WriteLine(".method private hidebysig static void " + identifierRecord + 
+                cilOutput.WriteLine(".method private hidebysig static void " + identifierRecord + 
                         "() cil managed");
-                Console.WriteLine("{");
-                Console.WriteLine(" .entrypoint");
+                cilOutput.WriteLine("{");
+                cilOutput.WriteLine(" .entrypoint");
             }
             else
             {
-                Console.WriteLine(".method public hidebysig instance void " + identifierRecord + 
+                cilOutput.WriteLine(".method public hidebysig instance void " + identifierRecord + 
                         "() cil managed");
-                Console.WriteLine("{");
+                cilOutput.WriteLine("{");
             }
 
             int delegateCount = 0;
 
-            Console.WriteLine("  .maxstack " + (delegateCount + DELEGATE_EXTRA_SPACE) + 
+            cilOutput.WriteLine("  .maxstack " + (delegateCount + DELEGATE_EXTRA_SPACE) + 
                                     Environment.NewLine);
 
             string cilScope = symbolTableStack.Peek().cilScope;
 
-            Console.WriteLine( "  .locals init ([0] class " + cilScope + "/c__" + identifierRecord +
+            cilOutput.WriteLine( "  .locals init ([0] class " + cilScope + "/c__" + identifierRecord +
                 " c__" + identifierRecord + "Obj" + ")" + Environment.NewLine);
 
-            Console.WriteLine("  newobj\tvoid " + cilScope + "/c__" + identifierRecord + "::.ctor()");
-            Console.WriteLine("  stloc.0" + Environment.NewLine);
+            cilOutput.WriteLine("  newobj\tvoid " + cilScope + "/c__" + identifierRecord + "::.ctor()");
+            cilOutput.WriteLine("  stloc.0" + Environment.NewLine);
 
         }
         /// <summary>
@@ -586,7 +560,7 @@ namespace Compiler.SemAnalyzer
         /// </summary>
         internal void GenerateLoadObject()
         {
-            Console.WriteLine("  ldloc.0");
+            cilOutput.WriteLine("  ldloc.0");
         }
     }
 }

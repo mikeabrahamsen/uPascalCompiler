@@ -73,7 +73,7 @@ namespace Compiler.Parse
             UsedRules.WriteLine("1");
             Program();
             UsedRules.Close();
-
+            analyzer.cilOutput.Close();
             //If we find the EOF then the parser is done here, if not then there 
             //was an error
             if(lookAheadToken.tag != Tags.MP_EOF)
