@@ -1126,13 +1126,15 @@ namespace Compiler.Parse
         /// </summary>
         private void ProcedureStatement() 
         {
-            string procedureIdentifier = null;
+            MethodRecord procedureRecord = new MethodRecord(SymbolType.ProcedureSymbol);
+
             switch (lookAheadToken.tag)
             {
                 case Tags.MP_IDENTIFIER:
                     UsedRules.WriteLine("63");
-                    Identifier(ref procedureIdentifier);
+                    Identifier(procedureRecord);
                     OptionalActualParameterList();
+                    analyzer.GenerateCallMethod(procedureRecord);
                     break;
                 default:
                     Error("Expecting ProcedureStatement but found " + lookAheadToken.lexeme);

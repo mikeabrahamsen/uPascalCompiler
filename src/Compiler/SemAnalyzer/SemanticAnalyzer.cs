@@ -581,5 +581,20 @@ namespace Compiler.SemAnalyzer
         {
             cilOutput.WriteLine("  ldloc.0");
         }
+
+        /// <summary>
+        /// Generates code for calling a method
+        /// </summary>
+        internal void GenerateCallMethod(MethodRecord methodRecord)
+        {
+            SymbolTable symbolTable = symbolTableStack.Peek();
+
+            Console.WriteLine("  ldloc.0");
+            Console.WriteLine("  ldfld      class Program/");
+            Console.WriteLine(methodRecord.name + "Delegate " + symbolTable.cilScope +
+                "/c__" + symbolTable.name + "::d__" + methodRecord.name);
+            Console.WriteLine("  callvirt\tinstance void Program/" + methodRecord.name +
+                "Delegate::Invoke()" + Environment.NewLine);
+        }
     }
 }
