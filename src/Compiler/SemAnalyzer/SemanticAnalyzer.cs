@@ -119,7 +119,6 @@ namespace Compiler.SemAnalyzer
                          
                         break;
                     default:
-                        //throw exception
                         break;
                 }
                 symbolTableStack.Peek().activationRecordSize += size; //increment activation record size
@@ -317,10 +316,12 @@ namespace Compiler.SemAnalyzer
                     {
                         case SymbolType.VariableSymbol:
                             //write the enum out as a string using the Get
-                            Console.Write(".field public " + Enumerations.GetDescription<VariableType>(
+                            Console.WriteLine(".field public " + Enumerations.GetDescription<VariableType>(
                                 (symbol as VariableSymbol).variableType) + " " + symbol.name);
                             break;
                         case SymbolType.ProcedureSymbol:
+                            Console.WriteLine(".field public class Program/" + symbol.name +
+                                "\tDelegate D__" + symbol.name);
                             break;
                         case SymbolType.FunctionSymbol:
                             break;
@@ -342,11 +343,15 @@ namespace Compiler.SemAnalyzer
         /// </summary>
         internal void GeneratePreviousScopeObjects()
         {
-
+            int count = 0;
             foreach (SymbolTable symbolTable in symbolTableStack)
             {
-                Console.WriteLine(".field public class " + symbolTable.cilScope + "/c__"
-                    + symbolTable.name + " c__" + symbolTable.name + "Obj");
+                if (count > 0)
+                {
+                    Console.WriteLine(".field public class " + symbolTable.cilScope + "/c__"
+                        + symbolTable.name + " c__" + symbolTable.name + "Obj");
+                }
+                count++;
             }
             
         }

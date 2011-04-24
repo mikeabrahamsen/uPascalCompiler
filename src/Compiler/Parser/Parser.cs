@@ -130,10 +130,10 @@ namespace Compiler.Parse
                 case Tags.MP_BEGIN:
                     UsedRules.WriteLine("4");
                     analyzer.GenerateClassDeclaration(identifierRecord);
-                    VariableDeclarationPart();
-                    analyzer.GenerateFields();
+                    VariableDeclarationPart();                    
                     analyzer.GenerateClassConstructor(identifierRecord);
                     ProcedureAndFunctionDeclarationPart();
+                    analyzer.GenerateFields();
                     analyzer.GenerateClosingBrace();
                     analyzer.GenerateMethodDeclaration(identifierRecord);
                     StatementPart();
@@ -295,8 +295,9 @@ namespace Compiler.Parse
                     UsedRules.WriteLine("17");
                     Match((int)Tags.MP_PROCEDURE);
                     Identifier(procedureRecord);
-                    analyzer.CreateSymbolTable(procedureRecord.name);
                     OptionalFormalParameterList(procedureRecord.parameterList);
+                    analyzer.SymbolTableInsert(procedureRecord);
+                    analyzer.CreateSymbolTable(procedureRecord.name);
                     break;
                 default:
                     Error("Expecting ProcedureHeading but found " + lookAheadToken.lexeme);
@@ -317,6 +318,10 @@ namespace Compiler.Parse
                     Identifier(functionRecord);
                     OptionalFormalParameterList(functionRecord.parameterList);
                     Type(ref typeRecord);
+                    functionRecord.returnType = typeRecord.variableType;
+                    //add a record into the current symbol table for the function
+                    analyzer.SymbolTableInsert(functionRecord);
+                    analyzer.CreateSymbolTable(functionRecord.name);
                     break;
                 default:
                     Error("Expecting FunctionHeading but found " + lookAheadToken.lexeme);
