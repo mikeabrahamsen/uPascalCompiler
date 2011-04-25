@@ -692,7 +692,7 @@ namespace Compiler.SemAnalyzer
             {
                 int nestingLevelDifference = symbolTableStack.Count - 1 - objectTable.nestingLevel;
 
-                if (nestingLevelDifference == 0)
+                if (nestingLevelDifference <= 1)
                 {
                     cilOutput.WriteLine("  ldloc.0");
                 }
