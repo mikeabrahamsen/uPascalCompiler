@@ -854,7 +854,7 @@ namespace Compiler.Parse
         /// </summary>
         private void WriteParameter() 
         {
-            VariableType ordinalExpressionRecord = VariableType.Null;
+            VariableRecord ordinalExpressionRecord = new VariableRecord();
             
             switch(lookAheadToken.tag)
             {
@@ -879,7 +879,7 @@ namespace Compiler.Parse
         private void AssignmentStatement () 
         {
             IdentifierRecord idRecord = new IdentifierRecord();
-            VariableType expressionRecord = VariableType.Null;
+            VariableRecord expressionRecord = new VariableRecord();
             string idRecName = null;
             switch (lookAheadToken.tag)
             {
@@ -1006,8 +1006,8 @@ namespace Compiler.Parse
         private void ForStatement () 
         {
             IdentifierRecord controlVariableRecord = new IdentifierRecord();
-            VariableType finalValueRecord = VariableType.Null;
-            VariableType controlStatementRecord = VariableType.Null;
+            VariableRecord finalValueRecord = new VariableRecord();
+            VariableRecord controlStatementRecord = new VariableRecord();
             string controlLabelRecord = string.Empty;
             string loopLabel = string.Empty;
             ControlRecord stepValueRecord = new ControlRecord();
@@ -1064,7 +1064,7 @@ namespace Compiler.Parse
         /// <param name="initialValueRecord"></param>
         private void InitialValue (ref IdentifierRecord initialValueRecord) 
         {
-            VariableType ordinalExpressionRecord = VariableType.Null;
+            VariableRecord ordinalExpressionRecord = new VariableRecord();
 
             switch (lookAheadToken.tag)
             {
@@ -1115,7 +1115,7 @@ namespace Compiler.Parse
         /// Parse FinalValue
         /// </summary>
         /// <param name="ordinalExpressionRecord"></param>
-        private void FinalValue (ref VariableType ordinalExpressionRecord) 
+        private void FinalValue (ref VariableRecord ordinalExpressionRecord) 
         {
             switch(lookAheadToken.tag)
             {
@@ -1248,7 +1248,7 @@ namespace Compiler.Parse
         /// </summary>
         private void ActualParameter()
         {
-            VariableType ordinalExpressionRecord = VariableType.Null;
+            VariableRecord ordinalExpressionRecord = new VariableRecord();
 
             switch (lookAheadToken.tag)
             {
@@ -1271,7 +1271,7 @@ namespace Compiler.Parse
         /// Parse Expression
         /// </summary>
         /// <param name="expressionRecord"></param>
-        private void Expression(ref VariableType expressionRecord)
+        private void Expression(ref VariableRecord expressionRecord)
         {
             switch(lookAheadToken.tag)
             {
@@ -1295,9 +1295,9 @@ namespace Compiler.Parse
         /// Parse OptionalRelationalPart
         /// </summary>
         /// <param name="expressionRecord"></param>
-        private void OptionalRelationalPart(ref VariableType expressionRecord)
+        private void OptionalRelationalPart(ref VariableRecord expressionRecord)
         {
-            VariableType simpleExpressionRecord = VariableType.Null;
+            VariableRecord simpleExpressionRecord = new VariableRecord();
             VariableType resultRecord = VariableType.Null;
             string relationalOpRecord = string.Empty;
 
@@ -1312,8 +1312,8 @@ namespace Compiler.Parse
                     UsedRules.WriteLine("70");
                     RelationalOperator(ref relationalOpRecord);
                     SimpleExpression(ref simpleExpressionRecord);
-                    analyzer.GenerateArithmetic(expressionRecord, relationalOpRecord, 
-                        simpleExpressionRecord, ref resultRecord);
+                    analyzer.GenerateArithmetic(expressionRecord.variableType, relationalOpRecord, 
+                        simpleExpressionRecord.variableType, ref resultRecord);
                     break;
 
                 case Tags.MP_SCOLON:
@@ -1382,7 +1382,7 @@ namespace Compiler.Parse
         /// Parse SimpleExpression
         /// </summary>
         /// <param name="simpleExpressionRecord"></param>
-        private void SimpleExpression(ref VariableType simpleExpressionRecord)
+        private void SimpleExpression(ref VariableRecord simpleExpressionRecord)
         {
             switch(lookAheadToken.tag)
             {
@@ -1407,12 +1407,12 @@ namespace Compiler.Parse
         /// Parse TermTail
         /// </summary>
         /// <param name="termTailRecord"></param>
-        private void TermTail(ref VariableType termTailRecord)
+        private void TermTail(ref VariableRecord termTailRecord)
         {
             string addOpRecord = null;
-            VariableType termRecord = VariableType.Null;
-            VariableType resultRecord = VariableType.Null;
-
+            VariableRecord termRecord = new VariableRecord();
+            VariableRecord resultRecord = new VariableRecord();
+            VariableType tempType = VariableType.Null;
             switch(lookAheadToken.tag)
             {
                 //AddingOperator Term TermTail
@@ -1422,8 +1422,9 @@ namespace Compiler.Parse
                     UsedRules.WriteLine("79");
                     AddingOperator(ref addOpRecord);
                     Term(ref termRecord);
-                    analyzer.GenerateArithmetic(termTailRecord, addOpRecord, termRecord, 
-                                                    ref resultRecord);
+                    analyzer.GenerateArithmetic(termTailRecord.variableType, addOpRecord, 
+                        termRecord.variableType,ref tempType);
+                    resultRecord.variableType = tempType;
                     TermTail(ref resultRecord);
                     break;
 
@@ -1510,7 +1511,7 @@ namespace Compiler.Parse
         /// Parse Term
         /// </summary>
         /// <param name="termRecord"></param>
-        private void Term(ref VariableType termRecord)
+        private void Term(ref VariableRecord termRecord)
         {
             switch(lookAheadToken.tag)
             {
@@ -1564,10 +1565,12 @@ namespace Compiler.Parse
         /// Parse FactorTail
         /// </summary>
         /// <param name="factorTailRecord"></param>
-        private void FactorTail(ref VariableType factorTailRecord)
+        private void FactorTail(ref VariableRecord factorTailRecord)
         {
             string mulOpRecord = null;
-            VariableType factorRecord = VariableType.Null, resultRecord = VariableType.Null;
+            VariableRecord factorRecord = new VariableRecord(), 
+                resultRecord = new VariableRecord();
+            VariableType tempType = VariableType.Null;
             switch (lookAheadToken.tag)
             {
                 case Tags.MP_TIMES:
@@ -1577,8 +1580,9 @@ namespace Compiler.Parse
                     UsedRules.WriteLine("88");
                     MultiplyingOperator(ref mulOpRecord);
                     Factor(ref factorTailRecord);
-                    analyzer.GenerateArithmetic(factorTailRecord, mulOpRecord, factorRecord,
-                                                    ref resultRecord);
+                    analyzer.GenerateArithmetic(factorTailRecord.variableType, mulOpRecord, 
+                        factorRecord.variableType,ref tempType);
+                    resultRecord.variableType = tempType;
                     FactorTail(ref factorTailRecord);
                     break;
 
@@ -1613,10 +1617,11 @@ namespace Compiler.Parse
         /// Parse Factor
         /// </summary>
         /// <param name="factorRecord"></param>
-        private void Factor(ref VariableType factorRecord)
+        private void Factor(ref VariableRecord factorRecord)
         {
             IdentifierRecord idRecord = new IdentifierRecord();
             LiteralRecord litRecord = new LiteralRecord();
+            VariableType tempType = VariableType.Null;
             string idRecName = null;
             switch (lookAheadToken.tag)
             {
@@ -1625,7 +1630,8 @@ namespace Compiler.Parse
                     litRecord.lexeme = lookAheadToken.lexeme;
                     litRecord.type = VariableType.Integer;
                     Match((int)Tags.MP_INTEGER_LIT);                    
-                    analyzer.GenerateLitPush(litRecord, ref factorRecord);
+                    analyzer.GenerateLitPush(litRecord, ref tempType);
+                    factorRecord.variableType = tempType;
                     break;
                 case Tags.MP_NOT:
                     UsedRules.WriteLine("95");
@@ -1665,7 +1671,7 @@ namespace Compiler.Parse
                 case Tags.MP_INTEGER:
                 case Tags.MP_NOT:
                 case Tags.MP_IDENTIFIER:
-                    VariableType expressionRecord = VariableType.Null;
+                    VariableRecord expressionRecord = new VariableRecord();
                     UsedRules.WriteLine("98");
                     Expression(ref expressionRecord);
                     break;
@@ -1679,7 +1685,7 @@ namespace Compiler.Parse
         /// Parse OrdinalExpression
         /// </summary>
         /// <param name="expressionRecord"></param>
-        private void OrdinalExpression(ref VariableType expressionRecord)
+        private void OrdinalExpression(ref VariableRecord expressionRecord)
         {
             switch (lookAheadToken.tag)
             {

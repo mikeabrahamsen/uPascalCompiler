@@ -72,6 +72,7 @@
     <Compile Include="SemAnalyzer\MethodRecord.cs" />
     <Compile Include="SemAnalyzer\SemanticAnalyzer.cs" />
     <Compile Include="SemAnalyzer\TypeRecord.cs" />
+    <Compile Include="SemAnalyzer\VariableRecord.cs" />
     <Compile Include="SymbolTbl\FunctionSymbol.cs" />
     <Compile Include="SymbolTbl\Parameter.cs" />
     <Compile Include="SymbolTbl\ParameterSymbol.cs" />

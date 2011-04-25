@@ -255,13 +255,13 @@ namespace Compiler.SemAnalyzer
         /// </summary>
         /// <param name="idRecord"></param>
         /// <param name="factorRecord"></param>
-        internal void GenerateIdPush (IdentifierRecord idRecord, ref VariableType factorRecord)
+        internal void GenerateIdPush(IdentifierRecord idRecord, ref VariableRecord factorRecord)
         {
             GenerateObjectScope(idRecord.symbolTable);
             cilOutput.Write("  ldfld\t");
             GenerateFieldLocation(idRecord);
 
-            factorRecord = idRecord.symbol.variableType;
+            factorRecord.variableType = idRecord.symbol.variableType;
         }
 
         /// <summary>
@@ -437,7 +437,7 @@ namespace Compiler.SemAnalyzer
         /// </summary>
         /// <param name="idRecord"></param>
         /// <param name="expressionRecord"></param>
-        internal void GenerateAssign (IdentifierRecord idRecord, VariableType expressionRecord)
+        internal void GenerateAssign(IdentifierRecord idRecord, VariableRecord expressionRecord)
         {
             cilOutput.WriteLine("  stfld\t" + 
                 Enumerations.GetDescription<VariableType>(idRecord.symbol.variableType) + " " + 

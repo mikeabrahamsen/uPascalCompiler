@@ -8,11 +8,18 @@ namespace Compiler.SemAnalyzer
 {
     class VariableRecord
     {
+        /// <summary>
+        /// Gets and sets the IoMode
+        /// </summary>
         public IOMode ioMode
         {
             get;
             set;
         }
+
+        /// <summary>
+        /// Gets and sets the Variable Type
+        /// </summary>
         public VariableType variableType
         {
             get;
