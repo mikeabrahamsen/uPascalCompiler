@@ -153,15 +153,35 @@ namespace Compiler.SemAnalyzer
                 symbolTableStack.Peek().Insert(symbol);
             }           
         }
-
+        
         /// <summary>
         /// Generates code for a delegate declaration
         /// </summary>
         internal void GenerateDelegateDeclaration()
         {
+            int count;
+            string parameterString;
             foreach(MethodRecord methodRecord in delegateList)
             {
-                
+                count = 0;
+                parameterString = string.Empty;
+                foreach (Parameter parameter in methodRecord.parameterList)
+                {
+                    if (count > 0)
+                    {
+                        parameterString += ", ";
+                    }
+
+                    parameterString += Enumerations.GetDescription<VariableType>(parameter.variableType);
+
+                    if (parameter.mode == IOMode.InOut)
+                    {
+                        parameterString += "&";
+                    }
+
+                    parameterString += " " + parameter.name;
+                    count++;
+                }
                 cilOutput.WriteLine("/* " + methodRecord.name + "Delegate" +
                     " delegate function declaration */");
                 cilOutput.WriteLine(".class auto ansi sealed nested public " + methodRecord.name 
@@ -178,13 +198,21 @@ namespace Compiler.SemAnalyzer
                
 
                 cilOutput.WriteLine(".method public hidebysig newslot virtual " + Environment.NewLine +
-                        "instance void  Invoke() runtime managed");
+                        "instance void  Invoke("+ parameterString +") runtime managed");
                 cilOutput.WriteLine("{");
                 cilOutput.WriteLine("} // end of method " + methodRecord.name + "Delegate" + "::Invoke");
 
                 cilOutput.WriteLine(".method public hidebysig newslot virtual");
                 cilOutput.WriteLine("\tinstance class [mscorlib]System.IAsyncResult");
-                cilOutput.WriteLine("\tBeginInvoke(class [mscorlib]System.AsyncCallback callback,");
+                cilOutput.Write("\tBeginInvoke(" +parameterString);
+
+                if(methodRecord.parameterList.Count > 0)
+                {
+                    cilOutput.Write(", ");
+                }
+                
+                parameterString = string.Empty;
+                cilOutput.WriteLine("class [mscorlib]System.AsyncCallback callback,");
                 cilOutput.WriteLine("\tobject 'object') runtime managed");
                 cilOutput.WriteLine("{");
                 cilOutput.WriteLine("} // end of method "+ methodRecord.name+ "Delegate" 
