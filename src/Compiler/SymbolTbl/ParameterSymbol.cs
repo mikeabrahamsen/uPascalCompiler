@@ -16,16 +16,17 @@ namespace Compiler.SymbolTbl
             get;
             set;
         }
-
         /// <summary>
         /// Constructor for parameter symbol
         /// </summary>
         /// <param name="name"></param>
         /// <param name="symbolType"></param>
         /// <param name="parameter"></param>
-        public ParameterSymbol (string name,SymbolType symbolType, Parameter parameter) 
+        public ParameterSymbol (string name,SymbolType symbolType, Parameter parameter,
+            VariableType variableType) 
             :base(name,symbolType)
         {
+            base.variableType = variableType;
             this.parameter = parameter;
         }
     }

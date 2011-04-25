@@ -27,14 +27,6 @@ namespace Compiler.SymbolTbl
         }
 
         /// <summary>
-        /// gets and sets the variable type
-        /// </summary>
-        public VariableType variableType
-        {
-            get;
-            set;
-        }
-        /// <summary>
         /// Constructor for Variable Symbol
         /// </summary>
         /// <param name="name"></param>

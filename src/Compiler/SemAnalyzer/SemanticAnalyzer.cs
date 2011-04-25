@@ -102,7 +102,7 @@ namespace Compiler.SemAnalyzer
         /// </summary>
         /// <param name="idRecord"></param>
         /// <param name="idRecordList"></param>
-        public void AddId(string idRecord,List<string>idRecordList)
+        public void ProcessId(string idRecord, ref List<string>idRecordList)
         {
             idRecordList.Add(idRecord);
         }
@@ -111,12 +111,12 @@ namespace Compiler.SemAnalyzer
        /// finds the correct symbol and sets the attributes of the idRecord
        /// </summary>
        /// <param name="idRecord"></param>
-        public void ProcessId (IdentifierRecord idRecord)
+        public void ProcessId (ref IdentifierRecord idRecord)
         {            
-            VariableSymbol symbol;
+            Symbol symbol;
             foreach(SymbolTable st in symbolTableStack)
             {
-                symbol = st.Find(idRecord.lexeme) as VariableSymbol;
+                symbol = st.Find(idRecord.lexeme);
                 if(symbol != null)
                 {
                     idRecord.symbolTable = st;
@@ -545,6 +545,31 @@ namespace Compiler.SemAnalyzer
         /// <param name="identifierRecord"></param>
         internal void GenerateMethodDeclaration(string identifierRecord)
         {
+
+            SymbolType type;
+            int symbolCount = 1;
+            string parameters = string.Empty;
+            foreach (Symbol symbol in symbolTableStack.Peek().symbolTable)
+            {
+                type = symbol.symbolType;
+                if (type == SymbolType.ParameterSymbol)
+                {
+                    ParameterSymbol pSymbol = symbol as ParameterSymbol;
+                    parameters += (Enumerations.GetDescription<VariableType>(
+                        pSymbol.variableType));
+                    if (pSymbol.parameter.mode == IOMode.InOut)
+                    {
+                        parameters += ("&");
+                    }
+                    parameters += (" " + pSymbol.name);
+                    symbolCount++;
+                    if (symbolCount != symbolTableStack.Peek().symbolTable.Count)
+                    {
+                        parameters += (", ");
+                    }                    
+                }
+            }
+
             if (symbolTableStack.Count == 1)
             {
                 cilOutput.WriteLine(".method private hidebysig static void ");
@@ -555,7 +580,8 @@ namespace Compiler.SemAnalyzer
             else
             {
                 cilOutput.WriteLine(".method public hidebysig instance void ");
-                cilOutput.WriteLine("\tb__"+identifierRecord + "() cil managed");
+                cilOutput.WriteLine("\tb__"+identifierRecord + "(" + parameters +
+                    ") cil managed");
                 cilOutput.WriteLine("{");
             }
 
@@ -682,6 +708,20 @@ namespace Compiler.SemAnalyzer
                     }
                 }
 
+            }
+        }
+
+        /// <summary>
+        /// Inserts a ParameterSymbol into the symbol table
+        /// </summary>
+        /// <param name="list"></param>
+        internal void SymbolTableInsert(List<Parameter> list)
+        {
+
+            foreach (Parameter parameter in list)
+            {
+                symbolTableStack.Peek().Insert(new ParameterSymbol(parameter.name,
+                    SymbolType.ParameterSymbol,parameter,parameter.variableType));
             }
         }
     }

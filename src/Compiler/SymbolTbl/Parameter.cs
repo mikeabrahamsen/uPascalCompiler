@@ -24,15 +24,22 @@ namespace Compiler.SymbolTbl
             get;
             set;
         }
+        public string name
+        {
+            get;
+            set;
+        }
         /// <summary>
         /// Constructor for a parameter
         /// </summary>
         /// <param name="mode"></param>
         /// <param name="variableType"></param>
-        public Parameter (IOMode mode, VariableType variableType)
+        public Parameter (string name,IOMode mode, VariableType variableType)
         {
             this.mode = mode;
             this.variableType = variableType;
+            this.name = name;
+
         }
     }
 }

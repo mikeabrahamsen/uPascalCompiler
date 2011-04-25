@@ -107,6 +107,15 @@ namespace Compiler.Parse
             
         }
 
+        private List<Parameter> BuildParameterList(List<string> identifierList, TypeRecord variableType,
+            IOMode ioMode,List<Parameter> parameterList)
+        {
+            foreach (string name in identifierList)
+            {
+                parameterList.Add(new Parameter(name,ioMode, variableType.variableType));
+            }
+            return parameterList;
+        }
         /// <summary>
         /// Remove a token from the queue
         /// </summary>
@@ -385,15 +394,18 @@ namespace Compiler.Parse
         /// <param name="procedureRecord"></param>
         private void ProcedureHeading (MethodRecord procedureRecord) 
         {
+            procedureRecord.parameterList = new List<Parameter>();
             switch(lookAheadToken.tag)
             {
                 case Tags.MP_PROCEDURE:                    
                     UsedRules.WriteLine("17");
                     Match((int)Tags.MP_PROCEDURE);
                     Identifier(procedureRecord);
-                    OptionalFormalParameterList(procedureRecord.parameterList);
+                    procedureRecord.parameterList = OptionalFormalParameterList(
+                        procedureRecord.parameterList);
                     analyzer.SymbolTableInsert(procedureRecord);
                     analyzer.CreateSymbolTable(procedureRecord.name);
+                    analyzer.SymbolTableInsert(procedureRecord.parameterList);
                     break;
                 default:
                     Error("Expecting ProcedureHeading but found " + lookAheadToken.lexeme);
@@ -417,7 +429,7 @@ namespace Compiler.Parse
                     UsedRules.WriteLine("18");
                     Match((int)Tags.MP_FUNCTION);
                     Identifier(functionRecord);
-                    OptionalFormalParameterList(functionRecord.parameterList);
+                    functionRecord.parameterList = OptionalFormalParameterList(functionRecord.parameterList);
                     Type(ref typeRecord);
                     functionRecord.returnType = typeRecord.variableType;
                     //add a record into the current symbol table for the function
@@ -434,15 +446,15 @@ namespace Compiler.Parse
         /// Parse OptionalFormalParameterList
         /// </summary>
         /// <param name="parameterList"></param>
-        private void OptionalFormalParameterList (List<Parameter> parameterList) 
+        private List<Parameter> OptionalFormalParameterList (List<Parameter> parameterList) 
         {
             switch(lookAheadToken.tag)
             {
                 case Tags.MP_LPAREN: // "(" FormalParameterSection FormalParameterSectionTail ")"
                     UsedRules.WriteLine("19");
                     Match('(');
-                    FormalParameterSection(parameterList);
-                    FormalParameterSectionTail(parameterList);
+                    FormalParameterSection(ref parameterList);
+                    FormalParameterSectionTail(ref parameterList);
                     Match(')');
                     break;
                 case Tags.MP_SCOLON:
@@ -454,21 +466,22 @@ namespace Compiler.Parse
                     Error("Expecting OptionalFormalParameterList but found " + lookAheadToken.lexeme);
                     break;
             }
+            return parameterList;
         }
 
         /// <summary>
         /// Parse FormalParameterSectionTail
         /// </summary>
         /// <param name="parameters"></param>
-        private void FormalParameterSectionTail (List<Parameter> parameters) 
+        private void FormalParameterSectionTail (ref List<Parameter> parameters) 
         {
             switch(lookAheadToken.tag)
             {
                 case Tags.MP_SCOLON: // ";" FormalParameterSection FormalParameterSectionTail
                     UsedRules.WriteLine("21");
                     Match(';');
-                    FormalParameterSection(parameters);
-                    FormalParameterSectionTail(parameters);
+                    FormalParameterSection(ref parameters);
+                    FormalParameterSectionTail(ref parameters);
                     break;
                 case Tags.MP_RPAREN: // lamda
                     UsedRules.WriteLine("22");
@@ -483,17 +496,17 @@ namespace Compiler.Parse
         /// Parse FormalParameterSection
         /// </summary>
         /// <param name="parameters"></param>
-        private void FormalParameterSection (List<Parameter> parameters) 
+        private void FormalParameterSection (ref List<Parameter> parameters) 
         {
             switch(lookAheadToken.tag)
             {
                 case Tags.MP_IDENTIFIER: // ValueParameterSection
                     UsedRules.WriteLine("23");
-                    ValueParameterSection(parameters);
+                    ValueParameterSection(ref parameters);
                     break;
                 case Tags.MP_VAR: // VariableParameterSection
                     UsedRules.WriteLine("24");
-                    VariableParameterSection(parameters);
+                    VariableParameterSection(ref parameters);
                     break;
                 default:
                     Error("Expecting FormalParameterSection but found " + lookAheadToken.lexeme);
@@ -505,7 +518,7 @@ namespace Compiler.Parse
         /// Parse ValueParameterSection
         /// </summary>
         /// <param name="parameters"></param>
-        private void ValueParameterSection (List<Parameter> parameters) 
+        private void ValueParameterSection (ref List<Parameter> parameters) 
         {
             TypeRecord typeRecord = new TypeRecord(SymbolType.ParameterSymbol, VariableType.Null);
             List<string> identifierList = new List<string>();
@@ -518,7 +531,7 @@ namespace Compiler.Parse
                     Match(':');
                     Type(ref typeRecord);
 
-                     //TODO: must make the list of parameters
+                    parameters = BuildParameterList(identifierList, typeRecord, IOMode.In,parameters);
                      break;
                  default:
                      Error("Expecting ValueParameterSection but found " + lookAheadToken.lexeme);
@@ -530,7 +543,7 @@ namespace Compiler.Parse
         /// Parse VariableParameterSection
         /// </summary>
         /// <param name="parameters"></param>
-        private void VariableParameterSection (List<Parameter> parameters) 
+        private void VariableParameterSection (ref List<Parameter> parameters) 
         {
             TypeRecord typeRecord = new TypeRecord(SymbolType.ParameterSymbol, VariableType.Null);
             List<string> identifierList = new List<string>();
@@ -543,7 +556,7 @@ namespace Compiler.Parse
                     IdentifierList(ref identifierList);
                     Match(':');
                     Type(ref typeRecord);
-                    //TODO: must make the list of parameters
+                    parameters = BuildParameterList(identifierList, typeRecord, IOMode.InOut,parameters);
                     break;
                 default:
                     Error("Expecting VariableParameterSection but found " + lookAheadToken.lexeme);
@@ -783,7 +796,7 @@ namespace Compiler.Parse
                     UsedRules.WriteLine("46");
                     Identifier(ref idRecName);
                     idRecord.lexeme = idRecName;
-                    analyzer.ProcessId(idRecord);
+                    analyzer.ProcessId(ref idRecord);
                     break;
                 default:
                     Error("Expecting ID found " + lookAheadToken.tag);
@@ -874,7 +887,7 @@ namespace Compiler.Parse
                     UsedRules.WriteLine("51");
                     Identifier(ref idRecName);
                     idRecord.lexeme = idRecName;
-                    analyzer.ProcessId(idRecord);
+                    analyzer.ProcessId(ref idRecord);
                     Match((int)Tags.MP_ASSIGN);
                     analyzer.GenerateObjectScope(idRecord.symbolTable);
                     Expression(ref expressionRecord);
@@ -1037,7 +1050,7 @@ namespace Compiler.Parse
                     UsedRules.WriteLine("58");
                     Identifier(ref procedureIdentifier);
                     controlVariableRecord.lexeme = procedureIdentifier;
-                    analyzer.ProcessId(controlVariableRecord);
+                    analyzer.ProcessId(ref controlVariableRecord);
                     break;
                 default:
                     Error("Expecting ControlVariable but found " + lookAheadToken.lexeme);
@@ -1629,7 +1642,7 @@ namespace Compiler.Parse
                     UsedRules.WriteLine("97");
                     Identifier(ref idRecName);
                     idRecord.lexeme = idRecName;
-                    analyzer.ProcessId(idRecord);
+                    analyzer.ProcessId(ref idRecord);
                     analyzer.GenerateIdPush(idRecord, ref factorRecord);
                     OptionalActualParameterList();
                     break;
@@ -1699,7 +1712,7 @@ namespace Compiler.Parse
                 case Tags.MP_IDENTIFIER:
                     UsedRules.WriteLine("100");
                     Identifier(ref identifierRecord);
-                    analyzer.AddId(identifierRecord, identifierRecordList);
+                    analyzer.ProcessId(identifierRecord, ref identifierRecordList);
                     IdentifierTail(ref identifierRecordList);
                     break;
                 default:
@@ -1721,7 +1734,7 @@ namespace Compiler.Parse
                     UsedRules.WriteLine("101");
                     Match((int)Tags.MP_COMMA);
                     Identifier(ref identifierRecord);
-                    analyzer.AddId(identifierRecord, identifierRecordList);
+                    analyzer.ProcessId(identifierRecord, ref identifierRecordList);
                     IdentifierTail(ref identifierRecordList);
                     break;
                 case Tags.MP_COLON: //lambda 

@@ -24,6 +24,14 @@ namespace Compiler.SymbolTbl
             get;
             private set;
         }
+        /// <summary>
+        /// gets and sets the variableType
+        /// </summary>
+        public VariableType variableType
+        {
+            get;
+            set;
+        }
 
         /// <summary>
         /// Creates a symbol
@@ -34,7 +42,10 @@ namespace Compiler.SymbolTbl
         {
             this.name = name;
             this.symbolType = symbolType;
+            this.variableType = VariableType.Null;
         }
+
+
         
     }
 

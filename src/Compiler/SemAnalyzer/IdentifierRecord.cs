@@ -28,7 +28,7 @@ namespace Compiler.SemAnalyzer
         /// <summary>
         /// Gets and sets the Varible Symbol
         /// </summary>
-        public VariableSymbol symbol
+        public Symbol symbol
         {
             get;
             set;
