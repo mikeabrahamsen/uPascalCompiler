@@ -668,14 +668,25 @@ namespace Compiler.SemAnalyzer
         /// </summary>
         internal void GenerateCallMethod(MethodRecord methodRecord)
         {
-            SymbolTable symbolTable = symbolTableStack.Peek();
+            string parameterString = string.Empty;
+            int count = 0;
 
-            cilOutput.WriteLine("  ldloc.0");
-            cilOutput.WriteLine("  ldfld      class Program/");
-            cilOutput.WriteLine(methodRecord.name + "Delegate " + symbolTable.cilScope +
-                "/c__" + symbolTable.name + "::d__" + methodRecord.name);
+            foreach (Parameter parameter in methodRecord.parameterList)
+            {
+                if (count > 0)
+                {
+                    parameterString += ", ";
+                }
+
+                parameterString += Enumerations.GetDescription<VariableType>(parameter.variableType);
+
+                if (parameter.mode == IOMode.InOut)
+                {
+                    parameterString += "&";
+                }
+            }
             cilOutput.WriteLine("  callvirt\tinstance void Program/" + methodRecord.name +
-                "Delegate::Invoke()" + Environment.NewLine);
+                "Delegate::Invoke(" + parameterString + ")" + Environment.NewLine);
         }
 
         /// <summary>
