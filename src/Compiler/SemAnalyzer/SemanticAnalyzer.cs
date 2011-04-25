@@ -121,6 +121,7 @@ namespace Compiler.SemAnalyzer
                 {
                     idRecord.symbolTable = st;
                     idRecord.symbol = symbol;
+                    break;
                 }
             }
             
@@ -258,7 +259,16 @@ namespace Compiler.SemAnalyzer
         internal void GenerateIdPush(IdentifierRecord idRecord, ref VariableRecord factorRecord)
         {
             GenerateObjectScope(idRecord.symbolTable);
-            cilOutput.Write("  ldfld\t");
+
+            if (factorRecord.ioMode == IOMode.InOut)
+            {
+                cilOutput.Write("  ldflda\t");
+            }
+            else
+            {
+                cilOutput.Write("  ldfld\t");
+            }
+                
             GenerateFieldLocation(idRecord);
 
             factorRecord.variableType = idRecord.symbol.variableType;
@@ -643,16 +653,35 @@ namespace Compiler.SemAnalyzer
         internal void GenerateDelegateInitilization()
         {
             SymbolTable symbolTable = symbolTableStack.Peek();
-
+            int count = 0;
+            string paramaterString = string.Empty;
             foreach (Symbol symbol in symbolTable.symbolTable)
             {
                 if (symbol.symbolType == SymbolType.ProcedureSymbol ||
                     symbol.symbolType == SymbolType.FunctionSymbol)
                 {
+
+                    foreach (Parameter parameter in 
+                        (symbol as ProcedureSymbol).paramList)
+                    {
+                        if (count > 0)
+                        {
+                            paramaterString += ", ";
+                        }
+                        paramaterString += Enumerations.GetDescription<VariableType>
+                            (parameter.variableType);
+
+                        if (parameter.mode == IOMode.InOut)
+                        {
+                            paramaterString += "&";
+                        }
+                        count++;
+                    }
                     cilOutput.WriteLine("  ldloc.0");
                     cilOutput.WriteLine("  ldloc.0");
                     cilOutput.WriteLine("  ldftn\tinstance void " + symbolTable.cilScope +
-                        "/c__" + symbolTable.name + "::b__" + symbol.name + "()");
+                        "/c__" + symbolTable.name + "::b__" + symbol.name + "(" + paramaterString +
+                        ")");
                     cilOutput.WriteLine("  newobj\tinstance void Program" + "/" + symbol.name +
                         "Delegate::.ctor(object,native int)");
                     cilOutput.WriteLine("  stfld\tclass Program" + "/" + symbol.name + "Delegate " +
@@ -684,6 +713,7 @@ namespace Compiler.SemAnalyzer
                 {
                     parameterString += "&";
                 }
+                count++;
             }
             cilOutput.WriteLine("  callvirt\tinstance void Program/" + methodRecord.name +
                 "Delegate::Invoke(" + parameterString + ")" + Environment.NewLine);
@@ -734,6 +764,48 @@ namespace Compiler.SemAnalyzer
                 symbolTableStack.Peek().Insert(new ParameterSymbol(parameter.name,
                     SymbolType.ParameterSymbol,parameter,parameter.variableType));
             }
+        }
+
+        /// <summary>
+        /// Generates code for loading a delegate
+        /// </summary>
+        /// <param name="methodRecord"></param>
+        internal void GenerateLoadDelegate(MethodRecord methodRecord)
+        {
+            SymbolTable table = symbolTableStack.Peek();
+
+            cilOutput.WriteLine("  ldloc.0");
+            cilOutput.WriteLine("  ldfld\tclass Program/" + methodRecord.name +
+                "Delegate " + table.cilScope + "/c__" + table.name + "::d__" +
+                methodRecord.name + Environment.NewLine);
+
+        }
+
+        /// <summary>
+        /// Process Parameters
+        /// </summary>
+        /// <param name="identifierRecord"></param>
+        /// <param name="procedureRecord"></param>
+        /// <param name="parameterList"></param>
+        internal void processParameters(IdentifierRecord identifierRecord, ref MethodRecord procedureRecord, 
+            ref List<Parameter> parameterList)
+        {
+            ProcedureSymbol pSymbol = identifierRecord.symbol as ProcedureSymbol;
+            procedureRecord.parameterList = pSymbol.paramList;
+            parameterList = new List<Parameter>(procedureRecord.parameterList);
+        }
+
+        /// <summary>
+        /// Process parameter
+        /// </summary>
+        /// <param name="parameterRecord"></param>
+        /// <param name="parameterList"></param>
+        internal void processParameter(ref VariableRecord parameterRecord, ref List<Parameter> parameterList)
+        {
+            parameterRecord.ioMode = parameterList.ElementAt(0).mode;
+            parameterRecord.variableType = parameterList.ElementAt(0).variableType;
+
+            parameterList.RemoveAt(0);
         }
     }
 }

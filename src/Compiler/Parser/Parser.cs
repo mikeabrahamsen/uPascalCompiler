@@ -1140,13 +1140,20 @@ namespace Compiler.Parse
         private void ProcedureStatement() 
         {
             MethodRecord procedureRecord = new MethodRecord(SymbolType.ProcedureSymbol);
-
+            IdentifierRecord identifierRecord = new IdentifierRecord();
+            List<Parameter> parameterList = new List<Parameter>();
+            procedureRecord.parameterList = new List<Parameter>();
             switch (lookAheadToken.tag)
             {
                 case Tags.MP_IDENTIFIER:
                     UsedRules.WriteLine("63");
                     Identifier(procedureRecord);
-                    OptionalActualParameterList();
+                    identifierRecord.lexeme = procedureRecord.name;
+                    analyzer.ProcessId(ref identifierRecord);
+                    analyzer.GenerateLoadDelegate(procedureRecord);
+                    analyzer.processParameters(identifierRecord, ref procedureRecord, 
+                        ref parameterList);
+                    OptionalActualParameterList(parameterList);
                     analyzer.GenerateCallMethod(procedureRecord);
                     break;
                 default:
@@ -1158,15 +1165,15 @@ namespace Compiler.Parse
         /// <summary>
         /// Parse OptionalActualParameterList
         /// </summary>
-        private void OptionalActualParameterList() 
+        private void OptionalActualParameterList(List<Parameter> parameterList) 
         {
             switch (lookAheadToken.tag)
             {
                 case Tags.MP_LPAREN: // "(" ActualParameter ActualParameterTail ")" 
                     UsedRules.WriteLine("64");
                     Match((int)Tags.MP_LPAREN);
-                    ActualParameter();
-                    ActualParameterTail();
+                    ActualParameter(ref parameterList);
+                    ActualParameterTail(ref parameterList);
                     Match((int)Tags.MP_RPAREN);
                     break;
                 case Tags.MP_SCOLON:
@@ -1223,15 +1230,15 @@ namespace Compiler.Parse
         /// <summary>
         /// Parse ActualParameterTail
         /// </summary>
-        private void ActualParameterTail()
+        private void ActualParameterTail(ref List<Parameter> parameterList)
         {
             switch(lookAheadToken.tag)
             {
                 case Tags.MP_COMMA: //"," ActualParameter ActualParameterTail
                     UsedRules.WriteLine("66");
                     Match((int)Tags.MP_COMMA);
-                    ActualParameter();
-                    ActualParameterTail();
+                    ActualParameter(ref parameterList);
+                    ActualParameterTail(ref parameterList);
                     break;
 
                 case Tags.MP_RPAREN: //lambda
@@ -1246,9 +1253,9 @@ namespace Compiler.Parse
         /// <summary>
         /// Parse ActualParameter
         /// </summary>
-        private void ActualParameter()
+        private void ActualParameter(ref List<Parameter> parameterList)
         {
-            VariableRecord ordinalExpressionRecord = new VariableRecord();
+            VariableRecord parameterRecord = new VariableRecord();
 
             switch (lookAheadToken.tag)
             {
@@ -1259,7 +1266,8 @@ namespace Compiler.Parse
                 case Tags.MP_NOT:
                 case Tags.MP_IDENTIFIER:
                     UsedRules.WriteLine("68");
-                    OrdinalExpression(ref ordinalExpressionRecord);
+                    analyzer.processParameter(ref parameterRecord, ref parameterList);
+                    OrdinalExpression(ref parameterRecord);
                     break;
                 default:
                     Error("Expecting ActualParameter but found " + lookAheadToken.lexeme);
@@ -1622,7 +1630,9 @@ namespace Compiler.Parse
             IdentifierRecord idRecord = new IdentifierRecord();
             LiteralRecord litRecord = new LiteralRecord();
             VariableType tempType = VariableType.Null;
+            List<Parameter> parameterList = new List<Parameter>();
             string idRecName = null;
+
             switch (lookAheadToken.tag)
             {
                 case Tags.MP_INTEGER_LIT:
@@ -1650,7 +1660,7 @@ namespace Compiler.Parse
                     idRecord.lexeme = idRecName;
                     analyzer.ProcessId(ref idRecord);
                     analyzer.GenerateIdPush(idRecord, ref factorRecord);
-                    OptionalActualParameterList();
+                    OptionalActualParameterList(parameterList);
                     break;
                 default:
                     Error("Expecting Factor but found " + lookAheadToken.lexeme);
