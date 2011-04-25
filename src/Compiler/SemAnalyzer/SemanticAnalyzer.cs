@@ -209,9 +209,24 @@ namespace Compiler.SemAnalyzer
                 if(methodRecord.parameterList.Count > 0)
                 {
                     cilOutput.Write(", ");
-                }
-                
+                }                
                 parameterString = string.Empty;
+                
+                //Need to find all of the references and EndInvoke them
+                //Sloppy
+                int pcount = 0;
+                foreach (Parameter pSymbol in methodRecord.parameterList)
+                {
+                    if (pSymbol.mode == IOMode.InOut)
+                    {
+                        if (pcount > 0)
+                        {
+                            parameterString += ", ";
+                        }
+                        parameterString += Enumerations.GetDescription<VariableType>
+                            (pSymbol.variableType) + "& " + pSymbol.name;
+                    }
+                }
                 cilOutput.WriteLine("class [mscorlib]System.AsyncCallback callback,");
                 cilOutput.WriteLine("\tobject 'object') runtime managed");
                 cilOutput.WriteLine("{");
@@ -219,8 +234,16 @@ namespace Compiler.SemAnalyzer
                     + "::BeginInvoke");
 
                 cilOutput.WriteLine(".method public hidebysig newslot virtual");
-                cilOutput.WriteLine("instance void  EndInvoke(class [mscorlib]System.IAsyncResult result) " 
+                cilOutput.Write("instance void  EndInvoke(" + parameterString);
+                
+                if (parameterString.Length > 0)
+                {
+                    cilOutput.Write(", ");
+                }
+                cilOutput.WriteLine("class [mscorlib]System.IAsyncResult result) " 
                     + "runtime managed");
+
+                
                 cilOutput.WriteLine("{");
                 cilOutput.WriteLine("} // end of method " +methodRecord.name+ "Delegate"+ "::EndInvoke");
                 cilOutput.WriteLine("} // end of class " + methodRecord.name+ "Delegate" + 
