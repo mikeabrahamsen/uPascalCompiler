@@ -457,6 +457,11 @@ namespace Compiler.SemAnalyzer
                                 Enumerations.GetDescription<VariableType>(
                                 (symbol as VariableSymbol).variableType) + " " + symbol.name);
                             break;
+                        case SymbolType.ParameterSymbol:
+                            cilOutput.WriteLine(".field public " +
+                                Enumerations.GetDescription<VariableType>(
+                                (symbol as ParameterSymbol).variableType) + " " + symbol.name);
+                            break;
                         case SymbolType.ProcedureSymbol:
                             cilOutput.WriteLine(".field public class Program/" + symbol.name +
                                 "Delegate d__" + symbol.name);
@@ -857,6 +862,28 @@ namespace Compiler.SemAnalyzer
             parameterRecord.variableType = parameterList.ElementAt(0).variableType;
 
             parameterList.RemoveAt(0);
+        }
+
+        internal void GenerateReferenceParameterReassignment()
+        {
+            int parameterCount = 0;
+            SymbolTable symbolTable = symbolTableStack.Peek();
+
+            foreach (Symbol symbol in symbolTable.symbolTable)
+            {
+                parameterCount++;
+
+                if ((symbol is ParameterSymbol) && (symbol as ParameterSymbol).
+                    parameter.mode == IOMode.InOut)
+                {
+                    cilOutput.WriteLine("  ldarg." + parameterCount);
+                    cilOutput.WriteLine("  ldloc.0");
+                    cilOutput.WriteLine("  ldfld\t" + Enumerations.GetDescription<VariableType>
+                        (symbol.variableType) + " " + symbolTable.cilScope +
+                        "/c__" + symbolTable.name + "::" + symbol.name);
+                    cilOutput.WriteLine("  stind.i4" + Environment.NewLine);
+                }
+            }
         }
     }
 }

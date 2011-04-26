@@ -208,6 +208,7 @@ namespace Compiler.Parse
                     analyzer.GenerateClosingBrace();
                     analyzer.GenerateMethodDeclaration(identifierRecord);
                     StatementPart();
+                    analyzer.GenerateReferenceParameterReassignment();
                     analyzer.GenerateReturn();
                     break;
                 default:
