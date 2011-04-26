@@ -181,7 +181,8 @@ namespace Compiler.SemAnalyzer
                
 
                 cilOutput.WriteLine(".method public hidebysig newslot virtual " + Environment.NewLine +
-                        "instance void  Invoke("+ parameterString +") runtime managed");
+                        "instance " + Enumerations.GetDescription<VariableType>(methodRecord.returnType) + 
+                        " Invoke("+ parameterString +") runtime managed");
                 cilOutput.WriteLine("{");
                 cilOutput.WriteLine("} // end of method " + methodRecord.name + "Delegate" + "::Invoke");
 
@@ -204,7 +205,8 @@ namespace Compiler.SemAnalyzer
                     + "::BeginInvoke");
 
                 cilOutput.WriteLine(".method public hidebysig newslot virtual");
-                cilOutput.Write("instance void  EndInvoke(" + parameterString);
+                cilOutput.Write("instance "+ Enumerations.GetDescription<VariableType>(methodRecord.returnType) +
+                    " EndInvoke(" + parameterString);
                 
                 if (parameterString.Length > 0)
                 {
