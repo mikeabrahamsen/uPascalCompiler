@@ -616,7 +616,7 @@ namespace Compiler.SemAnalyzer
         {
 
             SymbolType type;
-            int symbolCount = 1;
+            int symbolCount = 0;
             string parameters = string.Empty;
             foreach (Symbol symbol in symbolTableStack.Peek().symbolTable)
             {
@@ -631,11 +631,12 @@ namespace Compiler.SemAnalyzer
                         parameters += ("&");
                     }
                     parameters += (" " + pSymbol.name);
-                    symbolCount++;
-                    if (symbolCount != symbolTableStack.Peek().symbolTable.Count)
+                    if (symbolCount > 0)
                     {
                         parameters += (", ");
-                    }                    
+                    }
+
+                    symbolCount++;
                 }
             }
 
