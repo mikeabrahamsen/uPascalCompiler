@@ -423,6 +423,7 @@ namespace Compiler.Parse
         private void FunctionHeading (MethodRecord functionRecord) 
         {
             TypeRecord typeRecord = new TypeRecord(SymbolType.FunctionSymbol, VariableType.Null);
+            functionRecord.parameterList = new List<Parameter>();
 
             switch (lookAheadToken.tag)
             {
@@ -430,12 +431,13 @@ namespace Compiler.Parse
                     UsedRules.WriteLine("18");
                     Match((int)Tags.MP_FUNCTION);
                     Identifier(functionRecord);
-                    functionRecord.parameterList = OptionalFormalParameterList(functionRecord.parameterList);
+                    functionRecord.parameterList = OptionalFormalParameterList(
+                        functionRecord.parameterList);
                     Type(ref typeRecord);
                     functionRecord.returnType = typeRecord.variableType;
-                    //add a record into the current symbol table for the function
                     analyzer.SymbolTableInsert(functionRecord);
                     analyzer.CreateSymbolTable(functionRecord.name);
+                    analyzer.SymbolTableInsert(functionRecord.parameterList);
                     break;
                 default:
                     Error("Expecting FunctionHeading but found " + lookAheadToken.lexeme);
@@ -523,7 +525,7 @@ namespace Compiler.Parse
         {
             TypeRecord typeRecord = new TypeRecord(SymbolType.ParameterSymbol, VariableType.Null);
             List<string> identifierList = new List<string>();
-
+            parameters = new List<Parameter>();
              switch(lookAheadToken.tag)
             {
                  case Tags.MP_IDENTIFIER:
@@ -1661,6 +1663,7 @@ namespace Compiler.Parse
                     idRecord.lexeme = idRecName;
                     analyzer.ProcessId(ref idRecord);
                     analyzer.GenerateIdPush(idRecord, ref factorRecord);
+                    analyzer.processParameters(idRecord,ref parameterList);
                     OptionalActualParameterList(parameterList);
                     break;
                 default:

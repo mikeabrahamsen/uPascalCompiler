@@ -54,7 +54,8 @@ namespace Compiler
             {
                 Console.WriteLine(e.ErrorMessage);
             }
-
+            Console.WriteLine("Press Any Key To Exit");
+            Console.Read();
         }
     } 
 }

@@ -259,17 +259,20 @@ namespace Compiler.SemAnalyzer
         {
             delegateList.Add(methodRecord);
 
-            Symbol symbol;
+            Symbol symbol = null;
             switch (methodRecord.symbolType)
             {
                 case SymbolType.ProcedureSymbol:
                     symbol = new ProcedureSymbol(methodRecord.name, SymbolType.ProcedureSymbol, 
                         nextLabel, methodRecord.parameterList);
-                    symbolTableStack.Peek().Insert(symbol);
                     break;
                 case SymbolType.FunctionSymbol:
+                    symbol = new FunctionSymbol(methodRecord.name,SymbolType.FunctionSymbol,
+                        nextLabel,methodRecord.parameterList,methodRecord.returnType);
                     break;
             }
+
+            symbolTableStack.Peek().Insert(symbol);
         }
         /// <summary>
         /// Generates code for a read statement
@@ -837,6 +840,19 @@ namespace Compiler.SemAnalyzer
 
         }
 
+        /// <summary>
+        /// Process Parameters
+        /// </summary>
+        /// <param name="variableRecord"></param>
+        /// <param name="parameterList"></param>
+        internal void processParameters(IdentifierRecord identiferRecord, ref List<Parameter> parameterList)
+        {
+            if (identiferRecord.symbol is ProcedureSymbol)
+            {
+                ProcedureSymbol procedureSymbol = identiferRecord.symbol as ProcedureSymbol;
+                parameterList = new List<Parameter>(procedureSymbol.paramList);
+            }
+        }
         /// <summary>
         /// Process Parameters
         /// </summary>
