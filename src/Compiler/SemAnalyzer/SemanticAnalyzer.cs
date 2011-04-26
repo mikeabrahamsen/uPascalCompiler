@@ -478,10 +478,19 @@ namespace Compiler.SemAnalyzer
         /// <param name="expressionRecord"></param>
         internal void GenerateAssign(IdentifierRecord idRecord, VariableRecord expressionRecord)
         {
-            cilOutput.WriteLine("  stfld\t" + 
-                Enumerations.GetDescription<VariableType>(idRecord.symbol.variableType) + " " + 
-                    idRecord.symbolTable.cilScope + "/c__" + idRecord.symbolTable.name
-                        + "::" + idRecord.lexeme + Environment.NewLine);
+            switch (idRecord.symbol.symbolType)
+            {
+                case SymbolType.VariableSymbol:
+                case SymbolType.ParameterSymbol:
+                    cilOutput.WriteLine("  stfld\t" +
+                        Enumerations.GetDescription<VariableType>(idRecord.symbol.variableType) + " " +
+                            idRecord.symbolTable.cilScope + "/c__" + idRecord.symbolTable.name
+                                + "::" + idRecord.lexeme + Environment.NewLine);
+                    break;
+                case SymbolType.FunctionSymbol:
+                    cilOutput.WriteLine("  stloc.1" + Environment.NewLine);
+                    break;
+            }
         }
 
         /// <summary>

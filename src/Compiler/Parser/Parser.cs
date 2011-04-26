@@ -433,6 +433,7 @@ namespace Compiler.Parse
                     Identifier(functionRecord);
                     functionRecord.parameterList = OptionalFormalParameterList(
                         functionRecord.parameterList);
+                    Match((int)Tags.MP_COLON);
                     Type(ref typeRecord);
                     functionRecord.returnType = typeRecord.variableType;
                     analyzer.SymbolTableInsert(functionRecord);
