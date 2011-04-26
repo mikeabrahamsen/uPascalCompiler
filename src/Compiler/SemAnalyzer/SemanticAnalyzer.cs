@@ -159,29 +159,12 @@ namespace Compiler.SemAnalyzer
         /// </summary>
         internal void GenerateDelegateDeclaration()
         {
-            int count;
             string parameterString;
             foreach(MethodRecord methodRecord in delegateList)
             {
-                count = 0;
                 parameterString = string.Empty;
-                foreach (Parameter parameter in methodRecord.parameterList)
-                {
-                    if (count > 0)
-                    {
-                        parameterString += ", ";
-                    }
-
-                    parameterString += Enumerations.GetDescription<VariableType>(parameter.variableType);
-
-                    if (parameter.mode == IOMode.InOut)
-                    {
-                        parameterString += "&";
-                    }
-
-                    parameterString += " " + parameter.name;
-                    count++;
-                }
+                parameterString = GenerateParameterString(methodRecord.parameterList, true);
+                
                 cilOutput.WriteLine("/* " + methodRecord.name + "Delegate" +
                     " delegate function declaration */");
                 cilOutput.WriteLine(".class auto ansi sealed nested public " + methodRecord.name 
@@ -211,22 +194,9 @@ namespace Compiler.SemAnalyzer
                     cilOutput.Write(", ");
                 }                
                 parameterString = string.Empty;
+
+                parameterString = GenerateParameterString(methodRecord.parameterList, true);
                 
-                //Need to find all of the references and EndInvoke them
-                //Sloppy
-                int pcount = 0;
-                foreach (Parameter pSymbol in methodRecord.parameterList)
-                {
-                    if (pSymbol.mode == IOMode.InOut)
-                    {
-                        if (pcount > 0)
-                        {
-                            parameterString += ", ";
-                        }
-                        parameterString += Enumerations.GetDescription<VariableType>
-                            (pSymbol.variableType) + "& " + pSymbol.name;
-                    }
-                }
                 cilOutput.WriteLine("class [mscorlib]System.AsyncCallback callback,");
                 cilOutput.WriteLine("\tobject 'object') runtime managed");
                 cilOutput.WriteLine("{");
@@ -727,6 +697,10 @@ namespace Compiler.SemAnalyzer
                 type = symbol.symbolType;
                 if (type == SymbolType.ParameterSymbol)
                 {
+                    if (symbolCount > 0)
+                    {
+                        parameters += (", ");
+                    }
                     ParameterSymbol pSymbol = symbol as ParameterSymbol;
                     parameters += (Enumerations.GetDescription<VariableType>(
                         pSymbol.variableType));
@@ -738,22 +712,28 @@ namespace Compiler.SemAnalyzer
                     {
                         parameters += (" " + pSymbol.name);
                     }
-                    if (symbolCount > 0)
-                    {
-                        parameters += (", ");
-                    }
-
                     symbolCount++;
                 }
             }
             return parameters;
         }
+
+        /// <summary>
+        /// Generates a string for a parameter list
+        /// </summary>
+        /// <param name="list"></param>
+        /// <param name="nameGeneration"></param>
+        /// <returns></returns>
         private string GenerateParameterString(List<Parameter> list, bool nameGeneration)
         {
             int symbolCount = 0;
             string parameters = string.Empty;
             foreach (Parameter symbol in list)
             {
+                if (symbolCount > 0)
+                {
+                    parameters += (", ");
+                }
                 parameters += (Enumerations.GetDescription<VariableType>(
                     symbol.variableType));
                 if (symbol.mode == IOMode.InOut)
@@ -764,11 +744,6 @@ namespace Compiler.SemAnalyzer
                 {
                     parameters += (" " + symbol.name);
                 }
-                if (symbolCount > 0)
-                {
-                    parameters += (", ");
-                }
-
                 symbolCount++;
                 
             }
@@ -782,23 +757,9 @@ namespace Compiler.SemAnalyzer
         internal void GenerateCallMethod(MethodRecord methodRecord)
         {
             string parameterString = string.Empty;
-            int count = 0;
 
-            foreach (Parameter parameter in methodRecord.parameterList)
-            {
-                if (count > 0)
-                {
-                    parameterString += ", ";
-                }
-
-                parameterString += Enumerations.GetDescription<VariableType>(parameter.variableType);
-
-                if (parameter.mode == IOMode.InOut)
-                {
-                    parameterString += "&";
-                }
-                count++;
-            }
+            parameterString = GenerateParameterString(methodRecord.parameterList,false);
+            
             cilOutput.WriteLine("  callvirt\tinstance void Program/" + methodRecord.name +
                 "Delegate::Invoke(" + parameterString + ")" + Environment.NewLine);
         }
