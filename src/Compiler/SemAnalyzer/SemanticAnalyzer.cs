@@ -766,11 +766,15 @@ namespace Compiler.SemAnalyzer
         internal void GenerateCallMethod(MethodRecord methodRecord)
         {
             string parameterString = string.Empty;
+            if (methodRecord.symbolType == SymbolType.FunctionSymbol ||
+                methodRecord.symbolType == SymbolType.ProcedureSymbol)
+            {
+                parameterString = GenerateParameterString(methodRecord.parameterList, false);
 
-            parameterString = GenerateParameterString(methodRecord.parameterList,false);
-            
-            cilOutput.WriteLine("  callvirt\tinstance void Program/" + methodRecord.name +
+                cilOutput.WriteLine("  callvirt\tinstance void Program/" + methodRecord.name +
                 "Delegate::Invoke(" + parameterString + ")" + Environment.NewLine);
+            }
+            
         }
 
         /// <summary>
