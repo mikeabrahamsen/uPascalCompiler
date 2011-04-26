@@ -438,10 +438,9 @@ namespace Compiler.SemAnalyzer
                                 (symbol as ParameterSymbol).variableType) + " " + symbol.name);
                             break;
                         case SymbolType.ProcedureSymbol:
+                        case SymbolType.FunctionSymbol:
                             cilOutput.WriteLine(".field public class Program/" + symbol.name +
                                 "Delegate d__" + symbol.name);
-                            break;
-                        case SymbolType.FunctionSymbol:
                             break;
                     }
                     index++;
