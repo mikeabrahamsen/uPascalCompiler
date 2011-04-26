@@ -607,18 +607,17 @@ namespace Compiler.SemAnalyzer
             cilOutput.WriteLine("} // end of method c__" + identifierRecord + "::.ctor" + 
                 Environment.NewLine);
         }
-
         /// <summary>
-        /// Generates code for a method declaration
+        /// Generate a list of parameters from top symbol table
         /// </summary>
-        /// <param name="identifierRecord"></param>
-        internal void GenerateMethodDeclaration(string identifierRecord)
+        /// <param name="symbolTable"></param>
+        /// <returns></returns>
+        internal string GenerateParameterString(List<Symbol> list)
         {
-
             SymbolType type;
             int symbolCount = 0;
             string parameters = string.Empty;
-            foreach (Symbol symbol in symbolTableStack.Peek().symbolTable)
+            foreach (Symbol symbol in list)
             {
                 type = symbol.symbolType;
                 if (type == SymbolType.ParameterSymbol)
@@ -639,6 +638,16 @@ namespace Compiler.SemAnalyzer
                     symbolCount++;
                 }
             }
+            return parameters;
+        }
+        /// <summary>
+        /// Generates code for a method declaration
+        /// </summary>
+        /// <param name="identifierRecord"></param>
+        internal void GenerateMethodDeclaration(string identifierRecord)
+        {
+
+            string parameters = GenerateParameterString(symbolTableStack.Peek().symbolTable);
 
             if (symbolTableStack.Count == 1)
             {
