@@ -607,39 +607,7 @@ namespace Compiler.SemAnalyzer
             cilOutput.WriteLine("} // end of method c__" + identifierRecord + "::.ctor" + 
                 Environment.NewLine);
         }
-        /// <summary>
-        /// Generate a list of parameters from top symbol table
-        /// </summary>
-        /// <param name="symbolTable"></param>
-        /// <returns></returns>
-        internal string GenerateParameterString(List<Symbol> list)
-        {
-            SymbolType type;
-            int symbolCount = 0;
-            string parameters = string.Empty;
-            foreach (Symbol symbol in list)
-            {
-                type = symbol.symbolType;
-                if (type == SymbolType.ParameterSymbol)
-                {
-                    ParameterSymbol pSymbol = symbol as ParameterSymbol;
-                    parameters += (Enumerations.GetDescription<VariableType>(
-                        pSymbol.variableType));
-                    if (pSymbol.parameter.mode == IOMode.InOut)
-                    {
-                        parameters += ("&");
-                    }
-                    parameters += (" " + pSymbol.name);
-                    if (symbolCount > 0)
-                    {
-                        parameters += (", ");
-                    }
-
-                    symbolCount++;
-                }
-            }
-            return parameters;
-        }
+        
         /// <summary>
         /// Generates code for a method declaration
         /// </summary>
@@ -647,7 +615,7 @@ namespace Compiler.SemAnalyzer
         internal void GenerateMethodDeclaration(string identifierRecord)
         {
 
-            string parameters = GenerateParameterString(symbolTableStack.Peek().symbolTable);
+            string parameters = GenerateParameterString(symbolTableStack.Peek().symbolTable,true);
 
             if (symbolTableStack.Count == 1)
             {
@@ -722,30 +690,14 @@ namespace Compiler.SemAnalyzer
         internal void GenerateDelegateInitilization()
         {
             SymbolTable symbolTable = symbolTableStack.Peek();
-            int count = 0;
             string paramaterString = string.Empty;
             foreach (Symbol symbol in symbolTable.symbolTable)
             {
                 if (symbol.symbolType == SymbolType.ProcedureSymbol ||
                     symbol.symbolType == SymbolType.FunctionSymbol)
                 {
-
-                    foreach (Parameter parameter in 
-                        (symbol as ProcedureSymbol).paramList)
-                    {
-                        if (count > 0)
-                        {
-                            paramaterString += ", ";
-                        }
-                        paramaterString += Enumerations.GetDescription<VariableType>
-                            (parameter.variableType);
-
-                        if (parameter.mode == IOMode.InOut)
-                        {
-                            paramaterString += "&";
-                        }
-                        count++;
-                    }
+                    paramaterString = GenerateParameterString((symbol as ProcedureSymbol).paramList,
+                        false);
                     cilOutput.WriteLine("  ldloc.0");
                     cilOutput.WriteLine("  ldloc.0");
                     cilOutput.WriteLine("  ldftn\tinstance void " + symbolTable.cilScope +
@@ -758,6 +710,69 @@ namespace Compiler.SemAnalyzer
                         Environment.NewLine);
                 }
             }
+        }
+        /// <summary>
+        /// Generate a list of parameters from top symbol table
+        /// also generates the parameter name
+        /// </summary>
+        /// <param name="symbolTable"></param>
+        /// <returns></returns>
+        internal string GenerateParameterString(List<Symbol> list, bool nameGeneration)
+        {
+            SymbolType type;
+            int symbolCount = 0;
+            string parameters = string.Empty;
+            foreach (Symbol symbol in list)
+            {
+                type = symbol.symbolType;
+                if (type == SymbolType.ParameterSymbol)
+                {
+                    ParameterSymbol pSymbol = symbol as ParameterSymbol;
+                    parameters += (Enumerations.GetDescription<VariableType>(
+                        pSymbol.variableType));
+                    if (pSymbol.parameter.mode == IOMode.InOut)
+                    {
+                        parameters += ("&");
+                    }
+                    if (nameGeneration == true)
+                    {
+                        parameters += (" " + pSymbol.name);
+                    }
+                    if (symbolCount > 0)
+                    {
+                        parameters += (", ");
+                    }
+
+                    symbolCount++;
+                }
+            }
+            return parameters;
+        }
+        private string GenerateParameterString(List<Parameter> list, bool nameGeneration)
+        {
+            int symbolCount = 0;
+            string parameters = string.Empty;
+            foreach (Parameter symbol in list)
+            {
+                parameters += (Enumerations.GetDescription<VariableType>(
+                    symbol.variableType));
+                if (symbol.mode == IOMode.InOut)
+                {
+                    parameters += ("&");
+                }
+                if (nameGeneration == true)
+                {
+                    parameters += (" " + symbol.name);
+                }
+                if (symbolCount > 0)
+                {
+                    parameters += (", ");
+                }
+
+                symbolCount++;
+                
+            }
+            return parameters;
         }
 
 
