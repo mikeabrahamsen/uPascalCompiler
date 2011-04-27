@@ -112,7 +112,7 @@ namespace Compiler.Parse
         {
             foreach (string name in identifierList)
             {
-                parameterList.Add(new Parameter(name,ioMode, variableType.variableType));
+                parameterList.Add(new Parameter(name,ioMode, variableType.variableType,1));
             }
             return parameterList;
         }
@@ -146,13 +146,14 @@ namespace Compiler.Parse
         /// </summary>
         private void Program ()
         {
-            string programIdentifierRecord = string.Empty;
-
+            IdentifierRecord programIdentifierRecord = new IdentifierRecord();
+            string name = string.Empty;
             switch (lookAheadToken.tag)
             {
                 case Tags.MP_PROGRAM:
                     UsedRules.WriteLine("2");
-                    ProgramHeading(ref programIdentifierRecord);
+                    ProgramHeading(ref name);
+                    programIdentifierRecord.lexeme = name;
                     Match(';');
                     Block(programIdentifierRecord);
                     analyzer.symbolTableStack.Pop();
@@ -191,7 +192,7 @@ namespace Compiler.Parse
         /// Parse Block
         /// </summary>
         /// <param name="identifierRecord"></param>
-        private void Block (string identifierRecord) 
+        private void Block (IdentifierRecord identifierRecord) 
         {
             switch (lookAheadToken.tag)
             {
@@ -200,16 +201,16 @@ namespace Compiler.Parse
                 case Tags.MP_FUNCTION:
                 case Tags.MP_BEGIN:
                     UsedRules.WriteLine("4");
-                    analyzer.GenerateClassDeclaration(identifierRecord);
+                    analyzer.GenerateClassDeclaration(identifierRecord.lexeme);
                     VariableDeclarationPart();                    
-                    analyzer.GenerateClassConstructor(identifierRecord);
+                    analyzer.GenerateClassConstructor(identifierRecord.lexeme);
                     ProcedureAndFunctionDeclarationPart();
                     analyzer.GenerateFields();
                     analyzer.GenerateClosingBrace();
-                    analyzer.GenerateMethodDeclaration(identifierRecord);
+                    analyzer.GenerateMethodDeclaration(identifierRecord.lexeme);
                     StatementPart();
                     analyzer.GenerateReferenceParameterReassignment();
-                    analyzer.GenerateReturn();
+                    analyzer.GenerateReturn(identifierRecord);
                     break;
                 default:
                     Error("Expecting ProgramBlock found " + lookAheadToken.lexeme);
@@ -302,7 +303,7 @@ namespace Compiler.Parse
         private void VariableDeclaration () 
         {
             List<string> identifierRecordList = new List<string>();
-            TypeRecord typeRecord = new TypeRecord(SymbolType.VariableSymbol, VariableType.Null);
+            TypeRecord typeRecord = new TypeRecord(SymbolType.VariableSymbol, VariableType.Void);
             switch(lookAheadToken.tag)
             {
                 case Tags.MP_IDENTIFIER:
@@ -349,14 +350,14 @@ namespace Compiler.Parse
         private void ProcedureDeclaration () 
         {
             MethodRecord procedureIdentifierRecord = new MethodRecord(SymbolType.ProcedureSymbol);
-
+            IdentifierRecord identifierRecord = new IdentifierRecord();
             switch(lookAheadToken.tag)
             {
                 case Tags.MP_PROCEDURE:
                     UsedRules.WriteLine("15");
-                    ProcedureHeading(procedureIdentifierRecord);
+                    ProcedureHeading(procedureIdentifierRecord,ref identifierRecord);
                     Match(';');
-                    Block(procedureIdentifierRecord.name);
+                    Block(identifierRecord);
                     analyzer.symbolTableStack.Pop();
                     Match(';');
                     break;
@@ -372,14 +373,15 @@ namespace Compiler.Parse
         /// </summary>
         private void FunctionDeclaration () 
         {
+            IdentifierRecord identifierRecord = new IdentifierRecord();
             MethodRecord functionIdentifierRecord = new MethodRecord(SymbolType.FunctionSymbol);
             switch (lookAheadToken.tag)
             {
                 case Tags.MP_FUNCTION:
                     UsedRules.WriteLine("16");
-                    FunctionHeading(functionIdentifierRecord);
+                    FunctionHeading(functionIdentifierRecord,ref identifierRecord);
                     Match(';');
-                    Block(functionIdentifierRecord.name);
+                    Block(identifierRecord);
                     analyzer.symbolTableStack.Pop();
                     Match(';');
                     break;
@@ -393,7 +395,7 @@ namespace Compiler.Parse
         /// Parse ProcedureHeading
         /// </summary>
         /// <param name="procedureRecord"></param>
-        private void ProcedureHeading (MethodRecord procedureRecord) 
+        private void ProcedureHeading (MethodRecord procedureRecord,ref IdentifierRecord identifierRecord) 
         {
             procedureRecord.parameterList = new List<Parameter>();
             switch(lookAheadToken.tag)
@@ -401,11 +403,14 @@ namespace Compiler.Parse
                 case Tags.MP_PROCEDURE:                    
                     UsedRules.WriteLine("17");
                     Match((int)Tags.MP_PROCEDURE);
-                    Identifier(procedureRecord);
+                    Identifier(ref procedureRecord);
+                    identifierRecord.lexeme = procedureRecord.name;
                     procedureRecord.parameterList = OptionalFormalParameterList(
                         procedureRecord.parameterList);
                     analyzer.SymbolTableInsert(procedureRecord);
+                    analyzer.ProcessId(ref identifierRecord);
                     analyzer.CreateSymbolTable(procedureRecord.name);
+                    analyzer.ProcessMethod(identifierRecord, ref procedureRecord);
                     analyzer.SymbolTableInsert(procedureRecord.parameterList);
                     break;
                 default:
@@ -420,9 +425,10 @@ namespace Compiler.Parse
         /// Parse FunctionHeading
         /// </summary>
         /// <param name="functionRecord"></param>
-        private void FunctionHeading (MethodRecord functionRecord) 
+        private void FunctionHeading (MethodRecord functionRecord, ref IdentifierRecord
+            identifierRecord) 
         {
-            TypeRecord typeRecord = new TypeRecord(SymbolType.FunctionSymbol, VariableType.Null);
+            TypeRecord typeRecord = new TypeRecord(SymbolType.FunctionSymbol, VariableType.Void);
             functionRecord.parameterList = new List<Parameter>();
 
             switch (lookAheadToken.tag)
@@ -430,14 +436,16 @@ namespace Compiler.Parse
                 case Tags.MP_FUNCTION:
                     UsedRules.WriteLine("18");
                     Match((int)Tags.MP_FUNCTION);
-                    Identifier(functionRecord);
+                    Identifier(ref functionRecord);
+                    identifierRecord.lexeme = functionRecord.name;
                     functionRecord.parameterList = OptionalFormalParameterList(
                         functionRecord.parameterList);
-                    Match((int)Tags.MP_COLON);
                     Type(ref typeRecord);
                     functionRecord.returnType = typeRecord.variableType;
                     analyzer.SymbolTableInsert(functionRecord);
+                    analyzer.ProcessId(ref identifierRecord);
                     analyzer.CreateSymbolTable(functionRecord.name);
+                    //analyzer.ProcessMethod(identifierRecord, ref functionRecord);
                     analyzer.SymbolTableInsert(functionRecord.parameterList);
                     break;
                 default:
@@ -524,7 +532,7 @@ namespace Compiler.Parse
         /// <param name="parameters"></param>
         private void ValueParameterSection (ref List<Parameter> parameters) 
         {
-            TypeRecord typeRecord = new TypeRecord(SymbolType.ParameterSymbol, VariableType.Null);
+            TypeRecord typeRecord = new TypeRecord(SymbolType.ParameterSymbol, VariableType.Void);
             List<string> identifierList = new List<string>();
             parameters = new List<Parameter>();
              switch(lookAheadToken.tag)
@@ -549,7 +557,7 @@ namespace Compiler.Parse
         /// <param name="parameters"></param>
         private void VariableParameterSection (ref List<Parameter> parameters) 
         {
-            TypeRecord typeRecord = new TypeRecord(SymbolType.ParameterSymbol, VariableType.Null);
+            TypeRecord typeRecord = new TypeRecord(SymbolType.ParameterSymbol, VariableType.Void);
             List<string> identifierList = new List<string>();
 
             switch (lookAheadToken.tag)
@@ -749,7 +757,7 @@ namespace Compiler.Parse
                     Match((int)Tags.MP_READ);
                     Match((int)Tags.MP_LPAREN);
                     ReadParameter(idRecord);
-                    analyzer.GenerateObjectScope(idRecord.symbolTable);
+                    analyzer.GenerateObjectScope(idRecord,StoreMode.Load);
                     analyzer.GenerateReadStatement(idRecord);
                     ReadParameterTail();
                     Match((int)Tags.MP_RPAREN);
@@ -773,7 +781,7 @@ namespace Compiler.Parse
                     UsedRules.WriteLine("44");
                     Match((int)Tags.MP_COMMA);
                     ReadParameter(idRecord);
-                    analyzer.GenerateObjectScope(idRecord.symbolTable);
+                    analyzer.GenerateObjectScope(idRecord, StoreMode.Load);
                     analyzer.GenerateReadStatement(idRecord);
                     ReadParameterTail();
                     break;
@@ -893,7 +901,7 @@ namespace Compiler.Parse
                     idRecord.lexeme = idRecName;
                     analyzer.ProcessId(ref idRecord);
                     Match((int)Tags.MP_ASSIGN);
-                    analyzer.GenerateObjectScope(idRecord.symbolTable);
+                    analyzer.GenerateObjectScope(idRecord, StoreMode.Store);
                     Expression(ref expressionRecord);
                     analyzer.GenerateAssign(idRecord, expressionRecord);
                     break;
@@ -1079,7 +1087,7 @@ namespace Compiler.Parse
                 case Tags.MP_NOT:
                 case Tags.MP_IDENTIFIER:
                     UsedRules.WriteLine("59");
-                    analyzer.GenerateObjectScope(initialValueRecord.symbolTable);
+                    analyzer.GenerateObjectScope(initialValueRecord, StoreMode.Store);
                     OrdinalExpression(ref ordinalExpressionRecord);
                     analyzer.GenerateAssign(initialValueRecord, ordinalExpressionRecord);
                     break;
@@ -1151,7 +1159,7 @@ namespace Compiler.Parse
             {
                 case Tags.MP_IDENTIFIER:
                     UsedRules.WriteLine("63");
-                    Identifier(procedureRecord);
+                    Identifier(ref procedureRecord);
                     identifierRecord.lexeme = procedureRecord.name;
                     analyzer.ProcessId(ref identifierRecord);
                     analyzer.GenerateLoadDelegate(procedureRecord);
@@ -1225,7 +1233,7 @@ namespace Compiler.Parse
         /// Parse Identifier
         /// </summary>
         /// <param name="programIdenentifierRecord"></param>
-        private void Identifier(MethodRecord programIdenentifierRecord)
+        private void Identifier(ref MethodRecord programIdenentifierRecord)
         {
             programIdenentifierRecord.name = lookAheadToken.lexeme;
             Match((int)Tags.MP_IDENTIFIER);
@@ -1310,7 +1318,7 @@ namespace Compiler.Parse
         private void OptionalRelationalPart(ref VariableRecord expressionRecord)
         {
             VariableRecord simpleExpressionRecord = new VariableRecord();
-            VariableType resultRecord = VariableType.Null;
+            VariableType resultRecord = VariableType.Void;
             string relationalOpRecord = string.Empty;
 
             switch (lookAheadToken.tag)
@@ -1396,6 +1404,7 @@ namespace Compiler.Parse
         /// <param name="simpleExpressionRecord"></param>
         private void SimpleExpression(ref VariableRecord simpleExpressionRecord)
         {
+            string signRecord = string.Empty;
             switch(lookAheadToken.tag)
             {
                 case Tags.MP_LPAREN:
@@ -1405,8 +1414,9 @@ namespace Compiler.Parse
                 case Tags.MP_NOT:
                 case Tags.MP_IDENTIFIER:
                     UsedRules.WriteLine("78");
-                    OptionalSign();
+                    OptionalSign(ref signRecord);
                     Term(ref simpleExpressionRecord);
+                    analyzer.GenerateNegation(signRecord);
                     TermTail(ref simpleExpressionRecord);
                 break;
                 default:
@@ -1424,7 +1434,7 @@ namespace Compiler.Parse
             string addOpRecord = null;
             VariableRecord termRecord = new VariableRecord();
             VariableRecord resultRecord = new VariableRecord();
-            VariableType tempType = VariableType.Null;
+            VariableType tempType = VariableType.Void;
             switch(lookAheadToken.tag)
             {
                 //AddingOperator Term TermTail
@@ -1468,17 +1478,19 @@ namespace Compiler.Parse
         /// <summary>
         /// Parse OptionalSign
         /// </summary>
-        private void OptionalSign()
+        private void OptionalSign(ref string signRecord)
         {
             switch(lookAheadToken.tag)
             {
                 case Tags.MP_PLUS:
                     UsedRules.WriteLine("81");
                     Match('+');
+                    signRecord = "+";
                     break;
                 case Tags.MP_MINUS:
                     UsedRules.WriteLine("82");
                     Match('-');
+                    signRecord = "-";
                     break;
                 case Tags.MP_LPAREN: //lambda
                 case Tags.MP_INTEGER_LIT:
@@ -1582,7 +1594,7 @@ namespace Compiler.Parse
             string mulOpRecord = null;
             VariableRecord factorRecord = new VariableRecord(), 
                 resultRecord = new VariableRecord();
-            VariableType tempType = VariableType.Null;
+            VariableType tempType = VariableType.Void;
             switch (lookAheadToken.tag)
             {
                 case Tags.MP_TIMES:
@@ -1633,8 +1645,10 @@ namespace Compiler.Parse
         {
             IdentifierRecord idRecord = new IdentifierRecord();
             LiteralRecord litRecord = new LiteralRecord();
-            VariableType tempType = VariableType.Null;
+            VariableType tempType = VariableType.Void;
             List<Parameter> parameterList = new List<Parameter>();
+            MethodRecord methodRecord = new MethodRecord();
+            methodRecord.parameterList = new List<Parameter>();
             string idRecName = null;
 
             switch (lookAheadToken.tag)
@@ -1664,8 +1678,10 @@ namespace Compiler.Parse
                     idRecord.lexeme = idRecName;
                     analyzer.ProcessId(ref idRecord);
                     analyzer.GenerateIdPush(idRecord, ref factorRecord);
-                    analyzer.processParameters(idRecord,ref parameterList);
-                    OptionalActualParameterList(parameterList);
+                    analyzer.processParameters(idRecord,ref methodRecord,ref parameterList);
+                   OptionalActualParameterList(parameterList);
+                    analyzer.ProcessMethod(idRecord,ref methodRecord);
+                    analyzer.GenerateCallMethod(methodRecord);
                     break;
                 default:
                     Error("Expecting Factor but found " + lookAheadToken.lexeme);

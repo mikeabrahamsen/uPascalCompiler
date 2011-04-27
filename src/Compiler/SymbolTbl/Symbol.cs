@@ -42,7 +42,7 @@ namespace Compiler.SymbolTbl
         {
             this.name = name;
             this.symbolType = symbolType;
-            this.variableType = VariableType.Null;
+            this.variableType = VariableType.Void;
         }
 
 

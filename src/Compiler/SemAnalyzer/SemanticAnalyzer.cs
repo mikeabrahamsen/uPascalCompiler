@@ -146,6 +146,7 @@ namespace Compiler.SemAnalyzer
                                     size, symbolTableStack.Peek().activationRecordSize);
                          
                         break;
+                        
                     default:
                         break;
                 }
@@ -278,13 +279,28 @@ namespace Compiler.SemAnalyzer
         }
 
         /// <summary>
+        /// Process a method
+        /// </summary>
+        /// <param name="identifierRecord"></param>
+        /// <param name="methodRecord"></param>
+        internal void ProcessMethod(IdentifierRecord identifierRecord,ref MethodRecord methodRecord)
+        {
+            if (identifierRecord.symbol.symbolType == SymbolType.FunctionSymbol ||
+                identifierRecord.symbol.symbolType == SymbolType.ProcedureSymbol)
+            {
+                methodRecord.name = identifierRecord.lexeme;
+                methodRecord.returnType = identifierRecord.symbol.variableType;
+                methodRecord.symbolType = identifierRecord.symbol.symbolType;
+            }
+        }
+        /// <summary>
         /// Generates code for pushing an Identifier
         /// </summary>
         /// <param name="idRecord"></param>
         /// <param name="factorRecord"></param>
         internal void GenerateIdPush(IdentifierRecord idRecord, ref VariableRecord factorRecord)
         {
-            GenerateObjectScope(idRecord.symbolTable);
+            GenerateObjectScope(idRecord,StoreMode.Load);
 
             if (factorRecord.ioMode == IOMode.InOut)
             {
@@ -294,8 +310,16 @@ namespace Compiler.SemAnalyzer
             {
                 cilOutput.Write("  ldfld\t");
             }
-                
-            GenerateFieldLocation(idRecord);
+            if (idRecord.symbol.symbolType == SymbolType.FunctionSymbol)
+            {
+                cilOutput.WriteLine("class Program/" + idRecord.lexeme + "Delegate " +
+                    idRecord.symbolTable.cilScope + "/c__" + idRecord.symbolTable.name
+                    + "::d__" + idRecord.lexeme + Environment.NewLine);
+            }
+            else
+            {
+                GenerateFieldLocation(idRecord);
+            }
 
             factorRecord.variableType = idRecord.symbol.variableType;
         }
@@ -426,16 +450,16 @@ namespace Compiler.SemAnalyzer
                 {
                     switch (symbol.symbolType)
                     {
+                        case SymbolType.ParameterSymbol:
+                            cilOutput.WriteLine(".field public " +
+                                Enumerations.GetDescription<VariableType>(
+                                (symbol as ParameterSymbol).variableType) + " " + symbol.name);
+                            break;
                         case SymbolType.VariableSymbol:
                             //write the enum out as a string using the Get
                             cilOutput.WriteLine(".field public " + 
                                 Enumerations.GetDescription<VariableType>(
                                 (symbol as VariableSymbol).variableType) + " " + symbol.name);
-                            break;
-                        case SymbolType.ParameterSymbol:
-                            cilOutput.WriteLine(".field public " +
-                                Enumerations.GetDescription<VariableType>(
-                                (symbol as ParameterSymbol).variableType) + " " + symbol.name);
                             break;
                         case SymbolType.ProcedureSymbol:
                         case SymbolType.FunctionSymbol:
@@ -526,8 +550,13 @@ namespace Compiler.SemAnalyzer
         /// <summary>
         /// Generates code for return statements
         /// </summary>
-        internal void GenerateReturn ()
+        internal void GenerateReturn (IdentifierRecord identifierRecord)
         {
+            if(symbolTableStack.Peek().nestingLevel > 0 && identifierRecord.symbol.symbolType ==
+                SymbolType.FunctionSymbol)
+            {
+                cilOutput.WriteLine("  ldloc.1");
+            }
             cilOutput.WriteLine("  ret");
             cilOutput.WriteLine("}");
         }
@@ -597,31 +626,46 @@ namespace Compiler.SemAnalyzer
 
             string parameters = GenerateParameterString(symbolTableStack.Peek().symbolTable,true);
 
+            VariableType returnType = VariableType.Void;
             if (symbolTableStack.Count == 1)
             {
-                cilOutput.WriteLine(".method private hidebysig static void ");
-                cilOutput.WriteLine(identifierRecord + "() cil managed");
+                cilOutput.Write(".method private hidebysig static void ");
+                cilOutput.WriteLine("b__" + identifierRecord + "() cil managed");
                 cilOutput.WriteLine("{");
                 cilOutput.WriteLine(" .entrypoint");
             }
             else
             {
-                cilOutput.WriteLine(".method public hidebysig instance void ");
-                cilOutput.WriteLine("\tb__"+identifierRecord + "(" + parameters +
+                IdentifierRecord idRecord = new IdentifierRecord();
+                idRecord.lexeme = identifierRecord;
+                ProcessId(ref idRecord);
+                returnType = idRecord.symbol.variableType;
+                cilOutput.WriteLine(".method public hidebysig instance "+ 
+                    Enumerations.GetDescription<VariableType>(returnType));
+                cilOutput.WriteLine("\tb__"+ identifierRecord + "(" + parameters +
                     ") cil managed");
                 cilOutput.WriteLine("{");
             }
 
+            int stackCount = 2;
             int delegateCount = 0;
+            string resultLocal = string.Empty;
 
-            cilOutput.WriteLine("  .maxstack " + (delegateCount + DELEGATE_EXTRA_SPACE) + 
+            if (returnType != VariableType.Void)
+            {
+                stackCount++;
+                resultLocal = "," + Environment.NewLine + "\t\t[1] " + Enumerations.GetDescription
+                    <VariableType>(returnType) + " result";
+            }
+            stackCount += delegateCount;
+
+            cilOutput.WriteLine("  .maxstack " + (stackCount + DELEGATE_EXTRA_SPACE) + 
                                     Environment.NewLine);
 
             string cilScope = symbolTableStack.Peek().cilScope;
 
             cilOutput.WriteLine( "  .locals init ([0] class " + cilScope + "/c__" + identifierRecord +
-                " c__" + identifierRecord + "Obj" + ")" + Environment.NewLine);
-
+                " c__" + identifierRecord + "Obj" + resultLocal+ ")" + Environment.NewLine);
             cilOutput.WriteLine("  newobj\tinstance void " + cilScope + "/c__" + 
                 identifierRecord + "::.ctor()");
             cilOutput.WriteLine("  stloc.0" + Environment.NewLine);
@@ -665,12 +709,25 @@ namespace Compiler.SemAnalyzer
         }
 
         /// <summary>
+        /// Generate code for a sign record
+        /// </summary>
+        /// <param name="signRecord"></param>
+        internal void GenerateNegation(string signRecord)
+        {
+            if (signRecord.Equals("-"))
+            {
+                cilOutput.WriteLine("  ldc.i4.m1" + Environment.NewLine + "  mul");
+            }
+
+        }
+        /// <summary>
         /// Generates code for initilizing a delegate
         /// </summary>
         internal void GenerateDelegateInitilization()
         {
             SymbolTable symbolTable = symbolTableStack.Peek();
             string paramaterString = string.Empty;
+            int parameterCount = 0;
             foreach (Symbol symbol in symbolTable.symbolTable)
             {
                 if (symbol.symbolType == SymbolType.ProcedureSymbol ||
@@ -680,7 +737,8 @@ namespace Compiler.SemAnalyzer
                         false);
                     cilOutput.WriteLine("  ldloc.0");
                     cilOutput.WriteLine("  ldloc.0");
-                    cilOutput.WriteLine("  ldftn\tinstance void " + symbolTable.cilScope +
+                    cilOutput.WriteLine("  ldftn\tinstance "+ Enumerations.GetDescription<VariableType>
+                    (symbol.variableType) + " " + symbolTable.cilScope +
                         "/c__" + symbolTable.name + "::b__" + symbol.name + "(" + paramaterString +
                         ")");
                     cilOutput.WriteLine("  newobj\tinstance void Program" + "/" + symbol.name +
@@ -688,6 +746,14 @@ namespace Compiler.SemAnalyzer
                     cilOutput.WriteLine("  stfld\tclass Program" + "/" + symbol.name + "Delegate " +
                         symbolTable.cilScope + "/c__" + symbolTable.name + "::d__" + symbol.name +
                         Environment.NewLine);
+                }
+                else if (symbol.symbolType == SymbolType.ParameterSymbol)
+                {
+                    cilOutput.WriteLine("  ldloc.0");
+                    cilOutput.WriteLine("  ldarg." + ++parameterCount);
+                    cilOutput.WriteLine("  stfld\t" + Enumerations.GetDescription<VariableType>
+                        (symbol.variableType) + " " + symbolTable.cilScope + "/c__" + symbolTable.name +
+                        "::" + symbol.name + Environment.NewLine);
                 }
             }
         }
@@ -772,7 +838,8 @@ namespace Compiler.SemAnalyzer
             {
                 parameterString = GenerateParameterString(methodRecord.parameterList, false);
 
-                cilOutput.WriteLine("  callvirt\tinstance void Program/" + methodRecord.name +
+                cilOutput.WriteLine("  callvirt\tinstance " + Enumerations.GetDescription<VariableType>
+                    (methodRecord.returnType) + " Program/" + methodRecord.name +
                 "Delegate::Invoke(" + parameterString + ")" + Environment.NewLine);
             }
             
@@ -781,33 +848,38 @@ namespace Compiler.SemAnalyzer
         /// <summary>
         /// Generates code for the object scope
         /// </summary>
-        /// <param name="objectTable"></param>
-        internal void GenerateObjectScope(SymbolTable objectTable)
+        /// <param name="objectIdentifier"></param>
+        internal void GenerateObjectScope(IdentifierRecord objectIdentifier, StoreMode mode)
         {
-            if (symbolTableStack.Count == 1)
+            if (objectIdentifier.symbol.symbolType != SymbolType.FunctionSymbol || mode == StoreMode.Load)
             {
-                cilOutput.WriteLine("  ldloc.0");
-            }
-            else
-            {
-                int nestingLevelDifference = symbolTableStack.Count - 1 - objectTable.nestingLevel;
-
-                if (nestingLevelDifference <= 1)
+                if (symbolTableStack.Count == 1)
                 {
                     cilOutput.WriteLine("  ldloc.0");
                 }
                 else
                 {
-                    cilOutput.WriteLine("  ldarg.0");
+                    int nestingLevelDifference = symbolTableStack.Count - 1 - objectIdentifier.
+                        symbolTable.nestingLevel;
 
-                    if (nestingLevelDifference > 1)
+                    if (nestingLevelDifference < 1)
                     {
-                        cilOutput.WriteLine("  ldfld\tclass " + objectTable.cilScope + "/c__" +
-                            objectTable.name + " " + symbolTableStack.Peek().cilScope + "::c__" +
-                            objectTable.name + "Obj");
+                        cilOutput.WriteLine("  ldloc.0");
                     }
-                }
+                    else
+                    {
+                        cilOutput.WriteLine("  ldarg.0");
 
+                        if (nestingLevelDifference > 1)
+                        {
+                            cilOutput.WriteLine("  ldfld\tclass " + objectIdentifier.symbolTable.
+                                cilScope + "/c__" + objectIdentifier.symbolTable.name + " " + 
+                                symbolTableStack.Peek().cilScope + "::c__" +
+                                objectIdentifier.symbolTable.name + "Obj");
+                        }
+                    }
+
+                }
             }
         }
 
@@ -822,6 +894,7 @@ namespace Compiler.SemAnalyzer
             {
                 symbolTableStack.Peek().Insert(new ParameterSymbol(parameter.name,
                     SymbolType.ParameterSymbol,parameter,parameter.variableType));
+                symbolTableStack.Peek().activationRecordSize += parameter.size;
             }
         }
 
@@ -862,9 +935,12 @@ namespace Compiler.SemAnalyzer
         internal void processParameters(IdentifierRecord identifierRecord, ref MethodRecord procedureRecord, 
             ref List<Parameter> parameterList)
         {
-            ProcedureSymbol pSymbol = identifierRecord.symbol as ProcedureSymbol;
-            procedureRecord.parameterList = pSymbol.paramList;
-            parameterList = new List<Parameter>(procedureRecord.parameterList);
+            if (identifierRecord.symbol is ProcedureSymbol)
+            {
+                ProcedureSymbol pSymbol = identifierRecord.symbol as ProcedureSymbol;
+                procedureRecord.parameterList = pSymbol.paramList;
+                parameterList = new List<Parameter>(procedureRecord.parameterList);
+            }
         }
 
         /// <summary>
@@ -880,6 +956,9 @@ namespace Compiler.SemAnalyzer
             parameterList.RemoveAt(0);
         }
 
+        /// <summary>
+        /// Generate code for storing a reference parameter
+        /// </summary>
         internal void GenerateReferenceParameterReassignment()
         {
             int parameterCount = 0;

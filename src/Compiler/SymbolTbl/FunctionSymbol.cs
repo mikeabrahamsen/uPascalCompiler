@@ -30,6 +30,7 @@ namespace Compiler.SymbolTbl
             :base(name,symbolType,label,paramList)
         {
             this.returnVar = returnVar;
+            this.variableType = returnVar;
         }
         
     }

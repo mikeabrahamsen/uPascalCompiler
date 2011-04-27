@@ -31,7 +31,16 @@ namespace Compiler.Library
         [Description("brtrue ")]
         brtrue
     }
-    
+
+    /// <summary>
+    /// Load or store
+    /// </summary>
+    public enum StoreMode
+    {
+        Load,
+        Store
+    }
+
     /// <summary>
     /// Input/Output
     /// </summary>
@@ -51,7 +60,8 @@ namespace Compiler.Library
         Float,
         String,
         Fixed,
-        Null
+        [Description("void")]
+        Void
     }
 
     /// <summary>

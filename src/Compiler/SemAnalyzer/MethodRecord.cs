@@ -53,7 +53,7 @@ namespace Compiler.SemAnalyzer
         /// </summary>
         public MethodRecord()
         {
-            this.returnType = VariableType.Null;
+            this.returnType = VariableType.Void;
         }
 
         /// <summary>
@@ -62,7 +62,7 @@ namespace Compiler.SemAnalyzer
         /// <param name="symbolType"></param>
         public MethodRecord(SymbolType symbolType)
         {
-            this.returnType = VariableType.Null;
+            this.returnType = VariableType.Void;
             this.symbolType = symbolType;
 
         }
