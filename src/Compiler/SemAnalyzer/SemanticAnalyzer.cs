@@ -206,14 +206,8 @@ namespace Compiler.SemAnalyzer
                     + "::BeginInvoke");
 
                 cilOutput.WriteLine(".method public hidebysig newslot virtual");
-                cilOutput.Write("instance "+ Enumerations.GetDescription<VariableType>(methodRecord.returnType) +
-                    " EndInvoke(" + parameterString);
-                
-                if (parameterString.Length > 0)
-                {
-                    cilOutput.Write(", ");
-                }
-                cilOutput.WriteLine("class [mscorlib]System.IAsyncResult result) " 
+                cilOutput.WriteLine("instance "+ Enumerations.GetDescription<VariableType>(methodRecord.returnType) +
+                    " EndInvoke(class [mscorlib]System.IAsyncResult result) " 
                     + "runtime managed");
 
                 
@@ -320,7 +314,13 @@ namespace Compiler.SemAnalyzer
             {
                 GenerateFieldLocation(idRecord);
             }
-
+            if (idRecord.symbol is ParameterSymbol)
+            {
+                if ((idRecord.symbol as ParameterSymbol).parameter.mode == IOMode.InOut)
+                {
+                    cilOutput.WriteLine("ldind.i4");
+                }
+            }
             factorRecord.variableType = idRecord.symbol.variableType;
         }
 
@@ -330,10 +330,19 @@ namespace Compiler.SemAnalyzer
         /// <param name="idRecord"></param>
         internal void GenerateFieldLocation(IdentifierRecord idRecord)
         {
-            cilOutput.WriteLine(Enumerations.GetDescription<VariableType>(
-                idRecord.symbol.variableType) + " " +
-                    idRecord.symbolTable.cilScope + "/c__" + idRecord.symbolTable.name
-                        + "::" + idRecord.lexeme + Environment.NewLine);
+
+            cilOutput.Write(Enumerations.GetDescription<VariableType>(
+                idRecord.symbol.variableType));
+                if (idRecord.symbol is ParameterSymbol)
+                {
+                    if((idRecord.symbol as ParameterSymbol).parameter.mode == IOMode.InOut)
+                    {
+                        cilOutput.Write("*");
+                    }
+                }
+               cilOutput.WriteLine(" " + idRecord.symbolTable.cilScope + "/c__" + idRecord.symbolTable.name
+                        + "::" + idRecord.lexeme);
+               
         }
         /// <summary>
         /// Generates code for arithmetic operations
@@ -451,9 +460,14 @@ namespace Compiler.SemAnalyzer
                     switch (symbol.symbolType)
                     {
                         case SymbolType.ParameterSymbol:
-                            cilOutput.WriteLine(".field public " +
+                            cilOutput.Write(".field public " +
                                 Enumerations.GetDescription<VariableType>(
-                                (symbol as ParameterSymbol).variableType) + " " + symbol.name);
+                                (symbol as ParameterSymbol).variableType));
+                                if((symbol as ParameterSymbol).parameter.mode == IOMode.InOut)
+                                {
+                                    cilOutput.Write("*");
+                                }
+                                cilOutput.WriteLine( " " + symbol.name);
                             break;
                         case SymbolType.VariableSymbol:
                             //write the enum out as a string using the Get
@@ -506,11 +520,23 @@ namespace Compiler.SemAnalyzer
             switch (idRecord.symbol.symbolType)
             {
                 case SymbolType.VariableSymbol:
-                case SymbolType.ParameterSymbol:
                     cilOutput.WriteLine("  stfld\t" +
                         Enumerations.GetDescription<VariableType>(idRecord.symbol.variableType) + " " +
                             idRecord.symbolTable.cilScope + "/c__" + idRecord.symbolTable.name
                                 + "::" + idRecord.lexeme + Environment.NewLine);
+                    break;
+                case SymbolType.ParameterSymbol:
+                    if ((idRecord.symbol as ParameterSymbol).parameter.mode == IOMode.InOut)
+                    {
+                        cilOutput.WriteLine("  stind.i4");
+                    }
+                    else
+                    {
+                        cilOutput.WriteLine("  stfld\t" +
+                            Enumerations.GetDescription<VariableType>(idRecord.symbol.variableType) + " " +
+                                idRecord.symbolTable.cilScope + "/c__" + idRecord.symbolTable.name
+                                    + "::" + idRecord.lexeme + Environment.NewLine);
+                    }
                     break;
                 case SymbolType.FunctionSymbol:
                     cilOutput.WriteLine("  stloc.1" + Environment.NewLine);
@@ -552,11 +578,12 @@ namespace Compiler.SemAnalyzer
         /// </summary>
         internal void GenerateReturn (IdentifierRecord identifierRecord)
         {
-            if(symbolTableStack.Peek().nestingLevel > 0 && identifierRecord.symbol.symbolType ==
+            if (symbolTableStack.Peek().nestingLevel > 0 && identifierRecord.symbol.symbolType ==
                 SymbolType.FunctionSymbol)
             {
                 cilOutput.WriteLine("  ldloc.1");
             }
+
             cilOutput.WriteLine("  ret");
             cilOutput.WriteLine("}");
         }
@@ -751,8 +778,13 @@ namespace Compiler.SemAnalyzer
                 {
                     cilOutput.WriteLine("  ldloc.0");
                     cilOutput.WriteLine("  ldarg." + ++parameterCount);
-                    cilOutput.WriteLine("  stfld\t" + Enumerations.GetDescription<VariableType>
-                        (symbol.variableType) + " " + symbolTable.cilScope + "/c__" + symbolTable.name +
+                    cilOutput.Write("  stfld\t" + Enumerations.GetDescription<VariableType>
+                        (symbol.variableType));
+                    if((symbol as ParameterSymbol).parameter.mode == IOMode.InOut)
+                    {
+                        cilOutput.Write("*");
+                    }
+                    cilOutput.WriteLine(" " + symbolTable.cilScope + "/c__" + symbolTable.name +
                         "::" + symbol.name + Environment.NewLine);
                 }
             }
@@ -782,7 +814,7 @@ namespace Compiler.SemAnalyzer
                         pSymbol.variableType));
                     if (pSymbol.parameter.mode == IOMode.InOut)
                     {
-                        parameters += ("&");
+                        parameters += ("*");
                     }
                     if (nameGeneration == true)
                     {
@@ -814,7 +846,7 @@ namespace Compiler.SemAnalyzer
                     symbol.variableType));
                 if (symbol.mode == IOMode.InOut)
                 {
-                    parameters += ("&");
+                    parameters += ("*");
                 }
                 if (nameGeneration == true)
                 {
@@ -879,6 +911,17 @@ namespace Compiler.SemAnalyzer
                         }
                     }
 
+                }
+            }
+            if (objectIdentifier.symbol is ParameterSymbol)
+            {
+                if ((objectIdentifier.symbol as ParameterSymbol).parameter.mode == IOMode.InOut &&
+                    mode == StoreMode.Store)
+                {
+                    cilOutput.WriteLine("  ldfld\t" + Enumerations.GetDescription<VariableType>
+                            (objectIdentifier.symbol.variableType) + "* " +
+                            objectIdentifier.symbolTable.cilScope + "/c__" + objectIdentifier.
+                            symbolTable.name + "::" + objectIdentifier.symbol.name);
                 }
             }
         }

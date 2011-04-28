@@ -209,7 +209,7 @@ namespace Compiler.Parse
                     analyzer.GenerateClosingBrace();
                     analyzer.GenerateMethodDeclaration(identifierRecord.lexeme);
                     StatementPart();
-                    analyzer.GenerateReferenceParameterReassignment();
+                    //analyzer.GenerateReferenceParameterReassignment();
                     analyzer.GenerateReturn(identifierRecord);
                     break;
                 default:
